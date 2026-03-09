@@ -1237,7 +1237,7 @@
               "requires_crew_role": null,
               "requires_module": null,
               "requires_rep": null,
-              "requires_flag": "vreth_captain_debt_owed",
+              "requires_flag": null,
               "requires_ability": null,
               "locked_hint": "",
               "check_type": "skill",
@@ -1316,6 +1316,65 @@
                 },
                 "partial": null,
                 "failure": null
+              }
+            },
+            {
+              "label": "Full burn. Outrun her before she can react.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "pilot",
+              "difficulty": "hard",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your Pilot punches the drive the moment you give the word. The Vreth frigate's targeting solution breaks as you cut hard into the debris field. She doesn't pursue — not immediately. A single transmission arrives before you're out of range: 'Running does not reduce the debt, Captain. It increases it.'",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -2,
+                      "description": "Emergency burn fuel cost"
+                    }
+                  ],
+                  "sets_flag": "fled_vreth_captain_parley",
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "partial",
+                  "narrative": "You get distance but not clean separation. She tracks you for two sectors before breaking off, her weapons warm but never firing. The message comes later on a delayed channel: 'Next time, Captain. And there will be a next time.'",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -3,
+                      "description": "Prolonged evasion burn"
+                    }
+                  ],
+                  "sets_flag": "fled_vreth_captain_parley",
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": -5,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "failure",
+                  "narrative": "She's faster than you expected. A warning shot clips your port nacelle before you've cleared weapons range. You're not getting away clean. 'Sit down, Captain,' she transmits. 'I was being polite. That part is over.' Combat initiates on her terms.",
+                  "rewards": [],
+                  "sets_flag": "attacked_vreth_captain_parley",
+                  "clears_flag": null,
+                  "morale_delta": -3,
+                  "loyalty_delta": -2,
+                  "hull_delta": -15,
+                  "resonance_delta": 0
+                }
               }
             }
           ]
@@ -2054,6 +2113,39 @@
                 "partial": null,
                 "failure": null
               }
+            },
+            {
+              "label": "Log the coordinates and move on. Dead ships have reasons for being dead.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You log its position, note the Concord markings for a potential bounty tip later, and pull away. The courier shrinks on sensors behind you, still sitting in the shadow of the gas giant. Still dark. Still waiting for whatever comes next. Your crew watches in silence. Nobody argues the decision.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": 1,
+                      "description": "Fuel saved from cautious routing"
+                    }
+                  ],
+                  "sets_flag": "logged_voting_ship_coordinates",
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": null,
+                "failure": null
+              }
             }
           ]
         },
@@ -2677,6 +2769,53 @@
                 },
                 "partial": null,
                 "failure": null
+              }
+            },
+            {
+              "label": "Play ignorant. You don't know what they're talking about.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "diplomat",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "'You must have the wrong ship.' Your voice carries just the right amount of confusion. A long silence on the other end. 'Possible,' the operative says carefully. 'Unlikely. But possible.' The channel closes. You get the sense they'll verify before trying again — and that verification buys you time and distance.",
+                  "rewards": [],
+                  "sets_flag": "bluffed_reclamation_division",
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "partial",
+                  "narrative": "'Wrong ship,' you say. The pause is shorter than you'd like. 'Captain, we have your approach vector from the courier's last known position. We have your hull signature. The question isn't whether you have it. The question is what happens next.' They close the channel. Not a threat — a correction. They'll be back.",
+                  "rewards": [],
+                  "sets_flag": "reclamation_division_suspicious",
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "failure",
+                  "narrative": "'We both know that's not true, Captain.' The operative's voice is patient, which is worse than angry. 'This channel will remain open for six hours. After that, our methods of recovery become less conversational.' The channel stays open. The clock starts.",
+                  "rewards": [],
+                  "sets_flag": "reclamation_division_ultimatum",
+                  "clears_flag": null,
+                  "morale_delta": -3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
               }
             }
           ]
@@ -4418,6 +4557,59 @@
                 "partial": null,
                 "failure": null
               }
+            },
+            {
+              "label": "Walk the settlement yourself. Look for what they're not saying.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "pilot",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You walk the perimeter alone. The colonists watch but don't stop you. Near the storage buildings: turned earth, too neat to be farming, too large for drainage. Scorch marks on three walls, recently painted over but visible up close. A storage locker with a broken Vreth military lock still attached. They didn't fight animals. They fought soldiers. And they won.",
+                  "rewards": [],
+                  "sets_flag": "brennar_vi_vreth_buried",
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 1,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                },
+                "partial": {
+                  "level": "partial",
+                  "narrative": "You walk the settlement but the colonists steer you gently away from the storage area. You see enough — the fresh earth, the too-clean walls — to know something happened here. Not enough to know exactly what. The child's words echo: 'They fixed it themselves.'",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "failure",
+                  "narrative": "Two colonists fall into step beside you before you've gone twenty meters. Not threatening — escorting. They show you the school, the water system, the communal kitchen. Everything except the storage buildings. By the time they're done, you've learned nothing you didn't already suspect.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": 1,
+                      "description": "Colony fuel gift"
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
             }
           ]
         },
@@ -5558,6 +5750,65 @@
                   "morale_delta": -2,
                   "loyalty_delta": 0,
                   "hull_delta": -20,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Stay docked. Hide among Anesh's traffic until the patrol passes.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "technician",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You power down non-essentials and tuck the Meridian into the densest part of Anesh's docking cluster. Dorin helps — he knows how to make a ship look like it belongs. Twenty-two hours later, a Vreth patrol sweeps the sector. They ping the station. The station pings back with a manifest that doesn't include you. Drifter Compact solidarity at its finest. The patrol moves on.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 2,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "partial",
+                  "narrative": "You hide, but not well enough. The Vreth patrol pings the station twice and requests a detailed manifest. The station master cooperates — eventually — but the delay costs you. The patrol lingers. By the time they leave, you've burned a full day and the crew is wound tight from waiting.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -1,
+                      "description": "Extended idle power draw"
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "failure",
+                  "narrative": "The Vreth patrol doesn't just ping — they dock. An inspection team walks the station. Sera goes white when she hears the boots on the deck above. Dorin puts himself between her and the door. The patrol passes your berth without stopping, but only because Anesh's dock master sent them to the wrong section first. It cost him, and he'll remember what you owe.",
+                  "rewards": [
+                    {
+                      "type": "rep_down",
+                      "value": "drifter_compact",
+                      "description": "Drew unwanted Vreth attention to a Drifter station"
+                    }
+                  ],
+                  "sets_flag": "anesh_dock_master_owed_favor",
+                  "clears_flag": null,
+                  "morale_delta": -3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
                   "resonance_delta": 0
                 }
               }
