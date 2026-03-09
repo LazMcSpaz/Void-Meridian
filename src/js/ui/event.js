@@ -81,10 +81,19 @@ const EventUI = {
       colorMap[entry.word.toLowerCase()] = entry.color;
     }
 
+    // Negation patterns — if a danger/warning word is negated, don't color it
+    const negationRe = /\b(?:not|no|don't|won't|never|without|isn't|aren't|wasn't|weren't|cannot|can't)\s+$/i;
+    const negatedColors = new Set(['var(--color-danger)', 'var(--color-warning)']);
+
     // Replace matches with colored spans, preserving original case
-    html = html.replace(this._NARRATIVE_REGEX, (match) => {
+    html = html.replace(this._NARRATIVE_REGEX, (match, _g, offset, full) => {
       const color = colorMap[match.toLowerCase()];
       if (!color) return match;
+      // Check for negation before danger/warning words
+      if (negatedColors.has(color)) {
+        const before = full.substring(Math.max(0, offset - 20), offset);
+        if (negationRe.test(before)) return match;
+      }
       return `<span style="color:${color}">${match}</span>`;
     });
 
@@ -241,9 +250,8 @@ const EventUI = {
     if (!evt.steps) return false;
     for (let i = currentIdx + 1; i < evt.steps.length; i++) {
       const step = evt.steps[i];
-      if (!step.condition) return true;
-      const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
-      if (priorOutcome === step.condition.outcome) return true;
+      // Delegate to EventEngine's condition check (handles flags + outcome)
+      if (EventEngine._stepConditionMet(step)) return true;
     }
     return false;
   },

@@ -828,8 +828,8 @@
         },
         {
           "step_number": 2,
-          "condition": null,
-          "setup_text": "After the engagement — whether you defeated her, she withdrew, or you came to terms — the aftermath presents its own choices.",
+          "condition": { "requires_flag": "attacked_vreth_observer" },
+          "setup_text": "The Vreth frigate is disabled but intact. The crew is still aboard. The aftermath of the engagement presents its own choices.",
           "options": [
             {
               "label": "Board the disabled frigate and take what's useful.",

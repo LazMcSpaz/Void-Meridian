@@ -329,6 +329,8 @@ body {
 .choice-btn.locked {
   opacity: 0.4;
   cursor: default;
+  pointer-events: none;
+  font-size: var(--font-size-base);
 }
 
 .choice-btn.locked .lock-reason {
@@ -1421,8 +1423,8 @@ const DATA_EVENTS_MASTER =
         },
         {
           "step_number": 2,
-          "condition": null,
-          "setup_text": "After the engagement — whether you defeated her, she withdrew, or you came to terms — the aftermath presents its own choices.",
+          "condition": { "requires_flag": "attacked_vreth_observer" },
+          "setup_text": "The Vreth frigate is disabled but intact. The crew is still aboard. The aftermath of the engagement presents its own choices.",
           "options": [
             {
               "label": "Board the disabled frigate and take what's useful.",
@@ -7545,6 +7547,15 @@ const EventEngine = {
       }
     }
 
+    // Skill checks targeting a crew role require that role aboard
+    if (option.check_type === 'skill' && option.check_target) {
+      const role = option.check_target;
+      const roles = ['pilot', 'soldier', 'technician', 'medic', 'engineer', 'diplomat'];
+      if (roles.includes(role) && !run.crew.some(c => !c.dead && c.role === role)) {
+        return { available: false, hint: `Requires ${role}` };
+      }
+    }
+
     return { available: true, hint: '' };
   },
 
@@ -7665,8 +7676,16 @@ const EventEngine = {
 
   _stepConditionMet(step) {
     if (!step.condition) return true;
-    const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
-    return priorOutcome === step.condition.outcome;
+    // Flag-based condition: step only appears if a run flag is set
+    if (step.condition.requires_flag) {
+      if (!GameState.run.runFlags.includes(step.condition.requires_flag)) return false;
+    }
+    // Prior step outcome condition
+    if (step.condition.prior_step != null && step.condition.outcome) {
+      const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
+      if (priorOutcome !== step.condition.outcome) return false;
+    }
+    return true;
   },
 
   _getCurrentStep(event, stepIdx) {
@@ -9165,10 +9184,19 @@ const EventUI = {
       colorMap[entry.word.toLowerCase()] = entry.color;
     }
 
+    // Negation patterns — if a danger/warning word is negated, don't color it
+    const negationRe = /\b(?:not|no|don't|won't|never|without|isn't|aren't|wasn't|weren't|cannot|can't)\s+$/i;
+    const negatedColors = new Set(['var(--color-danger)', 'var(--color-warning)']);
+
     // Replace matches with colored spans, preserving original case
-    html = html.replace(this._NARRATIVE_REGEX, (match) => {
+    html = html.replace(this._NARRATIVE_REGEX, (match, _g, offset, full) => {
       const color = colorMap[match.toLowerCase()];
       if (!color) return match;
+      // Check for negation before danger/warning words
+      if (negatedColors.has(color)) {
+        const before = full.substring(Math.max(0, offset - 20), offset);
+        if (negationRe.test(before)) return match;
+      }
       return `<span style="color:${color}">${match}</span>`;
     });
 
@@ -9325,9 +9353,8 @@ const EventUI = {
     if (!evt.steps) return false;
     for (let i = currentIdx + 1; i < evt.steps.length; i++) {
       const step = evt.steps[i];
-      if (!step.condition) return true;
-      const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
-      if (priorOutcome === step.condition.outcome) return true;
+      // Delegate to EventEngine's condition check (handles flags + outcome)
+      if (EventEngine._stepConditionMet(step)) return true;
     }
     return false;
   },
