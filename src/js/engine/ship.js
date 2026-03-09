@@ -88,6 +88,9 @@ const ShipEngine = {
     GameState.run.ship.equippedWeapons.push(instance);
     GameState.addLog('system', `Weapon equipped: ${wpn.name}`);
 
+    // Re-apply module effects so weapon damage bonuses apply to new weapon
+    this.applyModuleEffects();
+
     if (wpn.nexus_flavor) {
       Overlay.showNexusTransmission(wpn.nexus_flavor, 3500);
     }
@@ -129,6 +132,7 @@ const ShipEngine = {
     GameState.run.ship.equippedModules.push(instance);
     GameState.addLog('system', `Module installed: ${mod.name} → ${this.SYSTEM_NAMES[mod.slots_onto] || mod.slots_onto}`);
 
+    this.applyModuleEffects();
     return true;
   },
 
@@ -145,7 +149,53 @@ const ShipEngine = {
 
     modules.splice(idx, 1);
     GameState.addLog('system', `Module removed: ${mod.name}`);
+
+    this.applyModuleEffects();
     return true;
+  },
+
+  // ─── Module Stat Effects ────────────────────────────────────────
+  // Parses effect text strings and applies bonuses to ship state.
+  // Called whenever modules are added or removed.
+
+  applyModuleEffects() {
+    const ship = GameState.run.ship;
+
+    // Calculate max hull bonus from modules
+    let hullBonus = 0;
+    let weaponDmgBonus = 0;
+
+    for (const mod of ship.equippedModules) {
+      const eff = mod.effect || '';
+
+      // +N Max Hull (e.g. Reinforced Bulkhead "+15 Max Hull")
+      const hullMatch = eff.match(/\+(\d+)\s*Max Hull/i);
+      if (hullMatch) hullBonus += parseInt(hullMatch[1], 10);
+
+      // +N damage to weapons (e.g. Targeting Computer "+2 damage to all equipped weapons")
+      const dmgMatch = eff.match(/\+(\d+)\s*damage/i);
+      if (dmgMatch) weaponDmgBonus += parseInt(dmgMatch[1], 10);
+    }
+
+    // Apply max hull bonus
+    // Base max hull is stored at allocation time; module bonuses are additive
+    if (!ship._baseMaxHull) ship._baseMaxHull = ship.maxHull;
+    const newMax = ship._baseMaxHull + hullBonus;
+    if (newMax !== ship.maxHull) {
+      const diff = newMax - ship.maxHull;
+      ship.maxHull = newMax;
+      // If max hull increased, also heal by the increase amount
+      if (diff > 0) ship.hull = Math.min(ship.maxHull, ship.hull + diff);
+      // If max hull decreased (module removed), cap current hull
+      else ship.hull = Math.min(ship.maxHull, ship.hull);
+    }
+
+    // Apply weapon damage bonus
+    // Store base damage on first calculation, then apply bonus on top
+    for (const wpn of ship.equippedWeapons) {
+      if (wpn._baseDamage == null) wpn._baseDamage = wpn.stats.damage;
+      wpn.stats.damage = wpn._baseDamage + weaponDmgBonus;
+    }
   },
 
   hasModule(moduleId) {
