@@ -6889,6 +6889,7 @@ function createMetaState() {
     milestoneFlags: [],
     runHistory: [],
     crewGraveyard: [],
+    namedCrewState: {},   // { [id]: { encountered, secret_revealed } }
     trueEndingReached: false,
     totalRuns: 0,
   };
@@ -6900,14 +6901,15 @@ function createShipState() {
     maxHull: 100,
     visualStage: 1,
     baseSystems: {
-      weapons:    { level: 1, maxLevel: 5, damaged: false },
-      propulsion: { level: 1, maxLevel: 5, damaged: false },
-      sensors:    { level: 1, maxLevel: 5, damaged: false },
-      shields:    { level: 1, maxLevel: 5, damaged: false },
-      cargo:      { level: 1, maxLevel: 5, damaged: false },
-      quarters:   { level: 1, maxLevel: 5, damaged: false },
+      weapons:       { level: 1, maxLevel: 5, damaged: false },
+      propulsion:    { level: 1, maxLevel: 5, damaged: false },
+      sensors:       { level: 1, maxLevel: 5, damaged: false },
+      shields_armor: { level: 1, maxLevel: 5, damaged: false },
+      cargo_hold:    { level: 1, maxLevel: 5, damaged: false },
+      crew_quarters: { level: 1, maxLevel: 5, damaged: false },
     },
-    equippedModules: [],
+    equippedWeapons: [],    // weapon instances from vm_weapons format
+    equippedModules: [],    // module instances from vm_modules format
     cargo: [],
     nexusIntegrations: [],
   };
@@ -7068,9 +7070,9 @@ const GameState = {
 const Registry = {
   weapons: new Map(),
   modules: new Map(),
-  crew: new Map(),
+  crewArchetypes: new Map(),
+  crewNamed: new Map(),
   enemies: new Map(),
-  factions: new Map(),
 
   // Event library (loaded from events_master.json format)
   eventLibrary: [],
@@ -7080,13 +7082,12 @@ const Registry = {
   // ─── Loading ────────────────────────────────────────────────
 
   loadAll() {
-    this._loadMap('weapons',  typeof DATA_WEAPONS  !== 'undefined' ? DATA_WEAPONS  : []);
-    this._loadMap('modules',  typeof DATA_MODULES  !== 'undefined' ? DATA_MODULES  : []);
-    this._loadMap('crew',     typeof DATA_CREW     !== 'undefined' ? DATA_CREW     : []);
-    this._loadMap('enemies',  typeof DATA_ENEMIES  !== 'undefined' ? DATA_ENEMIES  : []);
-    this._loadMap('factions', typeof DATA_FACTIONS  !== 'undefined' ? DATA_FACTIONS : []);
+    this._loadMap('weapons', typeof DATA_VM_WEAPONS !== 'undefined' ? DATA_VM_WEAPONS : (typeof DATA_WEAPONS !== 'undefined' ? DATA_WEAPONS : []));
+    this._loadMap('modules', typeof DATA_VM_MODULES !== 'undefined' ? DATA_VM_MODULES : (typeof DATA_MODULES !== 'undefined' ? DATA_MODULES : []));
+    this._loadCrewData(typeof DATA_VM_CREW !== 'undefined' ? DATA_VM_CREW : (typeof DATA_CREW !== 'undefined' ? DATA_CREW : []));
+    this._loadMap('enemies', typeof DATA_ENEMIES !== 'undefined' ? DATA_ENEMIES : []);
     this._loadEventLibrary();
-    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crew.size} crew, ${this.eventLibrary.length} events, ${this.enemies.size} enemies, ${this.factions.size} factions`);
+    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crewArchetypes.size} archetypes, ${this.crewNamed.size} named crew, ${this.eventLibrary.length} events, ${this.enemies.size} enemies`);
   },
 
   _loadMap(key, arr) {
@@ -7095,6 +7096,21 @@ const Registry = {
     for (const item of arr) {
       if (item && item.id) {
         this[key].set(item.id, item);
+      }
+    }
+  },
+
+  _loadCrewData(arr) {
+    this.crewArchetypes.clear();
+    this.crewNamed.clear();
+    if (!Array.isArray(arr)) return;
+    for (const item of arr) {
+      if (!item || !item.id) continue;
+      // Named characters have a fixed name and first_encounter object
+      if (item.first_encounter || (item.name && !item.name_pool)) {
+        this.crewNamed.set(item.id, item);
+      } else {
+        this.crewArchetypes.set(item.id, item);
       }
     }
   },
@@ -7120,19 +7136,64 @@ const Registry = {
 
   // ─── Lookups ────────────────────────────────────────────────
 
-  getWeapon(id)  { return this.weapons.get(id) || null; },
-  getModule(id)  { return this.modules.get(id) || null; },
-  getCrew(id)    { return this.crew.get(id) || null; },
-  getEvent(id)   { return this.eventIndex[id] || null; },
-  getEnemy(id)   { return this.enemies.get(id) || null; },
-  getFaction(id) { return this.factions.get(id) || null; },
+  getWeapon(id)   { return this.weapons.get(id) || null; },
+  getModule(id)   { return this.modules.get(id) || null; },
+  getCrew(id)     { return this.crewNamed.get(id) || this.crewArchetypes.get(id) || null; },
+  getEvent(id)    { return this.eventIndex[id] || null; },
+  getEnemy(id)    { return this.enemies.get(id) || null; },
 
-  getAllWeapons()  { return [...this.weapons.values()]; },
-  getAllModules()  { return [...this.modules.values()]; },
-  getAllCrew()     { return [...this.crew.values()]; },
-  getAllEvents()   { return this.eventLibrary; },
-  getAllEnemies()  { return [...this.enemies.values()]; },
-  getAllFactions() { return [...this.factions.values()]; },
+  getAllWeapons()      { return [...this.weapons.values()]; },
+  getAllModules()      { return [...this.modules.values()]; },
+  getAllCrewNamed()    { return [...this.crewNamed.values()]; },
+  getAllCrewArchetypes() { return [...this.crewArchetypes.values()]; },
+  getAllEvents()       { return this.eventLibrary; },
+  getAllEnemies()      { return [...this.enemies.values()]; },
+
+  // ─── Tier / Source Queries ────────────────────────────────────
+
+  getWeaponsByTier(tier)  { return this.getAllWeapons().filter(w => w.tier === tier); },
+  getModulesByTier(tier)  { return this.getAllModules().filter(m => m.tier === tier); },
+
+  getWeaponsBySource(sourceKey) {
+    return this.getAllWeapons().filter(w => w.gating && w.gating.source && w.gating.source.includes(sourceKey));
+  },
+
+  getModulesBySource(sourceKey) {
+    return this.getAllModules().filter(m => m.source && m.source.includes(sourceKey));
+  },
+
+  getArchetypeByRole(role) {
+    for (const arch of this.crewArchetypes.values()) {
+      if (arch.role === role) return arch;
+    }
+    return null;
+  },
+
+  // ─── Gating System ───────────────────────────────────────────
+
+  checkGating(requires) {
+    if (!requires || requires.length === 0) return true;
+
+    for (const req of requires) {
+      switch (req.type) {
+        case 'resonance_total':
+          if (GameState.meta.resonance < (req.minimum || 0)) return false;
+          break;
+
+        case 'faction_reputation': {
+          const rep = GameState.run.factions[req.faction] || 0;
+          if (rep < (req.minimum || 0)) return false;
+          break;
+        }
+
+        case 'milestone_flag':
+          if (!GameState.meta.milestoneFlags.includes(req.flag)) return false;
+          break;
+      }
+    }
+
+    return true;
+  },
 
   // ─── Event Selection ──────────────────────────────────────────
 
@@ -7144,22 +7205,14 @@ const Registry = {
     const depthZone = this._getDepthZone(run.depth, maxDepth);
 
     return candidates.filter(evt => {
-      // 1. faction_context must match
       if (evt.faction_context && evt.faction_context !== 'none') {
         if (evt.faction_context !== (factionContext || 'none')) return false;
       }
-
-      // 2. depth_zone must match
       if (evt.depth_zone && evt.depth_zone !== 'any') {
         if (evt.depth_zone !== depthZone) return false;
       }
-
-      // 3. min_resonance gate
       if ((evt.min_resonance || 0) > meta.resonance) return false;
-
-      // 4. Not already seen this run
       if (run.seenEventIds && run.seenEventIds.includes(evt.id)) return false;
-
       return true;
     });
   },
@@ -7346,7 +7399,8 @@ const EventEngine = {
     }
 
     if (option.requires_module) {
-      if (!run.ship.equippedModules.some(m => m.id === option.requires_module)) {
+      const reqMod = option.requires_module;
+      if (!run.ship.equippedModules.some(m => m.id === reqMod || m.id === 'mod_' + reqMod)) {
         return { available: false, hint: option.locked_hint || '' };
       }
     }
@@ -7697,6 +7751,16 @@ const EventEngine = {
 /* Void Meridian — Combat Engine */
 
 const CombatEngine = {
+
+  // Weapon type vs shield interaction
+  SHIELD_INTERACTION: {
+    ballistic:    'partial',   // shields reduce by 1
+    energy:       'blocked',   // fully blocked by shields
+    missile:      'bypass',    // ignores shields
+    emp:          'bypass',    // affects systems, not hull
+    nexus_energy: 'bypass',    // ignores shields
+  },
+
   startCombat(enemyId) {
     const enemyDef = Registry.getEnemy(enemyId);
     const enemy = enemyDef ? { ...enemyDef } : this._genericEnemy();
@@ -7707,6 +7771,8 @@ const CombatEngine = {
         emoji: enemy.emoji || '🚀',
         hull: enemy.hull || 50,
         maxHull: enemy.hull || 50,
+        shields: enemy.shields || 0,
+        maxShields: enemy.shields || 0,
         attack: enemy.attack || 8,
         defense: enemy.defense || 3,
         faction: enemy.faction || null,
@@ -7752,13 +7818,11 @@ const CombatEngine = {
         break;
     }
 
-    // Check if enemy destroyed
     if (combat.enemy.hull <= 0) {
       this._victory(combat);
       return;
     }
 
-    // Enemy turn
     combat.playerTurn = false;
     Game.render();
 
@@ -7767,7 +7831,6 @@ const CombatEngine = {
       combat.turn++;
       combat.playerTurn = true;
 
-      // Check if player destroyed
       if (GameState.run.ship.hull <= 0) {
         this._playerDestroyed();
         return;
@@ -7779,26 +7842,69 @@ const CombatEngine = {
 
   _playerAttack(combat) {
     const ship = GameState.run.ship;
-    const weaponLevel = ship.baseSystems.weapons.level;
+    const weapons = ship.equippedWeapons;
 
-    // Crew bonus from soldier
-    let crewBonus = 0;
-    const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
-    if (gunner) crewBonus = 2;
+    if (!weapons || weapons.length === 0) {
+      // Fallback: base system attack
+      const weaponLevel = ship.baseSystems.weapons.level;
+      const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
+      const crewBonus = gunner ? 2 : 0;
+      const baseDamage = 5 + weaponLevel * 3 + crewBonus;
+      const damage = Math.round(baseDamage * (0.7 + Math.random() * 0.6));
+      const actualDamage = Math.max(1, damage - combat.enemy.defense);
+      combat.enemy.hull = Math.max(0, combat.enemy.hull - actualDamage);
+      combat.lastAction = `Weapons fire! ${actualDamage} damage dealt.`;
+      return;
+    }
 
-    const baseDamage = 5 + weaponLevel * 3 + crewBonus;
-    const roll = Math.random();
-    const damage = Math.round(baseDamage * (0.7 + roll * 0.6));
+    // Fire all equipped weapons
+    let totalDamage = 0;
+    const actions = [];
 
-    const actualDamage = Math.max(1, damage - combat.enemy.defense);
-    combat.enemy.hull = Math.max(0, combat.enemy.hull - actualDamage);
-    combat.lastAction = `Weapons fire! ${actualDamage} damage dealt to ${combat.enemy.name}.`;
+    for (const wpn of weapons) {
+      // Check ammo
+      if (typeof wpn._currentAmmo === 'number' && wpn._currentAmmo <= 0) {
+        actions.push(`${wpn.name}: no ammo`);
+        continue;
+      }
 
-    // Weakness bonus
+      let damage = wpn.stats.damage || 2;
+
+      // Crew bonus from soldier
+      const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
+      if (gunner) damage += 1;
+
+      // Roll variance
+      damage = Math.round(damage * (0.7 + Math.random() * 0.6));
+
+      // Shield interaction
+      const shieldMode = this.SHIELD_INTERACTION[wpn.type] || 'partial';
+      if (combat.enemy.shields > 0) {
+        if (shieldMode === 'blocked') {
+          const shieldDmg = Math.min(damage, combat.enemy.shields);
+          combat.enemy.shields = Math.max(0, combat.enemy.shields - shieldDmg);
+          actions.push(`${wpn.name}: ${shieldDmg} to shields`);
+          if (typeof wpn._currentAmmo === 'number') wpn._currentAmmo--;
+          continue;
+        } else if (shieldMode === 'partial') {
+          damage = Math.max(1, damage - 1);
+        }
+      }
+
+      const actualDamage = Math.max(1, damage - combat.enemy.defense);
+      totalDamage += actualDamage;
+      actions.push(`${wpn.name}: ${actualDamage} dmg`);
+
+      if (typeof wpn._currentAmmo === 'number') wpn._currentAmmo--;
+    }
+
+    combat.enemy.hull = Math.max(0, combat.enemy.hull - totalDamage);
+    combat.lastAction = actions.join(' | ');
+
     if (combat.enemy.scanned && combat.enemy.weakness === 'weapons') {
-      const bonus = Math.round(actualDamage * 0.3);
+      const bonus = Math.round(totalDamage * 0.3);
       combat.enemy.hull = Math.max(0, combat.enemy.hull - bonus);
-      combat.lastAction += ` Exploited weakness for ${bonus} extra damage!`;
+      combat.lastAction += ` Weakness +${bonus}!`;
     }
   },
 
@@ -7811,7 +7917,7 @@ const CombatEngine = {
     combat.playerEvading = true;
     const pilot = GameState.run.crew.find(c => !c.dead && c.role === 'pilot');
     const chance = pilot ? 60 : 35;
-    combat.lastAction = `Evasive maneuver engaged. ${chance}% dodge chance.`;
+    combat.lastAction = `Evasive maneuver. ${chance}% dodge chance.`;
   },
 
   _playerRepair(combat) {
@@ -7823,7 +7929,7 @@ const CombatEngine = {
 
   _playerScan(combat) {
     if (combat.enemy.scanned) {
-      combat.lastAction = 'Enemy already scanned. No new data.';
+      combat.lastAction = 'Enemy already scanned.';
       return;
     }
     const scientist = GameState.run.crew.find(c => !c.dead && c.role === 'scientist');
@@ -7834,14 +7940,13 @@ const CombatEngine = {
       combat.enemy.scanned = true;
       const weaknesses = ['weapons', 'shields', 'engines'];
       combat.enemy.weakness = weaknesses[Math.floor(Math.random() * weaknesses.length)];
-      combat.lastAction = `Scan complete. Weakness identified: ${combat.enemy.weakness}.`;
+      combat.lastAction = `Scan complete. Weakness: ${combat.enemy.weakness}.`;
     } else {
       combat.lastAction = 'Scan inconclusive. Try again next turn.';
     }
   },
 
   _enemyTurn(combat) {
-    // Check evasion
     if (combat.playerEvading) {
       const pilot = GameState.run.crew.find(c => !c.dead && c.role === 'pilot');
       const dodgeChance = pilot ? 0.6 : 0.35;
@@ -7852,12 +7957,10 @@ const CombatEngine = {
     }
 
     const baseDamage = combat.enemy.attack;
-    const roll = Math.random();
-    let damage = Math.round(baseDamage * (0.6 + roll * 0.8));
+    let damage = Math.round(baseDamage * (0.6 + Math.random() * 0.8));
 
-    // Defense reduction
     if (combat.playerDefending) {
-      const shieldLevel = GameState.run.ship.baseSystems.shields.level;
+      const shieldLevel = GameState.run.ship.baseSystems.shields_armor.level;
       damage = Math.max(1, damage - shieldLevel * 2 - 3);
     }
 
@@ -7905,7 +8008,6 @@ const CombatEngine = {
     const combat = GameState.run.activeCombat;
     if (!combat) return;
 
-    // Lose credits and cargo
     const lost = Math.floor(GameState.run.credits * 0.5);
     GameState.run.credits -= lost;
     GameState.run.activeCombat = null;
@@ -7917,7 +8019,6 @@ const CombatEngine = {
   },
 
   _victory(combat) {
-    // Calculate loot
     const lootCredits = 10 + Math.floor(Math.random() * 30);
     GameState.run.credits += lootCredits;
 
@@ -7925,7 +8026,6 @@ const CombatEngine = {
     GameState.run.activeEvent = null;
     GameState.addLog('combat', `Destroyed ${combat.enemy.name}. Looted ₢${lootCredits}.`);
 
-    // Faction rep hit if enemy has a faction
     if (combat.enemy.faction) {
       EconomyEngine.adjustReputation(combat.enemy.faction, -1);
     }
@@ -7947,6 +8047,7 @@ const CombatEngine = {
       name: 'Hostile Vessel',
       emoji: '🚀',
       hull: 40,
+      shields: 0,
       attack: 7,
       defense: 2,
     };
@@ -8020,14 +8121,15 @@ const EconomyEngine = {
 
 const CrewEngine = {
   ROLES: ['engineer', 'pilot', 'medic', 'soldier', 'technician', 'diplomat', 'scientist'],
-  PERSONALITIES: ['reckless', 'stoic', 'vocal', 'curious', 'haunted', 'pragmatic', 'idealistic'],
+  TRAITS: ['reckless', 'stoic', 'vocal', 'curious', 'haunted', 'pragmatic', 'idealistic'],
+
+  // ─── Crew Generation ──────────────────────────────────────────
 
   generateStarterCrew(count, qualityPoints) {
     const crew = [];
     const usedRoles = new Set();
 
     for (let i = 0; i < count; i++) {
-      // Try to diversify roles
       let role;
       const availableRoles = this.ROLES.filter(r => !usedRoles.has(r));
       if (availableRoles.length > 0) {
@@ -8037,60 +8139,135 @@ const CrewEngine = {
       }
       usedRoles.add(role);
 
-      const baseMorale = 40 + qualityPoints * 5 + Math.floor(Math.random() * 20);
-      const baseLoyalty = 35 + qualityPoints * 4 + Math.floor(Math.random() * 20);
-
-      crew.push({
-        id: `crew_${Date.now()}_${i}`,
-        name: this._generateName(),
-        role,
-        personality: this.PERSONALITIES[Math.floor(Math.random() * this.PERSONALITIES.length)],
-        morale: Math.min(100, baseMorale),
-        loyalty: Math.min(100, baseLoyalty),
-        conditions: [],
-        relationships: [],
-        dead: false,
-        backstory: null,
-        unique: false,
-      });
+      crew.push(this._createFromArchetype(role, qualityPoints));
     }
     return crew;
   },
 
-  addCrewFromTemplate(crewId) {
-    const template = Registry.getCrew(crewId);
-    if (!template) return null;
+  _createFromArchetype(role, qualityBonus) {
+    const archetype = Registry.getArchetypeByRole(role);
 
-    const member = {
+    let name, trait, morale, loyalty, combatStats, emoji;
+
+    if (archetype) {
+      name = archetype.name_pool
+        ? archetype.name_pool[Math.floor(Math.random() * archetype.name_pool.length)]
+        : this._generateName();
+      trait = archetype.compatible_traits
+        ? archetype.compatible_traits[Math.floor(Math.random() * archetype.compatible_traits.length)]
+        : this.TRAITS[Math.floor(Math.random() * this.TRAITS.length)];
+      const mRange = archetype.morale_start_range || [45, 65];
+      const lRange = archetype.loyalty_start_range || [30, 50];
+      morale = mRange[0] + Math.floor(Math.random() * (mRange[1] - mRange[0] + 1));
+      loyalty = lRange[0] + Math.floor(Math.random() * (lRange[1] - lRange[0] + 1));
+      combatStats = archetype.combat_stats || { atk_modifier: 0, def_modifier: 0 };
+      emoji = archetype.emoji || this._roleEmoji(role);
+    } else {
+      name = this._generateName();
+      trait = this.TRAITS[Math.floor(Math.random() * this.TRAITS.length)];
+      morale = Math.min(100, 40 + (qualityBonus || 0) * 5 + Math.floor(Math.random() * 20));
+      loyalty = Math.min(100, 35 + (qualityBonus || 0) * 4 + Math.floor(Math.random() * 20));
+      combatStats = { atk_modifier: 0, def_modifier: 0 };
+      emoji = this._roleEmoji(role);
+    }
+
+    if (qualityBonus) {
+      morale = Math.min(100, morale + qualityBonus * 3);
+      loyalty = Math.min(100, loyalty + qualityBonus * 2);
+    }
+
+    return {
       id: `crew_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      name: template.name,
-      role: template.role,
-      personality: template.personality,
-      morale: template.baseStats ? template.baseStats.morale : 50,
-      loyalty: template.baseStats ? template.baseStats.loyalty : 50,
+      name,
+      role,
+      emoji,
+      trait,
+      morale,
+      loyalty,
+      combatStats,
       conditions: [],
       relationships: [],
       dead: false,
-      backstory: template.backstory || null,
-      unique: template.unique || false,
-      factionAffinity: template.factionAffinity || null,
+      isNamed: false,
+      namedId: null,
+      secretRevealed: false,
+    };
+  },
+
+  // ─── Named Character Recruitment ──────────────────────────────
+
+  addCrewFromTemplate(crewId) {
+    const named = Registry.crewNamed.get(crewId);
+    if (named) return this._recruitNamed(named);
+
+    const archetype = Registry.crewArchetypes.get(crewId);
+    if (archetype) {
+      const member = this._createFromArchetype(archetype.role, 0);
+      GameState.run.crew.push(member);
+      GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
+      return member;
+    }
+
+    // Fallback: parse role from crewId for event-referenced recruits
+    const roleMatch = crewId.match(/(engineer|pilot|medic|soldier|technician|diplomat|scientist)/);
+    if (roleMatch) {
+      const member = this._createFromArchetype(roleMatch[1], 0);
+      member.name = this._formatRecruitName(crewId);
+      GameState.run.crew.push(member);
+      GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
+      return member;
+    }
+
+    return null;
+  },
+
+  _recruitNamed(named) {
+    const member = {
+      id: `crew_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: named.name,
+      role: named.role,
+      emoji: named.emoji || this._roleEmoji(named.role),
+      trait: named.trait || 'stoic',
+      morale: named.morale_start || 50,
+      loyalty: named.loyalty_start || 30,
+      combatStats: { atk_modifier: 0, def_modifier: 0 },
+      conditions: [],
+      relationships: [],
+      dead: false,
+      isNamed: true,
+      namedId: named.id,
+      secretRevealed: false,
+      uniquePassive: named.unique_passive || null,
+      personalityDescription: named.personality_description || null,
+      factionAffiliation: named.faction_affiliation || null,
     };
 
     GameState.run.crew.push(member);
-    GameState.addLog('crew_join', `${member.name} (${member.role}) joined the crew.`);
+
+    // Track encounter in meta state
+    if (!GameState.meta.namedCrewState[named.id]) {
+      GameState.meta.namedCrewState[named.id] = { encountered: true, secret_revealed: false };
+    } else {
+      GameState.meta.namedCrewState[named.id].encountered = true;
+    }
+
+    GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
     return member;
   },
+
+  _formatRecruitName(crewId) {
+    return crewId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  },
+
+  // ─── Morale & Loyalty ─────────────────────────────────────────
 
   adjustMorale(member, delta) {
     if (member.dead) return;
     member.morale = Math.max(0, Math.min(100, member.morale + delta));
 
-    // Personality modifiers
-    if (member.personality === 'stoic') {
-      // Stoic crew resist morale swings
+    if (member.trait === 'stoic') {
       if (delta < 0) member.morale = Math.min(member.morale + Math.floor(Math.abs(delta) * 0.2), 100);
-    } else if (member.personality === 'vocal') {
-      // Vocal crew amplify morale effects on neighbors
+    } else if (member.trait === 'vocal') {
       this._spreadMorale(member, Math.sign(delta) * 3);
     }
   },
@@ -8104,6 +8281,23 @@ const CrewEngine = {
   adjustLoyalty(member, delta) {
     if (member.dead) return;
     member.loyalty = Math.max(0, Math.min(100, member.loyalty + delta));
+
+    // Check for secret reveal on named characters
+    if (member.isNamed && member.loyalty >= 80 && !member.secretRevealed) {
+      this._revealSecret(member);
+    }
+  },
+
+  _revealSecret(member) {
+    member.secretRevealed = true;
+    const named = Registry.crewNamed.get(member.namedId);
+    if (named && named.secret_loyalty_80) {
+      GameState.addLog('crew', `${member.name} trusts you enough to share a secret.`);
+      GameState.addLog('crew', named.secret_loyalty_80);
+    }
+    if (member.namedId && GameState.meta.namedCrewState[member.namedId]) {
+      GameState.meta.namedCrewState[member.namedId].secret_revealed = true;
+    }
   },
 
   _spreadMorale(source, delta) {
@@ -8113,6 +8307,8 @@ const CrewEngine = {
       }
     }
   },
+
+  // ─── Crew Death ───────────────────────────────────────────────
 
   killCrewMember(roleOrId) {
     let member;
@@ -8126,14 +8322,16 @@ const CrewEngine = {
 
     member.dead = true;
     member.conditions = ['dead'];
-    GameState.addLog('crew_death', `${member.name} (${member.role}) was lost.`);
+    GameState.addLog('crew', `${member.name} (${member.role}) was lost.`);
 
-    // Morale hit to all surviving crew
+    if (member.isNamed && member.uniquePassive) {
+      GameState.addLog('crew', `${member.name}'s final act: ${member.uniquePassive}`);
+    }
+
     this.adjustMoraleAll(-15);
 
-    // Loyalty hit if idealistic crew see deaths
     for (const c of GameState.run.crew) {
-      if (!c.dead && c.personality === 'idealistic') {
+      if (!c.dead && c.trait === 'idealistic') {
         this.adjustLoyalty(c, -10);
       }
     }
@@ -8141,16 +8339,15 @@ const CrewEngine = {
     return member;
   },
 
+  // ─── Post-Event Tick ──────────────────────────────────────────
+
   tickAfterEvent() {
-    // Natural morale/loyalty drift after each event node
     for (const member of GameState.run.crew) {
       if (member.dead) continue;
 
-      // Slow drift toward 50
       if (member.morale > 55) member.morale -= 1;
       else if (member.morale < 45) member.morale += 1;
 
-      // Check for autonomy issues
       if (member.loyalty <= 15) {
         this._checkMutiny(member);
       } else if (member.loyalty <= 30) {
@@ -8160,7 +8357,6 @@ const CrewEngine = {
   },
 
   _checkRefusal(member) {
-    // Low loyalty crew may refuse orders
     if (Math.random() < 0.2) {
       GameState.addLog('system', `${member.name} is becoming unreliable. Loyalty critically low.`);
     }
@@ -8169,8 +8365,17 @@ const CrewEngine = {
   _checkMutiny(member) {
     if (Math.random() < 0.1) {
       GameState.addLog('system', `${member.name} is on the verge of mutiny!`);
-      // Could escalate to actual mutiny event in future
     }
+  },
+
+  // ─── Helpers ──────────────────────────────────────────────────
+
+  _roleEmoji(role) {
+    const emojis = {
+      engineer: '🔧', pilot: '🚀', medic: '💉',
+      soldier: '⚔', technician: '💻', diplomat: '🤝', scientist: '🔬',
+    };
+    return emojis[role] || '👤';
   },
 
   _generateName() {
@@ -8194,18 +8399,27 @@ const ShipEngine = {
     { percent: 10, message: 'Hull failure imminent. Abandon ship protocols available.' },
   ],
 
+  SYSTEM_NAMES: {
+    weapons: 'Weapons',
+    propulsion: 'Propulsion',
+    sensors: 'Sensors',
+    shields_armor: 'Shields / Armor',
+    cargo_hold: 'Cargo Hold',
+    crew_quarters: 'Crew Quarters',
+  },
+
+  // ─── Hull Damage ──────────────────────────────────────────────
+
   takeDamage(amount) {
     const ship = GameState.run.ship;
     const prevPercent = (ship.hull / ship.maxHull) * 100;
     ship.hull = Math.max(0, ship.hull - amount);
     const newPercent = (ship.hull / ship.maxHull) * 100;
 
-    // Check threshold crossings
     for (const threshold of this.HULL_THRESHOLDS) {
       if (prevPercent > threshold.percent && newPercent <= threshold.percent) {
         GameState.addLog('system', threshold.message);
 
-        // Random system damage at critical thresholds
         if (threshold.percent <= 50 && Math.random() < 0.4) {
           const systems = Object.keys(ship.baseSystems);
           const target = systems[Math.floor(Math.random() * systems.length)];
@@ -8214,7 +8428,6 @@ const ShipEngine = {
       }
     }
 
-    // Check destruction
     if (ship.hull <= 0) {
       GameState.addLog('system', 'The Meridian breaks apart.');
     }
@@ -8231,7 +8444,8 @@ const ShipEngine = {
     if (!sys || sys.damaged) return;
 
     sys.damaged = true;
-    GameState.addLog('system', `${systemName.toUpperCase()} system damaged!`);
+    const displayName = this.SYSTEM_NAMES[systemName] || systemName;
+    GameState.addLog('system', `${displayName} system damaged!`);
   },
 
   repairSystem(systemName) {
@@ -8240,36 +8454,128 @@ const ShipEngine = {
     if (!sys || !sys.damaged) return;
 
     sys.damaged = false;
-    GameState.addLog('system', `${systemName.toUpperCase()} system repaired.`);
+    const displayName = this.SYSTEM_NAMES[systemName] || systemName;
+    GameState.addLog('system', `${displayName} system repaired.`);
   },
+
+  // ─── Weapon Management ────────────────────────────────────────
+
+  equipWeapon(weaponId) {
+    const wpn = Registry.getWeapon(weaponId);
+    if (!wpn) return false;
+
+    if (wpn.gating && wpn.gating.requires && !Registry.checkGating(wpn.gating.requires)) {
+      return false;
+    }
+
+    const instance = JSON.parse(JSON.stringify(wpn));
+    if (typeof instance.stats.ammo === 'number') {
+      instance._currentAmmo = instance.stats.ammo;
+    }
+    if (instance.stats.special_charges > 0) {
+      instance._currentCharges = instance.stats.special_charges;
+    }
+
+    GameState.run.ship.equippedWeapons.push(instance);
+    GameState.addLog('system', `Weapon equipped: ${wpn.name}`);
+
+    if (wpn.nexus_flavor) {
+      Overlay.showNexusTransmission(wpn.nexus_flavor, 3500);
+    }
+
+    return true;
+  },
+
+  unequipWeapon(weaponId) {
+    const weapons = GameState.run.ship.equippedWeapons;
+    const idx = weapons.findIndex(w => w.id === weaponId);
+    if (idx === -1) return false;
+
+    const wpn = weapons[idx];
+    if (wpn.irremovable) {
+      GameState.addLog('system', `${wpn.name} cannot be removed. [⬡]`);
+      return false;
+    }
+
+    weapons.splice(idx, 1);
+    GameState.addLog('system', `Weapon removed: ${wpn.name}`);
+    return true;
+  },
+
+  getEquippedWeapons() {
+    return GameState.run.ship.equippedWeapons;
+  },
+
+  // ─── Module Management ────────────────────────────────────────
 
   addModule(moduleId) {
     const mod = Registry.getModule(moduleId);
     if (!mod) return false;
 
-    GameState.run.ship.equippedModules.push({ ...mod });
-    GameState.addLog('system', `Module installed: ${mod.name}`);
-
-    // Apply passive effects
-    if (mod.effects) {
-      for (const effect of mod.effects) {
-        if (effect.type === 'maxHull') {
-          GameState.run.ship.maxHull += effect.value;
-          GameState.run.ship.hull += effect.value;
-        }
-      }
+    if (mod.gating_requires && !Registry.checkGating(mod.gating_requires)) {
+      return false;
     }
+
+    const instance = JSON.parse(JSON.stringify(mod));
+    GameState.run.ship.equippedModules.push(instance);
+    GameState.addLog('system', `Module installed: ${mod.name} → ${this.SYSTEM_NAMES[mod.slots_onto] || mod.slots_onto}`);
+
     return true;
   },
 
   removeModule(moduleId) {
-    const idx = GameState.run.ship.equippedModules.findIndex(m => m.id === moduleId);
+    const modules = GameState.run.ship.equippedModules;
+    const idx = modules.findIndex(m => m.id === moduleId);
     if (idx === -1) return false;
 
-    const mod = GameState.run.ship.equippedModules.splice(idx, 1)[0];
+    const mod = modules[idx];
+    if (mod.irremovable) {
+      GameState.addLog('system', `${mod.name} cannot be removed. [⬡]`);
+      return false;
+    }
+
+    modules.splice(idx, 1);
     GameState.addLog('system', `Module removed: ${mod.name}`);
     return true;
   },
+
+  hasModule(moduleId) {
+    return GameState.run.ship.equippedModules.some(m => m.id === moduleId);
+  },
+
+  getModulesForSystem(systemKey) {
+    return GameState.run.ship.equippedModules.filter(m => m.slots_onto === systemKey);
+  },
+
+  // ─── Nexus Integration ────────────────────────────────────────
+
+  nexusForceIntegrate(moduleId) {
+    const mod = Registry.getModule(moduleId);
+    if (!mod) return;
+
+    const instance = JSON.parse(JSON.stringify(mod));
+    instance.irremovable = true;
+    instance.nexus_integrated = true;
+
+    GameState.run.ship.equippedModules.push(instance);
+    GameState.run.ship.nexusIntegrations.push(moduleId);
+    GameState.addLog('nexus', `The Nexus has integrated something into your ship: ${mod.name}`);
+
+    Overlay.showNexusTransmission('i improved you. you are welcome.', 3000);
+  },
+
+  tickNexusResonance() {
+    for (const mod of GameState.run.ship.equippedModules) {
+      if (!mod.nexus_integrated) continue;
+      const match = (mod.effect || '').match(/[Gg]enerates?\s+(\d+)\s+[Rr]esonance/);
+      if (match) {
+        const amount = parseInt(match[1], 10);
+        GameState.meta.resonance += amount;
+      }
+    }
+  },
+
+  // ─── Visual Stage ─────────────────────────────────────────────
 
   updateVisualStage() {
     const ship = GameState.run.ship;
@@ -8284,17 +8590,6 @@ const ShipEngine = {
       ship.visualStage = 2;
       GameState.addLog('system', 'The ship looks different now. Battle-worn, but stronger.');
     }
-  },
-
-  nexusForceIntegrate(moduleId) {
-    const mod = Registry.getModule(moduleId);
-    if (!mod) return;
-
-    GameState.run.ship.equippedModules.push({ ...mod, nexusIntegrated: true });
-    GameState.run.ship.nexusIntegrations.push(moduleId);
-    GameState.addLog('nexus', `The Nexus has integrated something into your ship: ${mod.name}`);
-
-    Overlay.showNexusTransmission('i improved you. you are welcome.', 3000);
   },
 };
 
@@ -8816,10 +9111,12 @@ const EventUI = {
     sysHeader.textContent = 'SYSTEMS';
     screen.appendChild(sysHeader);
 
-    for (const [name, sys] of Object.entries(ship.baseSystems)) {
+    const sysNames = ShipEngine.SYSTEM_NAMES;
+    for (const [key, sys] of Object.entries(ship.baseSystems)) {
       const pct = Math.round((sys.level / sys.maxLevel) * 100);
+      const displayName = (sysNames[key] || key).toUpperCase();
       screen.appendChild(this._createStatBar(
-        name.toUpperCase() + (sys.damaged ? ' [DMG]' : ''),
+        displayName + (sys.damaged ? ' [DMG]' : ''),
         pct
       ));
     }
@@ -8836,6 +9133,29 @@ const EventUI = {
     `;
     screen.appendChild(res);
 
+    // Weapons
+    if (ship.equippedWeapons && ship.equippedWeapons.length > 0) {
+      screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+      const wpnHeader = document.createElement('div');
+      wpnHeader.className = 'system-label';
+      wpnHeader.style.marginBottom = 'var(--space-sm)';
+      wpnHeader.textContent = 'WEAPONS';
+      screen.appendChild(wpnHeader);
+
+      for (const wpn of ship.equippedWeapons) {
+        const wpnEl = document.createElement('div');
+        wpnEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary);';
+        const emoji = wpn.type === 'nexus_energy' ? '◈' : (wpn.emoji || '⚔');
+        let tags = '';
+        if (wpn.irremovable) tags += ' [⬡]';
+        if (typeof wpn._currentAmmo === 'number') tags += ` [${wpn._currentAmmo}/${wpn.stats.ammo}]`;
+        if (wpn._currentCharges > 0) tags += ` ◆${wpn._currentCharges}`;
+        wpnEl.textContent = `${emoji} ${wpn.name}${tags}`;
+        if (wpn.tier === 3) wpnEl.style.color = 'var(--color-nexus)';
+        screen.appendChild(wpnEl);
+      }
+    }
+
     // Modules
     if (ship.equippedModules.length > 0) {
       screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
@@ -8848,7 +9168,13 @@ const EventUI = {
       for (const mod of ship.equippedModules) {
         const modEl = document.createElement('div');
         modEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary);';
-        modEl.textContent = `${mod.emoji || '◻'} ${mod.name}`;
+        const emoji = mod.nexus_integrated ? '◈' : (mod.emoji || '◻');
+        let tags = '';
+        if (mod.irremovable) tags += ' [⬡]';
+        if (mod.nexus_integrated) tags += ' [◈]';
+        modEl.textContent = `${emoji} ${mod.name}${tags}`;
+        if (mod.tier === 3) modEl.style.color = 'var(--color-nexus)';
+        if (mod.nexus_integrated) modEl.style.fontStyle = 'italic';
         screen.appendChild(modEl);
       }
     }
@@ -8892,6 +9218,19 @@ const CrewUI = {
       screen.appendChild(this._renderCard(member));
     }
 
+    // Dead crew at bottom (grayed)
+    const dead = GameState.run.crew.filter(c => c.dead);
+    if (dead.length > 0) {
+      const deadHeader = document.createElement('div');
+      deadHeader.className = 'system-label';
+      deadHeader.style.cssText = 'margin-top:var(--space-lg); color:var(--text-muted);';
+      deadHeader.textContent = 'LOST';
+      screen.appendChild(deadHeader);
+      for (const member of dead) {
+        screen.appendChild(this._renderDeadCard(member));
+      }
+    }
+
     container.appendChild(screen);
   },
 
@@ -8900,23 +9239,24 @@ const CrewUI = {
     card.className = 'crew-card';
     const isExpanded = this.expandedCrewId === member.id;
 
-    // Role emoji
-    const roleEmoji = this._roleEmoji(member.role);
+    // Role emoji — named characters use their own emoji or special treatment
+    const emoji = member.emoji || this._roleEmoji(member.role);
 
-    // Header row
+    // Header row: named chars show full name, common show first name only
     const nameRow = document.createElement('div');
     nameRow.style.cssText = 'display:flex; justify-content:space-between; align-items:baseline;';
+    const displayName = member.isNamed ? member.name : member.name.split(' ')[0];
     nameRow.innerHTML = `
-      <span class="crew-name">${roleEmoji} ${member.name}</span>
-      <span class="crew-role">${member.role}</span>
+      <span class="crew-name">${emoji} ${displayName}</span>
+      <span class="crew-role">${member.role}${member.isNamed ? ' ★' : ''}</span>
     `;
     card.appendChild(nameRow);
 
-    // Personality trait
-    if (member.personality) {
+    // Trait
+    if (member.trait) {
       const trait = document.createElement('div');
       trait.className = 'crew-trait';
-      trait.textContent = member.personality;
+      trait.textContent = member.trait;
       card.appendChild(trait);
     }
 
@@ -8924,11 +9264,17 @@ const CrewUI = {
     const stats = document.createElement('div');
     stats.className = 'crew-stats';
     stats.appendChild(this._miniBar('MRL', member.morale || 50, member.morale <= 25 ? 'danger' : member.morale <= 50 ? 'warning' : ''));
-    stats.appendChild(this._miniBar('LYL', member.loyalty || 50, member.loyalty <= 25 ? 'danger' : ''));
+
+    // Secret loyalty: hide above 79 for named chars until revealed
+    if (member.isNamed && member.loyalty >= 80 && !member.secretRevealed) {
+      stats.appendChild(this._miniBar('LYL', 79, '', '???'));
+    } else {
+      stats.appendChild(this._miniBar('LYL', member.loyalty || 50, member.loyalty <= 25 ? 'danger' : ''));
+    }
     card.appendChild(stats);
 
     // Conditions
-    if (member.conditions && member.conditions.length > 0) {
+    if (member.conditions && member.conditions.length > 0 && member.conditions[0] !== 'dead') {
       const condRow = document.createElement('div');
       condRow.style.marginTop = 'var(--space-xs)';
       for (const cond of member.conditions) {
@@ -8946,17 +9292,35 @@ const CrewUI = {
       const details = document.createElement('div');
       details.style.cssText = 'margin-top:var(--space-sm); padding-top:var(--space-sm); border-top:1px solid var(--border);';
 
-      if (member.backstory) {
+      // Named character personality description
+      if (member.isNamed && member.personalityDescription) {
         const bio = document.createElement('div');
-        bio.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin-bottom:var(--space-sm);';
-        bio.textContent = member.backstory;
+        bio.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin-bottom:var(--space-sm); font-style:italic;';
+        bio.textContent = member.personalityDescription;
         details.appendChild(bio);
+      }
+
+      // Unique passive
+      if (member.uniquePassive) {
+        const passive = document.createElement('div');
+        passive.style.cssText = 'color:var(--color-nexus); font-size:var(--font-size-sm); margin-bottom:var(--space-sm);';
+        passive.textContent = `◈ ${member.uniquePassive}`;
+        details.appendChild(passive);
+      }
+
+      // Combat stats
+      if (member.combatStats) {
+        const combat = document.createElement('div');
+        combat.style.cssText = 'font-size:var(--font-size-sm); color:var(--text-secondary);';
+        combat.textContent = `ATK ${member.combatStats.atk_modifier >= 0 ? '+' : ''}${member.combatStats.atk_modifier} / DEF ${member.combatStats.def_modifier >= 0 ? '+' : ''}${member.combatStats.def_modifier}`;
+        details.appendChild(combat);
       }
 
       // Relationships
       if (member.relationships && member.relationships.length > 0) {
         const relHeader = document.createElement('div');
         relHeader.className = 'system-label';
+        relHeader.style.marginTop = 'var(--space-sm)';
         relHeader.textContent = 'RELATIONSHIPS';
         details.appendChild(relHeader);
         for (const rel of member.relationships) {
@@ -8970,12 +9334,26 @@ const CrewUI = {
       card.appendChild(details);
     }
 
-    // Tap to expand
     card.addEventListener('click', () => {
       this.expandedCrewId = isExpanded ? null : member.id;
       Game.render();
     });
 
+    return card;
+  },
+
+  _renderDeadCard(member) {
+    const card = document.createElement('div');
+    card.className = 'crew-card';
+    card.style.opacity = '0.4';
+
+    const emoji = member.emoji || this._roleEmoji(member.role);
+    const displayName = member.isNamed ? member.name : member.name.split(' ')[0];
+
+    card.innerHTML = `
+      <span style="text-decoration:line-through; color:var(--text-muted);">${emoji} ${displayName}</span>
+      <span class="crew-role" style="color:var(--text-muted);">${member.role}</span>
+    `;
     return card;
   },
 
@@ -8992,14 +9370,14 @@ const CrewUI = {
     return emojis[role] || '👤';
   },
 
-  _miniBar(label, value, variant) {
+  _miniBar(label, value, variant, suffix) {
     const pct = Math.max(0, Math.min(100, value));
     const filled = Math.round(pct / 10);
     const empty = 10 - filled;
     const el = document.createElement('div');
     el.className = 'stat-bar' + (variant ? ` ${variant}` : '');
     el.style.fontSize = 'var(--font-size-sm)';
-    el.innerHTML = `${label} <span class="stat-bar-fill">${'█'.repeat(filled)}</span><span class="stat-bar-empty">${'░'.repeat(empty)}</span> ${pct}`;
+    el.innerHTML = `${label} <span class="stat-bar-fill">${'█'.repeat(filled)}</span><span class="stat-bar-empty">${'░'.repeat(empty)}</span> ${suffix || pct}`;
     return el;
   },
 };
@@ -9064,8 +9442,9 @@ const LogUI = {
 /* Void Meridian — Reconstruction Screen */
 
 const ReconstructionUI = {
-  phase: 'recap',  // recap | transmission | allocation
+  phase: 'recap',  // recap | transmission | allocation | weapon_select
   allocation: { ship: 0, captain: 0, crew: 0, cargo: 0 },
+  selectedWeaponId: null,
   recapLineIndex: 0,
   recapTimer: null,
 
@@ -9083,6 +9462,9 @@ const ReconstructionUI = {
       case 'allocation':
         this._renderAllocation(screen);
         break;
+      case 'weapon_select':
+        this._renderWeaponSelect(screen);
+        break;
     }
 
     container.appendChild(screen);
@@ -9091,6 +9473,7 @@ const ReconstructionUI = {
   start() {
     this.phase = 'recap';
     this.allocation = { ship: 0, captain: 0, crew: 0, cargo: 0 };
+    this.selectedWeaponId = null;
     this.recapLineIndex = 0;
     Game.render();
     this._startRecapAnimation();
@@ -9172,7 +9555,6 @@ const ReconstructionUI = {
     el.innerHTML = `<div class="nexus-line" style="color:var(--color-nexus); font-style:italic; font-size:var(--font-size-nexus);">${text}</div>`;
     screen.appendChild(el);
 
-    // Auto-advance after hold
     setTimeout(() => {
       this.phase = 'allocation';
       Game.render();
@@ -9245,12 +9627,87 @@ const ReconstructionUI = {
 
     screen.appendChild(allocArea);
 
+    // Next: weapon selection
+    const confirm = document.createElement('button');
+    confirm.className = 'btn-confirm';
+    confirm.textContent = 'CHOOSE WEAPON →';
+    confirm.style.maxWidth = '400px';
+    confirm.addEventListener('click', () => {
+      this.phase = 'weapon_select';
+      Game.render();
+    });
+    screen.appendChild(confirm);
+  },
+
+  _renderWeaponSelect(screen) {
+    const title = document.createElement('div');
+    title.className = 'section-header';
+    title.style.cssText = 'text-align:center; margin-bottom:var(--space-lg);';
+    title.textContent = 'SELECT STARTING WEAPON';
+    screen.appendChild(title);
+
+    // Get tier 1 weapons available via run_start_choice
+    let startWeapons = Registry.getWeaponsBySource('run_start_choice');
+    if (startWeapons.length === 0) {
+      // Fallback: all tier 1 weapons
+      startWeapons = Registry.getWeaponsByTier(1);
+    }
+
+    // Also check tier 3 weapons gated by resonance on the reconstruction screen
+    const reconWeapons = Registry.getWeaponsBySource('reconstruction_screen_resonance')
+      .filter(w => Registry.checkGating(w.gating ? w.gating.requires : []));
+    startWeapons = startWeapons.concat(reconWeapons);
+
+    if (startWeapons.length === 0) {
+      // No weapon data loaded — skip weapon selection
+      this._confirmAllocation();
+      return;
+    }
+
+    const weaponArea = document.createElement('div');
+    weaponArea.style.cssText = 'width:100%; max-width:400px;';
+
+    for (const wpn of startWeapons) {
+      const card = document.createElement('div');
+      const isSelected = this.selectedWeaponId === wpn.id;
+      card.className = 'crew-card' + (isSelected ? ' selected' : '');
+      card.style.cssText = `cursor:pointer; border:2px solid ${isSelected ? 'var(--text-accent)' : 'var(--border)'}; margin-bottom:var(--space-sm); padding:var(--space-sm);`;
+
+      const emoji = wpn.type === 'nexus_energy' ? '◈' : (wpn.emoji || '⚔');
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <span style="font-weight:bold;">${emoji} ${wpn.name}</span>
+          <span style="color:var(--text-muted); font-size:var(--font-size-sm);">T${wpn.tier} ${wpn.type}</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:var(--font-size-sm); margin-top:var(--space-xs);">DMG ${wpn.stats.damage} | SPD ${wpn.stats.speed_modifier >= 0 ? '+' : ''}${wpn.stats.speed_modifier} | RNG ${wpn.stats.range}</div>
+        <div style="color:var(--text-secondary); font-size:var(--font-size-sm); margin-top:var(--space-xs); font-style:italic;">${wpn.flavor}</div>
+      `;
+
+      if (wpn.tier === 3) card.style.borderColor = 'var(--color-nexus)';
+
+      card.addEventListener('click', () => {
+        this.selectedWeaponId = wpn.id;
+        Game.render();
+      });
+
+      weaponArea.appendChild(card);
+    }
+
+    screen.appendChild(weaponArea);
+
     // Confirm button
     const confirm = document.createElement('button');
     confirm.className = 'btn-confirm';
     confirm.textContent = 'CONFIRM RECONSTRUCTION';
     confirm.style.maxWidth = '400px';
-    confirm.addEventListener('click', () => this._confirmAllocation());
+    if (!this.selectedWeaponId) {
+      confirm.style.opacity = '0.5';
+    }
+    confirm.addEventListener('click', () => {
+      if (this.selectedWeaponId || startWeapons.length === 0) {
+        this._confirmAllocation();
+      }
+    });
     screen.appendChild(confirm);
   },
 
@@ -9263,7 +9720,12 @@ const ReconstructionUI = {
     ship.maxHull = ship.hull;
     ship.baseSystems.weapons.level = 1 + Math.floor(alloc.ship / 3);
     ship.baseSystems.propulsion.level = 1 + Math.floor(alloc.ship / 4);
-    ship.baseSystems.shields.level = 1 + Math.floor(alloc.ship / 4);
+    ship.baseSystems.shields_armor.level = 1 + Math.floor(alloc.ship / 4);
+
+    // Equip starting weapon
+    if (this.selectedWeaponId) {
+      ShipEngine.equipWeapon(this.selectedWeaponId);
+    }
 
     // Apply captain allocation
     const cap = GameState.run.captain;

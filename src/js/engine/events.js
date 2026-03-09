@@ -49,7 +49,8 @@ const EventEngine = {
     }
 
     if (option.requires_module) {
-      if (!run.ship.equippedModules.some(m => m.id === option.requires_module)) {
+      const reqMod = option.requires_module;
+      if (!run.ship.equippedModules.some(m => m.id === reqMod || m.id === 'mod_' + reqMod)) {
         return { available: false, hint: option.locked_hint || '' };
       }
     }

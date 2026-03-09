@@ -201,10 +201,12 @@ const EventUI = {
     sysHeader.textContent = 'SYSTEMS';
     screen.appendChild(sysHeader);
 
-    for (const [name, sys] of Object.entries(ship.baseSystems)) {
+    const sysNames = ShipEngine.SYSTEM_NAMES;
+    for (const [key, sys] of Object.entries(ship.baseSystems)) {
       const pct = Math.round((sys.level / sys.maxLevel) * 100);
+      const displayName = (sysNames[key] || key).toUpperCase();
       screen.appendChild(this._createStatBar(
-        name.toUpperCase() + (sys.damaged ? ' [DMG]' : ''),
+        displayName + (sys.damaged ? ' [DMG]' : ''),
         pct
       ));
     }
@@ -221,6 +223,29 @@ const EventUI = {
     `;
     screen.appendChild(res);
 
+    // Weapons
+    if (ship.equippedWeapons && ship.equippedWeapons.length > 0) {
+      screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+      const wpnHeader = document.createElement('div');
+      wpnHeader.className = 'system-label';
+      wpnHeader.style.marginBottom = 'var(--space-sm)';
+      wpnHeader.textContent = 'WEAPONS';
+      screen.appendChild(wpnHeader);
+
+      for (const wpn of ship.equippedWeapons) {
+        const wpnEl = document.createElement('div');
+        wpnEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary);';
+        const emoji = wpn.type === 'nexus_energy' ? '◈' : (wpn.emoji || '⚔');
+        let tags = '';
+        if (wpn.irremovable) tags += ' [⬡]';
+        if (typeof wpn._currentAmmo === 'number') tags += ` [${wpn._currentAmmo}/${wpn.stats.ammo}]`;
+        if (wpn._currentCharges > 0) tags += ` ◆${wpn._currentCharges}`;
+        wpnEl.textContent = `${emoji} ${wpn.name}${tags}`;
+        if (wpn.tier === 3) wpnEl.style.color = 'var(--color-nexus)';
+        screen.appendChild(wpnEl);
+      }
+    }
+
     // Modules
     if (ship.equippedModules.length > 0) {
       screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
@@ -233,7 +258,13 @@ const EventUI = {
       for (const mod of ship.equippedModules) {
         const modEl = document.createElement('div');
         modEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary);';
-        modEl.textContent = `${mod.emoji || '◻'} ${mod.name}`;
+        const emoji = mod.nexus_integrated ? '◈' : (mod.emoji || '◻');
+        let tags = '';
+        if (mod.irremovable) tags += ' [⬡]';
+        if (mod.nexus_integrated) tags += ' [◈]';
+        modEl.textContent = `${emoji} ${mod.name}${tags}`;
+        if (mod.tier === 3) modEl.style.color = 'var(--color-nexus)';
+        if (mod.nexus_integrated) modEl.style.fontStyle = 'italic';
         screen.appendChild(modEl);
       }
     }

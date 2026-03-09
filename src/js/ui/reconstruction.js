@@ -1,8 +1,9 @@
 /* Void Meridian — Reconstruction Screen */
 
 const ReconstructionUI = {
-  phase: 'recap',  // recap | transmission | allocation
+  phase: 'recap',  // recap | transmission | allocation | weapon_select
   allocation: { ship: 0, captain: 0, crew: 0, cargo: 0 },
+  selectedWeaponId: null,
   recapLineIndex: 0,
   recapTimer: null,
 
@@ -20,6 +21,9 @@ const ReconstructionUI = {
       case 'allocation':
         this._renderAllocation(screen);
         break;
+      case 'weapon_select':
+        this._renderWeaponSelect(screen);
+        break;
     }
 
     container.appendChild(screen);
@@ -28,6 +32,7 @@ const ReconstructionUI = {
   start() {
     this.phase = 'recap';
     this.allocation = { ship: 0, captain: 0, crew: 0, cargo: 0 };
+    this.selectedWeaponId = null;
     this.recapLineIndex = 0;
     Game.render();
     this._startRecapAnimation();
@@ -109,7 +114,6 @@ const ReconstructionUI = {
     el.innerHTML = `<div class="nexus-line" style="color:var(--color-nexus); font-style:italic; font-size:var(--font-size-nexus);">${text}</div>`;
     screen.appendChild(el);
 
-    // Auto-advance after hold
     setTimeout(() => {
       this.phase = 'allocation';
       Game.render();
@@ -182,12 +186,87 @@ const ReconstructionUI = {
 
     screen.appendChild(allocArea);
 
+    // Next: weapon selection
+    const confirm = document.createElement('button');
+    confirm.className = 'btn-confirm';
+    confirm.textContent = 'CHOOSE WEAPON →';
+    confirm.style.maxWidth = '400px';
+    confirm.addEventListener('click', () => {
+      this.phase = 'weapon_select';
+      Game.render();
+    });
+    screen.appendChild(confirm);
+  },
+
+  _renderWeaponSelect(screen) {
+    const title = document.createElement('div');
+    title.className = 'section-header';
+    title.style.cssText = 'text-align:center; margin-bottom:var(--space-lg);';
+    title.textContent = 'SELECT STARTING WEAPON';
+    screen.appendChild(title);
+
+    // Get tier 1 weapons available via run_start_choice
+    let startWeapons = Registry.getWeaponsBySource('run_start_choice');
+    if (startWeapons.length === 0) {
+      // Fallback: all tier 1 weapons
+      startWeapons = Registry.getWeaponsByTier(1);
+    }
+
+    // Also check tier 3 weapons gated by resonance on the reconstruction screen
+    const reconWeapons = Registry.getWeaponsBySource('reconstruction_screen_resonance')
+      .filter(w => Registry.checkGating(w.gating ? w.gating.requires : []));
+    startWeapons = startWeapons.concat(reconWeapons);
+
+    if (startWeapons.length === 0) {
+      // No weapon data loaded — skip weapon selection
+      this._confirmAllocation();
+      return;
+    }
+
+    const weaponArea = document.createElement('div');
+    weaponArea.style.cssText = 'width:100%; max-width:400px;';
+
+    for (const wpn of startWeapons) {
+      const card = document.createElement('div');
+      const isSelected = this.selectedWeaponId === wpn.id;
+      card.className = 'crew-card' + (isSelected ? ' selected' : '');
+      card.style.cssText = `cursor:pointer; border:2px solid ${isSelected ? 'var(--text-accent)' : 'var(--border)'}; margin-bottom:var(--space-sm); padding:var(--space-sm);`;
+
+      const emoji = wpn.type === 'nexus_energy' ? '◈' : (wpn.emoji || '⚔');
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <span style="font-weight:bold;">${emoji} ${wpn.name}</span>
+          <span style="color:var(--text-muted); font-size:var(--font-size-sm);">T${wpn.tier} ${wpn.type}</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:var(--font-size-sm); margin-top:var(--space-xs);">DMG ${wpn.stats.damage} | SPD ${wpn.stats.speed_modifier >= 0 ? '+' : ''}${wpn.stats.speed_modifier} | RNG ${wpn.stats.range}</div>
+        <div style="color:var(--text-secondary); font-size:var(--font-size-sm); margin-top:var(--space-xs); font-style:italic;">${wpn.flavor}</div>
+      `;
+
+      if (wpn.tier === 3) card.style.borderColor = 'var(--color-nexus)';
+
+      card.addEventListener('click', () => {
+        this.selectedWeaponId = wpn.id;
+        Game.render();
+      });
+
+      weaponArea.appendChild(card);
+    }
+
+    screen.appendChild(weaponArea);
+
     // Confirm button
     const confirm = document.createElement('button');
     confirm.className = 'btn-confirm';
     confirm.textContent = 'CONFIRM RECONSTRUCTION';
     confirm.style.maxWidth = '400px';
-    confirm.addEventListener('click', () => this._confirmAllocation());
+    if (!this.selectedWeaponId) {
+      confirm.style.opacity = '0.5';
+    }
+    confirm.addEventListener('click', () => {
+      if (this.selectedWeaponId || startWeapons.length === 0) {
+        this._confirmAllocation();
+      }
+    });
     screen.appendChild(confirm);
   },
 
@@ -200,7 +279,12 @@ const ReconstructionUI = {
     ship.maxHull = ship.hull;
     ship.baseSystems.weapons.level = 1 + Math.floor(alloc.ship / 3);
     ship.baseSystems.propulsion.level = 1 + Math.floor(alloc.ship / 4);
-    ship.baseSystems.shields.level = 1 + Math.floor(alloc.ship / 4);
+    ship.baseSystems.shields_armor.level = 1 + Math.floor(alloc.ship / 4);
+
+    // Equip starting weapon
+    if (this.selectedWeaponId) {
+      ShipEngine.equipWeapon(this.selectedWeaponId);
+    }
 
     // Apply captain allocation
     const cap = GameState.run.captain;
