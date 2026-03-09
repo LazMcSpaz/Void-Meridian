@@ -1,0 +1,334 @@
+/* Void Meridian — Component Styles */
+
+/* === Stat Bars === */
+.stat-bar {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.stat-bar-fill {
+  color: var(--color-hull);
+}
+
+.stat-bar-empty {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.stat-bar.danger .stat-bar-fill {
+  color: var(--color-danger);
+}
+
+.stat-bar.warning .stat-bar-fill {
+  color: var(--color-warning);
+}
+
+/* === System Labels === */
+.system-label {
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+}
+
+/* === Condition Badges === */
+.badge {
+  display: inline-block;
+  font-size: var(--font-size-sm);
+  padding: 1px var(--space-xs);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.badge-danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.badge-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.badge-nexus {
+  color: var(--color-nexus);
+  border-color: var(--color-nexus);
+}
+
+/* === Choice Buttons (Events) === */
+.choice-btn {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.choice-btn:active {
+  background: var(--bg-secondary);
+  border-color: var(--border-active);
+}
+
+.choice-btn.locked {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.choice-btn.locked .lock-reason {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  display: block;
+  margin-top: var(--space-xs);
+}
+
+/* === Crew Card === */
+.crew-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.crew-card .crew-name {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+.crew-card .crew-role {
+  font-size: var(--font-size-sm);
+  color: var(--text-accent);
+  text-transform: uppercase;
+}
+
+.crew-card .crew-trait {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.crew-card .crew-stats {
+  margin-top: var(--space-sm);
+}
+
+/* === Map Nodes === */
+.map-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.map-node.current {
+  border-color: var(--text-accent);
+  box-shadow: 0 0 8px rgba(92, 207, 230, 0.3);
+}
+
+.map-node.visited {
+  opacity: 0.5;
+}
+
+.map-node.hidden-node {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.map-node.selectable:active {
+  border-color: var(--border-active);
+}
+
+/* === Narrative Text === */
+.narrative {
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.narrative em {
+  color: var(--text-accent);
+}
+
+/* === Divider === */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: var(--space-md) 0;
+}
+
+/* === Nexus Overlay === */
+.nexus-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+  padding: var(--space-lg);
+}
+
+.nexus-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nexus-overlay .nexus-text {
+  color: var(--color-nexus);
+  font-size: var(--font-size-nexus);
+  font-style: italic;
+  text-align: center;
+  max-width: 80vw;
+  line-height: 1.6;
+}
+
+/* === Log Entry === */
+.log-entry {
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.log-entry .log-depth {
+  color: var(--text-muted);
+}
+
+.log-entry .log-event {
+  color: var(--text-primary);
+}
+
+/* === Reconstruction Screen === */
+.recon-screen {
+  background: #050810;
+  color: var(--text-secondary);
+}
+
+.recon-screen .death-recap-line {
+  opacity: 0;
+  animation: fadeInLine 0.4s forwards;
+}
+
+@keyframes fadeInLine {
+  to { opacity: 1; }
+}
+
+.recon-screen .nexus-line {
+  color: var(--color-nexus);
+  font-style: italic;
+  font-size: var(--font-size-lg);
+}
+
+/* === Allocation UI === */
+.alloc-category {
+  margin-bottom: var(--space-md);
+}
+
+.alloc-category .alloc-label {
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.alloc-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.alloc-btn {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.alloc-btn:active {
+  background: var(--bg-secondary);
+  border-color: var(--border-active);
+}
+
+.alloc-value {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  min-width: 2em;
+  text-align: center;
+}
+
+/* === Confirm Button === */
+.btn-confirm {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-md);
+  margin-top: var(--space-lg);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--text-accent);
+  color: var(--text-accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-confirm:active {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+}
+
+/* === Title Screen === */
+.title-screen {
+  text-align: center;
+}
+
+.title-screen .game-title {
+  font-size: 2rem;
+  color: var(--text-accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-sm);
+}
+
+.title-screen .game-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+/* === Section Header === */
+.section-header {
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-md);
+}

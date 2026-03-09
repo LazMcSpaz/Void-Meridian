@@ -1,0 +1,114 @@
+/* Void Meridian — Terminal Aesthetic Theme */
+
+:root {
+  /* Base palette — dark mode default */
+  --bg-primary: #0a0e14;
+  --bg-secondary: #111820;
+  --bg-tertiary: #1a2230;
+  --bg-card: #141c28;
+
+  --text-primary: #c8d0dc;
+  --text-secondary: #7a8694;
+  --text-muted: #4a5568;
+  --text-accent: #5ccfe6;
+
+  --border: #2a3545;
+  --border-active: #5ccfe6;
+
+  /* Semantic colors */
+  --color-hull: #73d0ff;
+  --color-danger: #ff6b6b;
+  --color-warning: #ffd580;
+  --color-success: #87d68d;
+  --color-nexus: #d4bfff;
+  --color-credits: #ffd580;
+
+  /* Faction colors */
+  --faction-concord: #5ccfe6;
+  --faction-vreth: #ff6b6b;
+  --faction-drifter: #ffd580;
+  --faction-remnant: #d4bfff;
+
+  /* Stat bar characters */
+  --bar-filled: "█";
+  --bar-empty: "░";
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Touch targets */
+  --touch-min: 48px;
+
+  /* Typography */
+  --font-mono: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+  --font-size-sm: 0.8rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.15rem;
+  --font-size-xl: 1.4rem;
+  --font-size-nexus: 1.6rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-medium: 300ms ease;
+  --transition-slow: 600ms ease;
+}
+
+/* Light mode adaptation */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #f0f0f0;
+    --bg-secondary: #e4e4e4;
+    --bg-tertiary: #d8d8d8;
+    --bg-card: #eaeaea;
+
+    --text-primary: #1a1a2e;
+    --text-secondary: #555568;
+    --text-muted: #888898;
+    --text-accent: #1a6b7a;
+
+    --border: #c0c0c8;
+    --border-active: #1a6b7a;
+
+    --color-hull: #2a7a9a;
+    --color-danger: #c0392b;
+    --color-warning: #b8860b;
+    --color-success: #27854a;
+    --color-nexus: #6a4c93;
+  }
+}
+
+/* Base reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+}
+
+#app {
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

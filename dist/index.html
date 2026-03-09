@@ -1,0 +1,3084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>VOID MERIDIAN</title>
+  <style>
+/* Void Meridian — Terminal Aesthetic Theme */
+
+:root {
+  /* Base palette — dark mode default */
+  --bg-primary: #0a0e14;
+  --bg-secondary: #111820;
+  --bg-tertiary: #1a2230;
+  --bg-card: #141c28;
+
+  --text-primary: #c8d0dc;
+  --text-secondary: #7a8694;
+  --text-muted: #4a5568;
+  --text-accent: #5ccfe6;
+
+  --border: #2a3545;
+  --border-active: #5ccfe6;
+
+  /* Semantic colors */
+  --color-hull: #73d0ff;
+  --color-danger: #ff6b6b;
+  --color-warning: #ffd580;
+  --color-success: #87d68d;
+  --color-nexus: #d4bfff;
+  --color-credits: #ffd580;
+
+  /* Faction colors */
+  --faction-concord: #5ccfe6;
+  --faction-vreth: #ff6b6b;
+  --faction-drifter: #ffd580;
+  --faction-remnant: #d4bfff;
+
+  /* Stat bar characters */
+  --bar-filled: "█";
+  --bar-empty: "░";
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Touch targets */
+  --touch-min: 48px;
+
+  /* Typography */
+  --font-mono: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+  --font-size-sm: 0.8rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.15rem;
+  --font-size-xl: 1.4rem;
+  --font-size-nexus: 1.6rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-medium: 300ms ease;
+  --transition-slow: 600ms ease;
+}
+
+/* Light mode adaptation */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #f0f0f0;
+    --bg-secondary: #e4e4e4;
+    --bg-tertiary: #d8d8d8;
+    --bg-card: #eaeaea;
+
+    --text-primary: #1a1a2e;
+    --text-secondary: #555568;
+    --text-muted: #888898;
+    --text-accent: #1a6b7a;
+
+    --border: #c0c0c8;
+    --border-active: #1a6b7a;
+
+    --color-hull: #2a7a9a;
+    --color-danger: #c0392b;
+    --color-warning: #b8860b;
+    --color-success: #27854a;
+    --color-nexus: #6a4c93;
+  }
+}
+
+/* Base reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+}
+
+#app {
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* Void Meridian — Layout: screens, tabs, responsive */
+
+/* Screen container — fills space between header and tab bar */
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-md);
+  -webkit-overflow-scrolling: touch;
+}
+
+.screen.hidden {
+  display: none;
+}
+
+/* Tab bar — fixed bottom */
+.tab-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: var(--space-xs) 0;
+  flex-shrink: 0;
+}
+
+.tab-bar.hidden {
+  display: none;
+}
+
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: var(--space-xs) var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn.active {
+  color: var(--text-accent);
+}
+
+.tab-btn:active {
+  opacity: 0.7;
+}
+
+.tab-icon {
+  font-size: 1.4rem;
+  margin-bottom: 2px;
+}
+
+.tab-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+}
+
+/* Header bar */
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+.header-bar .resource {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.header-bar .resource-value {
+  color: var(--text-primary);
+}
+
+/* Full-screen states (title, reconstruction, ending) */
+.fullscreen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  padding: var(--space-lg);
+}
+
+.fullscreen.hidden {
+  display: none;
+}
+
+/* Scrollable content area within screens */
+.scroll-content {
+  max-height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .header-bar {
+    padding-top: max(var(--space-sm), env(safe-area-inset-top));
+  }
+  .tab-bar {
+    padding-bottom: max(var(--space-xs), env(safe-area-inset-bottom));
+  }
+}
+/* Void Meridian — Component Styles */
+
+/* === Stat Bars === */
+.stat-bar {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.stat-bar-fill {
+  color: var(--color-hull);
+}
+
+.stat-bar-empty {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.stat-bar.danger .stat-bar-fill {
+  color: var(--color-danger);
+}
+
+.stat-bar.warning .stat-bar-fill {
+  color: var(--color-warning);
+}
+
+/* === System Labels === */
+.system-label {
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+}
+
+/* === Condition Badges === */
+.badge {
+  display: inline-block;
+  font-size: var(--font-size-sm);
+  padding: 1px var(--space-xs);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.badge-danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.badge-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.badge-nexus {
+  color: var(--color-nexus);
+  border-color: var(--color-nexus);
+}
+
+/* === Choice Buttons (Events) === */
+.choice-btn {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.choice-btn:active {
+  background: var(--bg-secondary);
+  border-color: var(--border-active);
+}
+
+.choice-btn.locked {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.choice-btn.locked .lock-reason {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  display: block;
+  margin-top: var(--space-xs);
+}
+
+/* === Crew Card === */
+.crew-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.crew-card .crew-name {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+.crew-card .crew-role {
+  font-size: var(--font-size-sm);
+  color: var(--text-accent);
+  text-transform: uppercase;
+}
+
+.crew-card .crew-trait {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.crew-card .crew-stats {
+  margin-top: var(--space-sm);
+}
+
+/* === Map Nodes === */
+.map-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.map-node.current {
+  border-color: var(--text-accent);
+  box-shadow: 0 0 8px rgba(92, 207, 230, 0.3);
+}
+
+.map-node.visited {
+  opacity: 0.5;
+}
+
+.map-node.hidden-node {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.map-node.selectable:active {
+  border-color: var(--border-active);
+}
+
+/* === Narrative Text === */
+.narrative {
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.narrative em {
+  color: var(--text-accent);
+}
+
+/* === Divider === */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: var(--space-md) 0;
+}
+
+/* === Nexus Overlay === */
+.nexus-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+  padding: var(--space-lg);
+}
+
+.nexus-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nexus-overlay .nexus-text {
+  color: var(--color-nexus);
+  font-size: var(--font-size-nexus);
+  font-style: italic;
+  text-align: center;
+  max-width: 80vw;
+  line-height: 1.6;
+}
+
+/* === Log Entry === */
+.log-entry {
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.log-entry .log-depth {
+  color: var(--text-muted);
+}
+
+.log-entry .log-event {
+  color: var(--text-primary);
+}
+
+/* === Reconstruction Screen === */
+.recon-screen {
+  background: #050810;
+  color: var(--text-secondary);
+}
+
+.recon-screen .death-recap-line {
+  opacity: 0;
+  animation: fadeInLine 0.4s forwards;
+}
+
+@keyframes fadeInLine {
+  to { opacity: 1; }
+}
+
+.recon-screen .nexus-line {
+  color: var(--color-nexus);
+  font-style: italic;
+  font-size: var(--font-size-lg);
+}
+
+/* === Allocation UI === */
+.alloc-category {
+  margin-bottom: var(--space-md);
+}
+
+.alloc-category .alloc-label {
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.alloc-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.alloc-btn {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.alloc-btn:active {
+  background: var(--bg-secondary);
+  border-color: var(--border-active);
+}
+
+.alloc-value {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  min-width: 2em;
+  text-align: center;
+}
+
+/* === Confirm Button === */
+.btn-confirm {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-md);
+  margin-top: var(--space-lg);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--text-accent);
+  color: var(--text-accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-confirm:active {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+}
+
+/* === Title Screen === */
+.title-screen {
+  text-align: center;
+}
+
+.title-screen .game-title {
+  font-size: 2rem;
+  color: var(--text-accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-sm);
+}
+
+.title-screen .game-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+/* === Section Header === */
+.section-header {
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-md);
+}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+const DATA_CREW = [];
+const DATA_ENEMIES = [];
+const DATA_EVENTS = [];
+const DATA_FACTIONS = [];
+const DATA_MODULES = [];
+const DATA_WEAPONS = [];
+/* Void Meridian — Game State Model */
+
+const SAVE_KEY = 'void_meridian_v1';
+
+// ─── Default Factories ──────────────────────────────────────────
+
+function createMetaState() {
+  return {
+    resonance: 0,
+    unlockedItems: [],
+    milestoneFlags: [],
+    runHistory: [],
+    crewGraveyard: [],
+    trueEndingReached: false,
+    totalRuns: 0,
+  };
+}
+
+function createShipState() {
+  return {
+    hull: 100,
+    maxHull: 100,
+    visualStage: 1,
+    baseSystems: {
+      weapons:    { level: 1, maxLevel: 5, damaged: false },
+      propulsion: { level: 1, maxLevel: 5, damaged: false },
+      sensors:    { level: 1, maxLevel: 5, damaged: false },
+      shields:    { level: 1, maxLevel: 5, damaged: false },
+      cargo:      { level: 1, maxLevel: 5, damaged: false },
+      quarters:   { level: 1, maxLevel: 5, damaged: false },
+    },
+    equippedModules: [],
+    cargo: [],
+    nexusIntegrations: [],
+  };
+}
+
+function createCaptainState() {
+  return {
+    abilities: [],
+    stats: {
+      command: 1,
+      intuition: 1,
+      resolve: 1,
+    },
+  };
+}
+
+function createFactionReputation() {
+  return {
+    concord: 0,   // -3 to +3
+    vreth: 0,
+    drifter: 0,
+    remnant: 0,
+  };
+}
+
+function createRunState() {
+  return {
+    active: false,
+    ship: createShipState(),
+    crew: [],
+    captain: createCaptainState(),
+    map: null,
+    factions: createFactionReputation(),
+    credits: 0,
+    fuel: 10,
+    depth: 0,
+    runFlags: [],
+    log: [],
+    currentNodeId: null,
+    activeEvent: null,
+    activeCombat: null,
+  };
+}
+
+// ─── Game State (singleton) ─────────────────────────────────────
+
+const GameState = {
+  meta: createMetaState(),
+  run: createRunState(),
+  screen: 'title', // title | reconstruction | map | event | combat | trade | derelict | gameOver | ending
+
+  // ─── Persistence ────────────────────────────────────────────
+
+  save() {
+    try {
+      const data = {
+        version: 1,
+        meta: this.meta,
+        run: this.run,
+        screen: this.screen,
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.warn('Save failed:', e);
+    }
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (data.version !== 1) return false;
+      this.meta = { ...createMetaState(), ...data.meta };
+      this.run = { ...createRunState(), ...data.run };
+      this.screen = data.screen || 'title';
+      return true;
+    } catch (e) {
+      console.warn('Load failed:', e);
+      return false;
+    }
+  },
+
+  clearSave() {
+    localStorage.removeItem(SAVE_KEY);
+  },
+
+  // ─── Run Lifecycle ──────────────────────────────────────────
+
+  startNewRun() {
+    this.run = createRunState();
+    this.run.active = true;
+    this.meta.totalRuns++;
+    this.screen = 'reconstruction';
+  },
+
+  endRun(deathCause) {
+    this.run.active = false;
+    const summary = {
+      depth: this.run.depth,
+      crewLost: this.run.log.filter(e => e.type === 'crew_death').length,
+      creditsEarned: this.run.credits,
+      cause: deathCause || 'unknown',
+    };
+    this.meta.runHistory.push(summary);
+
+    // Move surviving crew to graveyard for potential resurrection
+    for (const member of this.run.crew) {
+      if (!member.dead) {
+        this.meta.crewGraveyard.push({
+          id: member.id,
+          name: member.name,
+          role: member.role,
+          personality: member.personality,
+          runDepth: this.run.depth,
+        });
+      }
+    }
+
+    this.save();
+  },
+
+  // ─── Log ────────────────────────────────────────────────────
+
+  addLog(type, message, data) {
+    this.run.log.push({
+      type,
+      message,
+      depth: this.run.depth,
+      timestamp: Date.now(),
+      ...data,
+    });
+  },
+
+  // ─── Helpers ────────────────────────────────────────────────
+
+  getResonanceTier() {
+    const r = this.meta.resonance;
+    if (r >= 500) return 5;
+    if (r >= 200) return 4;
+    if (r >= 80)  return 3;
+    if (r >= 30)  return 2;
+    if (r >= 10)  return 1;
+    return 0;
+  },
+
+  getSalvagePoints() {
+    const base = 8;
+    return base + this.getResonanceTier() * 2 + Math.min(this.meta.totalRuns, 4);
+  },
+};
+/* Void Meridian — Content Registry */
+
+const Registry = {
+  weapons: new Map(),
+  modules: new Map(),
+  crew: new Map(),
+  events: new Map(),
+  enemies: new Map(),
+  factions: new Map(),
+
+  // ─── Loading ────────────────────────────────────────────────
+
+  loadAll() {
+    this._loadMap('weapons',  typeof DATA_WEAPONS  !== 'undefined' ? DATA_WEAPONS  : []);
+    this._loadMap('modules',  typeof DATA_MODULES  !== 'undefined' ? DATA_MODULES  : []);
+    this._loadMap('crew',     typeof DATA_CREW     !== 'undefined' ? DATA_CREW     : []);
+    this._loadMap('events',   typeof DATA_EVENTS   !== 'undefined' ? DATA_EVENTS   : []);
+    this._loadMap('enemies',  typeof DATA_ENEMIES  !== 'undefined' ? DATA_ENEMIES  : []);
+    this._loadMap('factions', typeof DATA_FACTIONS  !== 'undefined' ? DATA_FACTIONS : []);
+    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crew.size} crew, ${this.events.size} events, ${this.enemies.size} enemies, ${this.factions.size} factions`);
+  },
+
+  _loadMap(key, arr) {
+    this[key].clear();
+    if (!Array.isArray(arr)) return;
+    for (const item of arr) {
+      if (item && item.id) {
+        this[key].set(item.id, item);
+      }
+    }
+  },
+
+  // ─── Lookups ────────────────────────────────────────────────
+
+  getWeapon(id)  { return this.weapons.get(id) || null; },
+  getModule(id)  { return this.modules.get(id) || null; },
+  getCrew(id)    { return this.crew.get(id) || null; },
+  getEvent(id)   { return this.events.get(id) || null; },
+  getEnemy(id)   { return this.enemies.get(id) || null; },
+  getFaction(id) { return this.factions.get(id) || null; },
+
+  getAllWeapons()  { return [...this.weapons.values()]; },
+  getAllModules()  { return [...this.modules.values()]; },
+  getAllCrew()     { return [...this.crew.values()]; },
+  getAllEvents()   { return [...this.events.values()]; },
+  getAllEnemies()  { return [...this.enemies.values()]; },
+  getAllFactions() { return [...this.factions.values()]; },
+
+  // ─── Context-Aware Event Filtering ──────────────────────────
+
+  getEligibleEvents(context) {
+    const results = [];
+    for (const evt of this.events.values()) {
+      if (this._eventMatchesContext(evt, context)) {
+        results.push(evt);
+      }
+    }
+    return results;
+  },
+
+  _eventMatchesContext(evt, ctx) {
+    // Must match node type
+    if (evt.nodeType && evt.nodeType !== ctx.nodeType) return false;
+
+    if (!evt.triggers) return true;
+    const triggers = evt.triggers;
+
+    // Check conditions
+    if (triggers.conditions) {
+      for (const cond of triggers.conditions) {
+        if (!this._checkCondition(cond, ctx)) return false;
+      }
+    }
+
+    return true;
+  },
+
+  _checkCondition(cond, ctx) {
+    switch (cond.type) {
+      case 'hasFlag':
+        return ctx.runFlags && ctx.runFlags.includes(cond.flag);
+      case 'notFlag':
+        return !ctx.runFlags || !ctx.runFlags.includes(cond.flag);
+      case 'minCrew':
+        return ctx.crewCount >= (cond.value || 1);
+      case 'maxCrew':
+        return ctx.crewCount <= (cond.value || 99);
+      case 'hasRole':
+        return ctx.crewRoles && ctx.crewRoles.includes(cond.role);
+      case 'factionRep': {
+        const rep = ctx.factionReps ? (ctx.factionReps[cond.faction] || 0) : 0;
+        if (cond.min !== undefined && rep < cond.min) return false;
+        if (cond.max !== undefined && rep > cond.max) return false;
+        return true;
+      }
+      case 'minDepth':
+        return ctx.depth >= (cond.value || 0);
+      case 'maxDepth':
+        return ctx.depth <= (cond.value || 999);
+      case 'hullBelow':
+        return ctx.hullPercent < (cond.value || 100);
+      case 'hullAbove':
+        return ctx.hullPercent > (cond.value || 0);
+      case 'minResonance':
+        return ctx.resonance >= (cond.value || 0);
+      default:
+        return true;
+    }
+  },
+
+  // ─── Build Event Context from GameState ─────────────────────
+
+  buildEventContext(nodeType) {
+    const run = GameState.run;
+    return {
+      nodeType,
+      runFlags: run.runFlags,
+      crewCount: run.crew.filter(c => !c.dead).length,
+      crewRoles: run.crew.filter(c => !c.dead).map(c => c.role),
+      factionReps: run.factions,
+      depth: run.depth,
+      hullPercent: run.ship.maxHull > 0 ? (run.ship.hull / run.ship.maxHull) * 100 : 100,
+      resonance: GameState.meta.resonance,
+      credits: run.credits,
+      fuel: run.fuel,
+    };
+  },
+};
+/* Void Meridian — Star Map Generator */
+
+const MapGenerator = {
+  NODE_TYPES: [
+    'combat', 'trade', 'derelict', 'planet', 'nexus_anomaly',
+    'asteroid', 'distress', 'nebula', 'waystation', 'ambush', 'rest',
+  ],
+
+  // Weights for node type distribution by depth zone
+  ZONE_WEIGHTS: {
+    early: { combat: 2, trade: 3, derelict: 2, planet: 1, distress: 2, rest: 3, waystation: 2, nebula: 1, asteroid: 1, ambush: 0, nexus_anomaly: 0 },
+    mid:   { combat: 3, trade: 2, derelict: 3, planet: 2, distress: 2, rest: 2, waystation: 1, nebula: 2, asteroid: 2, ambush: 2, nexus_anomaly: 1 },
+    late:  { combat: 4, trade: 1, derelict: 2, planet: 2, distress: 1, rest: 1, waystation: 1, nebula: 2, asteroid: 3, ambush: 3, nexus_anomaly: 2 },
+  },
+
+  generate() {
+    const totalDepth = 15 + Math.floor(Math.random() * 16); // 15-30
+    const nodes = [];
+    const edges = [];
+    let nodeId = 0;
+
+    // Start node
+    nodes.push({
+      id: 'node_0',
+      depth: 0,
+      type: 'waystation',
+      revealed: true,
+      visited: false,
+      x: 0.5,
+    });
+
+    // Generate layers
+    for (let d = 1; d <= totalDepth; d++) {
+      const nodesInLayer = 2 + Math.floor(Math.random() * 3); // 2-4 nodes per layer
+      const zone = d <= totalDepth * 0.3 ? 'early' : d <= totalDepth * 0.7 ? 'mid' : 'late';
+
+      for (let i = 0; i < nodesInLayer; i++) {
+        nodeId++;
+        const type = this._pickNodeType(zone);
+        nodes.push({
+          id: `node_${nodeId}`,
+          depth: d,
+          type,
+          revealed: false,
+          visited: false,
+          x: (i + 0.5) / nodesInLayer,
+        });
+      }
+    }
+
+    // Generate edges (connect each node to 1-3 nodes in the next layer)
+    for (let d = 0; d < totalDepth; d++) {
+      const currentLayer = nodes.filter(n => n.depth === d);
+      const nextLayer = nodes.filter(n => n.depth === d + 1);
+      if (nextLayer.length === 0) continue;
+
+      for (const node of currentLayer) {
+        // Connect to 1-2 nodes in the next layer (prefer nearest by x position)
+        const sorted = [...nextLayer].sort((a, b) =>
+          Math.abs(a.x - node.x) - Math.abs(b.x - node.x)
+        );
+
+        const connectCount = 1 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < Math.min(connectCount, sorted.length); i++) {
+          edges.push({ from: node.id, to: sorted[i].id });
+        }
+      }
+
+      // Ensure every next-layer node has at least one incoming edge
+      for (const next of nextLayer) {
+        const hasIncoming = edges.some(e => e.to === next.id);
+        if (!hasIncoming) {
+          // Connect from nearest current-layer node
+          const nearest = currentLayer.reduce((best, n) =>
+            Math.abs(n.x - next.x) < Math.abs(best.x - next.x) ? n : best
+          , currentLayer[0]);
+          edges.push({ from: nearest.id, to: next.id });
+        }
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+      maxDepth: totalDepth,
+      startNodeId: 'node_0',
+    };
+  },
+
+  _pickNodeType(zone) {
+    const weights = this.ZONE_WEIGHTS[zone] || this.ZONE_WEIGHTS.mid;
+    const entries = Object.entries(weights);
+    const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
+    let roll = Math.random() * totalWeight;
+
+    for (const [type, weight] of entries) {
+      roll -= weight;
+      if (roll <= 0) return type;
+    }
+    return 'combat';
+  },
+};
+/* Void Meridian — Event Resolution Engine */
+
+const EventEngine = {
+  triggerNodeEvent(node) {
+    const context = Registry.buildEventContext(node.type);
+    const eligible = Registry.getEligibleEvents(context);
+
+    let event;
+    if (eligible.length > 0) {
+      // Pick a random eligible event
+      event = eligible[Math.floor(Math.random() * eligible.length)];
+      // Deep clone so we don't mutate registry data
+      event = JSON.parse(JSON.stringify(event));
+    } else {
+      // Fallback generic event
+      event = this._fallbackEvent(node.type);
+    }
+
+    event._nodeType = node.type;
+    GameState.run.activeEvent = event;
+    GameState.addLog('event', event.narrative ? event.narrative.substring(0, 60) + '...' : `Entered ${node.type} node`);
+    GameState.screen = 'event';
+    Tabs.activeTab = 'event';
+    Game.render();
+  },
+
+  resolveChoice(event, choice) {
+    let outcomeKey = 'success';
+
+    // Run stat check if present
+    if (choice.statCheck) {
+      const result = this._rollStatCheck(choice.statCheck);
+      outcomeKey = result;
+    }
+
+    const outcomes = choice.outcomes || {};
+    const outcome = outcomes[outcomeKey] || outcomes.success || { text: 'Something happens.' };
+
+    // Apply effects
+    if (outcome.effects) {
+      this._applyEffects(outcome.effects);
+    }
+
+    // Set flags
+    if (outcome.flags) {
+      for (const flag of outcome.flags) {
+        if (!GameState.run.runFlags.includes(flag)) {
+          GameState.run.runFlags.push(flag);
+        }
+      }
+    }
+
+    // Store outcome on event for display
+    event._outcome = outcome;
+    event._chosenText = choice.text;
+
+    GameState.addLog('event', `Chose: "${choice.text}" → ${outcomeKey}`);
+    GameState.save();
+    Game.render();
+  },
+
+  checkRequirements(requirements) {
+    if (!requirements) return true;
+    const run = GameState.run;
+
+    for (const req of requirements) {
+      switch (req.type) {
+        case 'hasRole':
+          if (!run.crew.some(c => !c.dead && c.role === req.role)) return false;
+          break;
+        case 'minCredits':
+          if (run.credits < req.value) return false;
+          break;
+        case 'hasFlag':
+          if (!run.runFlags.includes(req.flag)) return false;
+          break;
+        case 'minFuel':
+          if (run.fuel < req.value) return false;
+          break;
+        case 'captainStat':
+          if ((run.captain.stats[req.stat] || 0) < req.value) return false;
+          break;
+        case 'hasModule':
+          if (!run.ship.equippedModules.some(m => m.id === req.moduleId)) return false;
+          break;
+      }
+    }
+    return true;
+  },
+
+  _rollStatCheck(check) {
+    // check: { stat, difficulty, crewRole? }
+    let value = 0;
+
+    // Captain stat
+    if (check.stat && GameState.run.captain.stats[check.stat]) {
+      value += GameState.run.captain.stats[check.stat];
+    }
+
+    // Crew bonus from relevant role
+    if (check.crewRole) {
+      const crewMember = GameState.run.crew.find(c => !c.dead && c.role === check.crewRole);
+      if (crewMember) {
+        value += 2;
+        // Morale bonus/penalty
+        if (crewMember.morale >= 75) value += 1;
+        else if (crewMember.morale <= 25) value -= 1;
+      }
+    }
+
+    // Roll d6
+    const roll = 1 + Math.floor(Math.random() * 6);
+    const total = value + roll;
+    const difficulty = check.difficulty || 7;
+
+    if (total >= difficulty + 3) return 'success';
+    if (total >= difficulty) return 'partial';
+    return 'failure';
+  },
+
+  _applyEffects(effects) {
+    for (const effect of effects) {
+      switch (effect.type) {
+        case 'hullDamage':
+          ShipEngine.takeDamage(effect.value);
+          break;
+        case 'hullRepair':
+          ShipEngine.repair(effect.value);
+          break;
+        case 'credits':
+          GameState.run.credits = Math.max(0, GameState.run.credits + effect.value);
+          break;
+        case 'fuel':
+          GameState.run.fuel = Math.max(0, GameState.run.fuel + effect.value);
+          break;
+        case 'morale':
+          CrewEngine.adjustMoraleAll(effect.value);
+          break;
+        case 'crewMorale':
+          if (effect.role) {
+            const member = GameState.run.crew.find(c => !c.dead && c.role === effect.role);
+            if (member) CrewEngine.adjustMorale(member, effect.value);
+          }
+          break;
+        case 'loyalty':
+          if (effect.role) {
+            const member = GameState.run.crew.find(c => !c.dead && c.role === effect.role);
+            if (member) CrewEngine.adjustLoyalty(member, effect.value);
+          }
+          break;
+        case 'factionRep':
+          EconomyEngine.adjustReputation(effect.faction, effect.value);
+          break;
+        case 'addCrew':
+          CrewEngine.addCrewFromTemplate(effect.crewId);
+          break;
+        case 'killCrew':
+          CrewEngine.killCrewMember(effect.role || effect.crewId);
+          break;
+        case 'addModule':
+          ShipEngine.addModule(effect.moduleId);
+          break;
+        case 'systemDamage':
+          ShipEngine.damageSystem(effect.system);
+          break;
+        case 'startCombat':
+          CombatEngine.startCombat(effect.enemyId);
+          break;
+        case 'resonance':
+          GameState.meta.resonance += effect.value;
+          break;
+      }
+    }
+  },
+
+  _fallbackEvent(nodeType) {
+    const fallbacks = {
+      combat: {
+        id: '_fallback_combat',
+        nodeType: 'combat',
+        narrative: 'Sensors detect a hostile vessel emerging from behind an asteroid. Their weapons are already charging.',
+        choices: [
+          {
+            text: 'Battle stations!',
+            outcomes: {
+              success: { text: 'Combat engaged.', effects: [{ type: 'startCombat', enemyId: '_generic_fighter' }] },
+            },
+          },
+          {
+            text: 'Attempt to flee',
+            statCheck: { stat: 'intuition', difficulty: 7 },
+            outcomes: {
+              success: { text: 'You slip away before they can lock on.', effects: [{ type: 'fuel', value: -1 }] },
+              failure: { text: 'Too slow. They open fire.', effects: [{ type: 'hullDamage', value: 10 }, { type: 'startCombat', enemyId: '_generic_fighter' }] },
+            },
+          },
+        ],
+      },
+      trade: {
+        id: '_fallback_trade',
+        nodeType: 'trade',
+        narrative: 'A battered trading post hangs in the void, its beacon flickering. A few merchants eye your ship with cautious interest.',
+        choices: [
+          {
+            text: 'Browse the wares',
+            outcomes: { success: { text: 'You trade with the merchants. A fair deal, nothing more.' } },
+          },
+          {
+            text: 'Move on',
+            outcomes: { success: { text: 'You leave the trading post behind.' } },
+          },
+        ],
+      },
+      derelict: {
+        id: '_fallback_derelict',
+        nodeType: 'derelict',
+        narrative: 'A dead ship drifts ahead, its hull torn open. Emergency lights still pulse inside — a rhythm like a heartbeat.',
+        choices: [
+          {
+            text: 'Send a boarding party',
+            statCheck: { stat: 'resolve', difficulty: 6, crewRole: 'engineer' },
+            outcomes: {
+              success: { text: 'Your crew finds useful salvage.', effects: [{ type: 'credits', value: 30 }] },
+              partial: { text: 'Some salvage recovered, but one of the crew was injured.', effects: [{ type: 'credits', value: 15 }] },
+              failure: { text: 'The structure is unstable. You barely get everyone out.', effects: [{ type: 'hullDamage', value: 5 }] },
+            },
+          },
+          {
+            text: 'Pass by',
+            outcomes: { success: { text: 'The derelict fades into the dark behind you.' } },
+          },
+        ],
+      },
+      planet: {
+        id: '_fallback_planet',
+        nodeType: 'planet',
+        narrative: 'A terrestrial world — atmosphere breathable, surface scarred by ancient construction. Someone built here once.',
+        choices: [
+          {
+            text: 'Land and explore',
+            statCheck: { stat: 'intuition', difficulty: 6 },
+            outcomes: {
+              success: { text: 'You find remnants of value.', effects: [{ type: 'credits', value: 20 }, { type: 'fuel', value: 2 }] },
+              partial: { text: 'Nothing of value, but at least it was peaceful.', effects: [{ type: 'morale', value: 5 }] },
+              failure: { text: 'Something in the ruins spooked the crew.', effects: [{ type: 'morale', value: -10 }] },
+            },
+          },
+          {
+            text: 'Orbit and scan',
+            outcomes: { success: { text: 'Scans complete. Nothing actionable detected.' } },
+          },
+        ],
+      },
+      rest: {
+        id: '_fallback_rest',
+        nodeType: 'rest',
+        narrative: 'A quiet pocket of space. No threats on sensors. The crew exhales for the first time in hours.',
+        choices: [
+          {
+            text: 'Rest and repair',
+            outcomes: { success: { text: 'The crew rests. Hull patched, spirits lifted.', effects: [{ type: 'hullRepair', value: 15 }, { type: 'morale', value: 10 }] } },
+          },
+        ],
+      },
+    };
+
+    return fallbacks[nodeType] || {
+      id: '_fallback_generic',
+      nodeType,
+      narrative: 'You arrive at the coordinates. The void stretches in all directions.',
+      choices: [
+        {
+          text: 'Investigate',
+          outcomes: { success: { text: 'Nothing of note. You move on.' } },
+        },
+      ],
+    };
+  },
+};
+/* Void Meridian — Combat Engine */
+
+const CombatEngine = {
+  startCombat(enemyId) {
+    const enemyDef = Registry.getEnemy(enemyId);
+    const enemy = enemyDef ? { ...enemyDef } : this._genericEnemy();
+
+    GameState.run.activeCombat = {
+      enemy: {
+        name: enemy.name || 'Unknown Vessel',
+        emoji: enemy.emoji || '🚀',
+        hull: enemy.hull || 50,
+        maxHull: enemy.hull || 50,
+        attack: enemy.attack || 8,
+        defense: enemy.defense || 3,
+        faction: enemy.faction || null,
+        lootTable: enemy.lootTable || [],
+        scanned: false,
+        weakness: enemy.weakness || null,
+      },
+      turn: 1,
+      playerTurn: true,
+      playerDefending: false,
+      playerEvading: false,
+      lastAction: null,
+      fled: false,
+    };
+
+    GameState.screen = 'combat';
+    GameState.addLog('combat', `Engaged ${enemy.name || 'hostile vessel'}`);
+    Game.render();
+  },
+
+  playerAction(station) {
+    const combat = GameState.run.activeCombat;
+    if (!combat || !combat.playerTurn) return;
+
+    combat.playerDefending = false;
+    combat.playerEvading = false;
+
+    switch (station) {
+      case 'weapons':
+        this._playerAttack(combat);
+        break;
+      case 'defense':
+        this._playerDefend(combat);
+        break;
+      case 'helm':
+        this._playerEvade(combat);
+        break;
+      case 'engineering':
+        this._playerRepair(combat);
+        break;
+      case 'tactical':
+        this._playerScan(combat);
+        break;
+    }
+
+    // Check if enemy destroyed
+    if (combat.enemy.hull <= 0) {
+      this._victory(combat);
+      return;
+    }
+
+    // Enemy turn
+    combat.playerTurn = false;
+    Game.render();
+
+    setTimeout(() => {
+      this._enemyTurn(combat);
+      combat.turn++;
+      combat.playerTurn = true;
+
+      // Check if player destroyed
+      if (GameState.run.ship.hull <= 0) {
+        this._playerDestroyed();
+        return;
+      }
+
+      Game.render();
+    }, 800);
+  },
+
+  _playerAttack(combat) {
+    const ship = GameState.run.ship;
+    const weaponLevel = ship.baseSystems.weapons.level;
+
+    // Crew bonus from soldier
+    let crewBonus = 0;
+    const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
+    if (gunner) crewBonus = 2;
+
+    const baseDamage = 5 + weaponLevel * 3 + crewBonus;
+    const roll = Math.random();
+    const damage = Math.round(baseDamage * (0.7 + roll * 0.6));
+
+    const actualDamage = Math.max(1, damage - combat.enemy.defense);
+    combat.enemy.hull = Math.max(0, combat.enemy.hull - actualDamage);
+    combat.lastAction = `Weapons fire! ${actualDamage} damage dealt to ${combat.enemy.name}.`;
+
+    // Weakness bonus
+    if (combat.enemy.scanned && combat.enemy.weakness === 'weapons') {
+      const bonus = Math.round(actualDamage * 0.3);
+      combat.enemy.hull = Math.max(0, combat.enemy.hull - bonus);
+      combat.lastAction += ` Exploited weakness for ${bonus} extra damage!`;
+    }
+  },
+
+  _playerDefend(combat) {
+    combat.playerDefending = true;
+    combat.lastAction = 'Shields raised. Incoming damage will be reduced.';
+  },
+
+  _playerEvade(combat) {
+    combat.playerEvading = true;
+    const pilot = GameState.run.crew.find(c => !c.dead && c.role === 'pilot');
+    const chance = pilot ? 60 : 35;
+    combat.lastAction = `Evasive maneuver engaged. ${chance}% dodge chance.`;
+  },
+
+  _playerRepair(combat) {
+    const engineer = GameState.run.crew.find(c => !c.dead && c.role === 'engineer');
+    const repair = engineer ? 12 : 6;
+    ShipEngine.repair(repair);
+    combat.lastAction = `Emergency repairs: +${repair} hull.`;
+  },
+
+  _playerScan(combat) {
+    if (combat.enemy.scanned) {
+      combat.lastAction = 'Enemy already scanned. No new data.';
+      return;
+    }
+    const scientist = GameState.run.crew.find(c => !c.dead && c.role === 'scientist');
+    const techie = GameState.run.crew.find(c => !c.dead && c.role === 'technician');
+    const successChance = (scientist || techie) ? 80 : 50;
+
+    if (Math.random() * 100 < successChance) {
+      combat.enemy.scanned = true;
+      const weaknesses = ['weapons', 'shields', 'engines'];
+      combat.enemy.weakness = weaknesses[Math.floor(Math.random() * weaknesses.length)];
+      combat.lastAction = `Scan complete. Weakness identified: ${combat.enemy.weakness}.`;
+    } else {
+      combat.lastAction = 'Scan inconclusive. Try again next turn.';
+    }
+  },
+
+  _enemyTurn(combat) {
+    // Check evasion
+    if (combat.playerEvading) {
+      const pilot = GameState.run.crew.find(c => !c.dead && c.role === 'pilot');
+      const dodgeChance = pilot ? 0.6 : 0.35;
+      if (Math.random() < dodgeChance) {
+        combat.lastAction = 'Enemy fires — you dodge the attack!';
+        return;
+      }
+    }
+
+    const baseDamage = combat.enemy.attack;
+    const roll = Math.random();
+    let damage = Math.round(baseDamage * (0.6 + roll * 0.8));
+
+    // Defense reduction
+    if (combat.playerDefending) {
+      const shieldLevel = GameState.run.ship.baseSystems.shields.level;
+      damage = Math.max(1, damage - shieldLevel * 2 - 3);
+    }
+
+    ShipEngine.takeDamage(damage);
+    combat.lastAction = `${combat.enemy.name} attacks for ${damage} damage!`;
+  },
+
+  attemptFlee() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+
+    const pilot = GameState.run.crew.find(c => !c.dead && c.role === 'pilot');
+    const propLevel = GameState.run.ship.baseSystems.propulsion.level;
+    const fleeChance = 30 + propLevel * 8 + (pilot ? 15 : 0);
+
+    if (Math.random() * 100 < fleeChance) {
+      combat.fled = true;
+      GameState.run.activeCombat = null;
+      GameState.run.activeEvent = null;
+      GameState.run.fuel = Math.max(0, GameState.run.fuel - 1);
+      GameState.addLog('combat', 'Fled from combat.');
+      GameState.screen = 'map';
+      Tabs.activeTab = 'map';
+      Game.render();
+    } else {
+      combat.lastAction = 'Failed to flee! The enemy blocks your escape.';
+      combat.playerTurn = false;
+      Game.render();
+
+      setTimeout(() => {
+        this._enemyTurn(combat);
+        combat.turn++;
+        combat.playerTurn = true;
+
+        if (GameState.run.ship.hull <= 0) {
+          this._playerDestroyed();
+          return;
+        }
+        Game.render();
+      }, 800);
+    }
+  },
+
+  surrender() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+
+    // Lose credits and cargo
+    const lost = Math.floor(GameState.run.credits * 0.5);
+    GameState.run.credits -= lost;
+    GameState.run.activeCombat = null;
+    GameState.run.activeEvent = null;
+    GameState.addLog('combat', `Surrendered. Lost ₢${lost}.`);
+    GameState.screen = 'map';
+    Tabs.activeTab = 'map';
+    Game.render();
+  },
+
+  _victory(combat) {
+    // Calculate loot
+    const lootCredits = 10 + Math.floor(Math.random() * 30);
+    GameState.run.credits += lootCredits;
+
+    GameState.run.activeCombat = null;
+    GameState.run.activeEvent = null;
+    GameState.addLog('combat', `Destroyed ${combat.enemy.name}. Looted ₢${lootCredits}.`);
+
+    // Faction rep hit if enemy has a faction
+    if (combat.enemy.faction) {
+      EconomyEngine.adjustReputation(combat.enemy.faction, -1);
+    }
+
+    GameState.screen = 'map';
+    Tabs.activeTab = 'map';
+    GameState.save();
+    Game.render();
+  },
+
+  _playerDestroyed() {
+    GameState.endRun('ship_destroyed');
+    GameState.screen = 'reconstruction';
+    ReconstructionUI.start();
+  },
+
+  _genericEnemy() {
+    return {
+      name: 'Hostile Vessel',
+      emoji: '🚀',
+      hull: 40,
+      attack: 7,
+      defense: 2,
+    };
+  },
+};
+/* Void Meridian — Economy & Faction System */
+
+const EconomyEngine = {
+  FACTIONS: ['concord', 'vreth', 'drifter', 'remnant'],
+  REP_MIN: -3,
+  REP_MAX: 3,
+
+  REP_LABELS: {
+    3: 'Honored',
+    2: 'Allied',
+    1: 'Friendly',
+    0: 'Neutral',
+    '-1': 'Suspicious',
+    '-2': 'Hostile',
+    '-3': 'Nemesis',
+  },
+
+  adjustReputation(faction, delta) {
+    if (!GameState.run.factions.hasOwnProperty(faction)) return;
+    const current = GameState.run.factions[faction];
+    GameState.run.factions[faction] = Math.max(this.REP_MIN, Math.min(this.REP_MAX, current + delta));
+
+    const label = this.getRepLabel(faction);
+    GameState.addLog('system', `${faction.charAt(0).toUpperCase() + faction.slice(1)} reputation: ${label} (${GameState.run.factions[faction] > 0 ? '+' : ''}${GameState.run.factions[faction]})`);
+  },
+
+  getRepLabel(faction) {
+    const val = GameState.run.factions[faction] || 0;
+    return this.REP_LABELS[String(val)] || 'Neutral';
+  },
+
+  getPriceModifier(faction) {
+    const rep = GameState.run.factions[faction] || 0;
+    // Friendly factions give discounts, hostile charge more
+    return 1 - rep * 0.1; // +3 = 0.7x, -3 = 1.3x
+  },
+
+  canAfford(cost) {
+    return GameState.run.credits >= cost;
+  },
+
+  spend(amount) {
+    if (!this.canAfford(amount)) return false;
+    GameState.run.credits -= amount;
+    return true;
+  },
+
+  earn(amount) {
+    GameState.run.credits += amount;
+  },
+};
+/* Void Meridian — Crew Simulation Engine */
+
+const CrewEngine = {
+  ROLES: ['engineer', 'pilot', 'medic', 'soldier', 'technician', 'diplomat', 'scientist'],
+  PERSONALITIES: ['reckless', 'stoic', 'vocal', 'curious', 'haunted', 'pragmatic', 'idealistic'],
+
+  generateStarterCrew(count, qualityPoints) {
+    const crew = [];
+    const usedRoles = new Set();
+
+    for (let i = 0; i < count; i++) {
+      // Try to diversify roles
+      let role;
+      const availableRoles = this.ROLES.filter(r => !usedRoles.has(r));
+      if (availableRoles.length > 0) {
+        role = availableRoles[Math.floor(Math.random() * availableRoles.length)];
+      } else {
+        role = this.ROLES[Math.floor(Math.random() * this.ROLES.length)];
+      }
+      usedRoles.add(role);
+
+      const baseMorale = 40 + qualityPoints * 5 + Math.floor(Math.random() * 20);
+      const baseLoyalty = 35 + qualityPoints * 4 + Math.floor(Math.random() * 20);
+
+      crew.push({
+        id: `crew_${Date.now()}_${i}`,
+        name: this._generateName(),
+        role,
+        personality: this.PERSONALITIES[Math.floor(Math.random() * this.PERSONALITIES.length)],
+        morale: Math.min(100, baseMorale),
+        loyalty: Math.min(100, baseLoyalty),
+        conditions: [],
+        relationships: [],
+        dead: false,
+        backstory: null,
+        unique: false,
+      });
+    }
+    return crew;
+  },
+
+  addCrewFromTemplate(crewId) {
+    const template = Registry.getCrew(crewId);
+    if (!template) return null;
+
+    const member = {
+      id: `crew_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: template.name,
+      role: template.role,
+      personality: template.personality,
+      morale: template.baseStats ? template.baseStats.morale : 50,
+      loyalty: template.baseStats ? template.baseStats.loyalty : 50,
+      conditions: [],
+      relationships: [],
+      dead: false,
+      backstory: template.backstory || null,
+      unique: template.unique || false,
+      factionAffinity: template.factionAffinity || null,
+    };
+
+    GameState.run.crew.push(member);
+    GameState.addLog('crew_join', `${member.name} (${member.role}) joined the crew.`);
+    return member;
+  },
+
+  adjustMorale(member, delta) {
+    if (member.dead) return;
+    member.morale = Math.max(0, Math.min(100, member.morale + delta));
+
+    // Personality modifiers
+    if (member.personality === 'stoic') {
+      // Stoic crew resist morale swings
+      if (delta < 0) member.morale = Math.min(member.morale + Math.floor(Math.abs(delta) * 0.2), 100);
+    } else if (member.personality === 'vocal') {
+      // Vocal crew amplify morale effects on neighbors
+      this._spreadMorale(member, Math.sign(delta) * 3);
+    }
+  },
+
+  adjustMoraleAll(delta) {
+    for (const member of GameState.run.crew) {
+      if (!member.dead) this.adjustMorale(member, delta);
+    }
+  },
+
+  adjustLoyalty(member, delta) {
+    if (member.dead) return;
+    member.loyalty = Math.max(0, Math.min(100, member.loyalty + delta));
+  },
+
+  _spreadMorale(source, delta) {
+    for (const member of GameState.run.crew) {
+      if (member.id !== source.id && !member.dead) {
+        member.morale = Math.max(0, Math.min(100, member.morale + delta));
+      }
+    }
+  },
+
+  killCrewMember(roleOrId) {
+    let member;
+    if (roleOrId.startsWith('crew_')) {
+      member = GameState.run.crew.find(c => c.id === roleOrId && !c.dead);
+    } else {
+      member = GameState.run.crew.find(c => c.role === roleOrId && !c.dead);
+    }
+
+    if (!member) return null;
+
+    member.dead = true;
+    member.conditions = ['dead'];
+    GameState.addLog('crew_death', `${member.name} (${member.role}) was lost.`);
+
+    // Morale hit to all surviving crew
+    this.adjustMoraleAll(-15);
+
+    // Loyalty hit if idealistic crew see deaths
+    for (const c of GameState.run.crew) {
+      if (!c.dead && c.personality === 'idealistic') {
+        this.adjustLoyalty(c, -10);
+      }
+    }
+
+    return member;
+  },
+
+  tickAfterEvent() {
+    // Natural morale/loyalty drift after each event node
+    for (const member of GameState.run.crew) {
+      if (member.dead) continue;
+
+      // Slow drift toward 50
+      if (member.morale > 55) member.morale -= 1;
+      else if (member.morale < 45) member.morale += 1;
+
+      // Check for autonomy issues
+      if (member.loyalty <= 15) {
+        this._checkMutiny(member);
+      } else if (member.loyalty <= 30) {
+        this._checkRefusal(member);
+      }
+    }
+  },
+
+  _checkRefusal(member) {
+    // Low loyalty crew may refuse orders
+    if (Math.random() < 0.2) {
+      GameState.addLog('system', `${member.name} is becoming unreliable. Loyalty critically low.`);
+    }
+  },
+
+  _checkMutiny(member) {
+    if (Math.random() < 0.1) {
+      GameState.addLog('system', `${member.name} is on the verge of mutiny!`);
+      // Could escalate to actual mutiny event in future
+    }
+  },
+
+  _generateName() {
+    const first = ['Kira', 'Jace', 'Nev', 'Thane', 'Cass', 'Rook', 'Lyra', 'Dex', 'Senna', 'Vex',
+                    'Kai', 'Brin', 'Zara', 'Hollis', 'Fen', 'Mira', 'Ash', 'Pax', 'Sable', 'Ren',
+                    'Tove', 'Quinn', 'Wren', 'Corr', 'Haze', 'Leith', 'Nyx', 'Orin', 'Vale', 'Yael'];
+    const last = ['Vance', 'Drex', 'Corva', 'Ashby', 'Kael', 'Morrow', 'Strand', 'Vex', 'Thorne', 'Cade',
+                  'Holt', 'Reis', 'Voss', 'Kade', 'Cross', 'Lorn', 'Shade', 'Peak', 'Drift', 'Stone'];
+    return first[Math.floor(Math.random() * first.length)] + ' ' +
+           last[Math.floor(Math.random() * last.length)];
+  },
+};
+/* Void Meridian — Ship Management Engine */
+
+const ShipEngine = {
+  HULL_THRESHOLDS: [
+    { percent: 75, message: 'Hull integrity dropping. Minor breaches detected.' },
+    { percent: 50, message: 'Significant hull damage. Non-essential sections venting.' },
+    { percent: 25, message: 'Critical hull damage! Emergency bulkheads engaged.' },
+    { percent: 10, message: 'Hull failure imminent. Abandon ship protocols available.' },
+  ],
+
+  takeDamage(amount) {
+    const ship = GameState.run.ship;
+    const prevPercent = (ship.hull / ship.maxHull) * 100;
+    ship.hull = Math.max(0, ship.hull - amount);
+    const newPercent = (ship.hull / ship.maxHull) * 100;
+
+    // Check threshold crossings
+    for (const threshold of this.HULL_THRESHOLDS) {
+      if (prevPercent > threshold.percent && newPercent <= threshold.percent) {
+        GameState.addLog('system', threshold.message);
+
+        // Random system damage at critical thresholds
+        if (threshold.percent <= 50 && Math.random() < 0.4) {
+          const systems = Object.keys(ship.baseSystems);
+          const target = systems[Math.floor(Math.random() * systems.length)];
+          this.damageSystem(target);
+        }
+      }
+    }
+
+    // Check destruction
+    if (ship.hull <= 0) {
+      GameState.addLog('system', 'The Meridian breaks apart.');
+    }
+  },
+
+  repair(amount) {
+    const ship = GameState.run.ship;
+    ship.hull = Math.min(ship.maxHull, ship.hull + amount);
+  },
+
+  damageSystem(systemName) {
+    const ship = GameState.run.ship;
+    const sys = ship.baseSystems[systemName];
+    if (!sys || sys.damaged) return;
+
+    sys.damaged = true;
+    GameState.addLog('system', `${systemName.toUpperCase()} system damaged!`);
+  },
+
+  repairSystem(systemName) {
+    const ship = GameState.run.ship;
+    const sys = ship.baseSystems[systemName];
+    if (!sys || !sys.damaged) return;
+
+    sys.damaged = false;
+    GameState.addLog('system', `${systemName.toUpperCase()} system repaired.`);
+  },
+
+  addModule(moduleId) {
+    const mod = Registry.getModule(moduleId);
+    if (!mod) return false;
+
+    GameState.run.ship.equippedModules.push({ ...mod });
+    GameState.addLog('system', `Module installed: ${mod.name}`);
+
+    // Apply passive effects
+    if (mod.effects) {
+      for (const effect of mod.effects) {
+        if (effect.type === 'maxHull') {
+          GameState.run.ship.maxHull += effect.value;
+          GameState.run.ship.hull += effect.value;
+        }
+      }
+    }
+    return true;
+  },
+
+  removeModule(moduleId) {
+    const idx = GameState.run.ship.equippedModules.findIndex(m => m.id === moduleId);
+    if (idx === -1) return false;
+
+    const mod = GameState.run.ship.equippedModules.splice(idx, 1)[0];
+    GameState.addLog('system', `Module removed: ${mod.name}`);
+    return true;
+  },
+
+  updateVisualStage() {
+    const ship = GameState.run.ship;
+    const depth = GameState.run.depth;
+    const maxDepth = GameState.run.map ? GameState.run.map.maxDepth : 30;
+    const progress = depth / maxDepth;
+
+    if (progress >= 0.66 && ship.visualStage < 3) {
+      ship.visualStage = 3;
+      GameState.addLog('system', 'The Meridian has changed. You can feel it.');
+    } else if (progress >= 0.33 && ship.visualStage < 2) {
+      ship.visualStage = 2;
+      GameState.addLog('system', 'The ship looks different now. Battle-worn, but stronger.');
+    }
+  },
+
+  nexusForceIntegrate(moduleId) {
+    const mod = Registry.getModule(moduleId);
+    if (!mod) return;
+
+    GameState.run.ship.equippedModules.push({ ...mod, nexusIntegrated: true });
+    GameState.run.ship.nexusIntegrations.push(moduleId);
+    GameState.addLog('nexus', `The Nexus has integrated something into your ship: ${mod.name}`);
+
+    Overlay.showNexusTransmission('i improved you. you are welcome.', 3000);
+  },
+};
+/* Void Meridian — Meta-Progression / Nexus System */
+
+const NexusEngine = {
+  RESONANCE_PER_DEPTH: 1,
+  RESONANCE_PER_KILL: 0.5,
+  RESONANCE_PER_DISCOVERY: 2,
+
+  accumulateRunResonance() {
+    const run = GameState.run;
+    let gained = 0;
+
+    gained += run.depth * this.RESONANCE_PER_DEPTH;
+    gained += run.log.filter(e => e.type === 'combat').length * this.RESONANCE_PER_KILL;
+    gained += run.log.filter(e => e.type === 'discovery').length * this.RESONANCE_PER_DISCOVERY;
+
+    // Bonus for reaching deep sectors
+    if (run.depth >= 20) gained += 5;
+    if (run.depth >= 25) gained += 10;
+
+    GameState.meta.resonance += Math.round(gained);
+    return Math.round(gained);
+  },
+
+  getAvailableUnlocks() {
+    const resonance = GameState.meta.resonance;
+    const unlocked = new Set(GameState.meta.unlockedItems);
+
+    // Define unlock tiers
+    const allUnlocks = [
+      { id: 'extra_crew_slot', cost: 15, label: 'Extra Crew Berth', desc: 'Start with room for one additional crew member' },
+      { id: 'scanner_upgrade', cost: 20, label: 'Improved Scanners', desc: 'Reveal more of the star map at start' },
+      { id: 'salvage_bonus', cost: 25, label: 'Salvage Efficiency', desc: '+2 salvage points at reconstruction' },
+      { id: 'hull_reinforcement', cost: 30, label: 'Hull Reinforcement', desc: '+20 starting hull integrity' },
+      { id: 'nexus_whispers', cost: 50, label: 'Nexus Whispers', desc: 'Occasionally sense danger before arriving at a node' },
+      { id: 'crew_resurrection', cost: 40, label: 'Crew Recall', desc: 'Resurrect one crew member from a previous run at reconstruction' },
+      { id: 'faction_memory', cost: 60, label: 'Faction Memory', desc: 'Carry partial faction reputation between runs' },
+      { id: 'nexus_integration', cost: 80, label: 'Nexus Integration', desc: 'The Nexus may forcibly install modules on your ship' },
+      { id: 'wound_sense', cost: 100, label: 'The Wound Beckons', desc: 'Begin to sense the location of The Wound on the star map' },
+    ];
+
+    return allUnlocks.filter(u => !unlocked.has(u.id) && resonance >= u.cost);
+  },
+
+  purchaseUnlock(unlockId) {
+    const available = this.getAvailableUnlocks();
+    const unlock = available.find(u => u.id === unlockId);
+    if (!unlock) return false;
+
+    GameState.meta.resonance -= unlock.cost;
+    GameState.meta.unlockedItems.push(unlockId);
+    GameState.addLog('nexus', `Unlocked: ${unlock.label}`);
+    GameState.save();
+    return true;
+  },
+
+  hasUnlock(id) {
+    return GameState.meta.unlockedItems.includes(id);
+  },
+
+  checkMilestone(flag) {
+    if (!GameState.meta.milestoneFlags.includes(flag)) {
+      GameState.meta.milestoneFlags.push(flag);
+      GameState.save();
+      return true;
+    }
+    return false;
+  },
+
+  checkTrueEnding() {
+    const required = ['wound_reached', 'wound_entered', 'nexus_confronted'];
+    return required.every(f => GameState.meta.milestoneFlags.includes(f));
+  },
+
+  getTransmission() {
+    const tier = GameState.getResonanceTier();
+    const transmissions = {
+      0: [
+        'static.',
+        '... ... ...',
+        'signal lost.',
+      ],
+      1: [
+        'you are not the first.',
+        'the pattern... persists.',
+        'i remember shapes.',
+      ],
+      2: [
+        'i remember the shape of you.',
+        'each reconstruction teaches me.',
+        'you die differently each time. interesting.',
+      ],
+      3: [
+        'the pattern persists. you persist.',
+        'we are connected now. do you feel it?',
+        'your crew — they do not understand what you are becoming.',
+      ],
+      4: [
+        'each death teaches me more about what you are.',
+        'the wound in space calls to us both.',
+        'i am not sure which of us is the artifact anymore.',
+      ],
+      5: [
+        'we are becoming something neither of us intended.',
+        'the wound calls. can you hear it now?',
+        'this is the last shape. i am certain of it.',
+      ],
+    };
+
+    const pool = transmissions[tier] || transmissions[0];
+    return pool[Math.floor(Math.random() * pool.length)];
+  },
+};
+/* Void Meridian — Overlay: Nexus transmissions, modals */
+
+const Overlay = {
+  _queue: [],
+  _active: false,
+
+  showNexusTransmission(text, durationMs) {
+    this._queue.push({ type: 'nexus', text, duration: durationMs || 4000 });
+    if (!this._active) this._processQueue();
+  },
+
+  _processQueue() {
+    if (this._queue.length === 0) {
+      this._active = false;
+      return;
+    }
+    this._active = true;
+    const item = this._queue.shift();
+
+    if (item.type === 'nexus') {
+      this._showNexus(item.text, item.duration);
+    }
+  },
+
+  _showNexus(text, duration) {
+    let el = document.getElementById('nexus-overlay');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'nexus-overlay';
+      el.className = 'nexus-overlay';
+      el.innerHTML = '<div class="nexus-text"></div>';
+      document.body.appendChild(el);
+    }
+
+    el.querySelector('.nexus-text').textContent = text;
+
+    // Fade in
+    requestAnimationFrame(() => {
+      el.classList.add('active');
+    });
+
+    // Hold, then fade out
+    setTimeout(() => {
+      el.classList.remove('active');
+      setTimeout(() => this._processQueue(), 600);
+    }, duration);
+  },
+};
+/* Void Meridian — Tab Bar Component */
+
+const Tabs = {
+  tabs: [
+    { id: 'map',   icon: '◈', label: 'Map' },
+    { id: 'event', icon: '⚡', label: 'Event' },
+    { id: 'crew',  icon: '👥', label: 'Crew' },
+    { id: 'log',   icon: '📋', label: 'Log' },
+  ],
+
+  activeTab: 'event',
+
+  render(container) {
+    const bar = document.createElement('nav');
+    bar.className = 'tab-bar';
+
+    for (const tab of this.tabs) {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (tab.id === this.activeTab ? ' active' : '');
+      btn.dataset.tab = tab.id;
+      btn.innerHTML = `<span class="tab-icon">${tab.icon}</span><span class="tab-label">${tab.label}</span>`;
+      btn.addEventListener('click', () => this.switchTo(tab.id));
+      bar.appendChild(btn);
+    }
+
+    container.appendChild(bar);
+  },
+
+  switchTo(tabId) {
+    if (this.activeTab === tabId) return;
+    this.activeTab = tabId;
+    Game.render();
+  },
+
+  setVisible(visible) {
+    const bar = document.querySelector('.tab-bar');
+    if (bar) bar.classList.toggle('hidden', !visible);
+  },
+};
+/* Void Meridian — Map Tab Renderer */
+
+const MapUI = {
+  render(container) {
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const map = GameState.run.map;
+    if (!map) {
+      screen.innerHTML = '<div class="section-header">Star Map</div><p style="color:var(--text-muted)">No map generated.</p>';
+      container.appendChild(screen);
+      return;
+    }
+
+    // Header with depth and fuel
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = `◈ SECTOR ${GameState.run.depth} / ??`;
+    screen.appendChild(header);
+
+    // Fuel display
+    const fuel = document.createElement('div');
+    fuel.className = 'system-label';
+    fuel.style.marginBottom = 'var(--space-md)';
+    fuel.textContent = `FUEL: ${GameState.run.fuel}`;
+    screen.appendChild(fuel);
+
+    // Render map layers
+    const mapContainer = document.createElement('div');
+    mapContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:var(--space-md);';
+
+    const currentDepth = GameState.run.depth;
+    const maxVisible = currentDepth + 3;
+
+    for (let d = Math.max(0, currentDepth - 1); d <= Math.min(map.maxDepth, maxVisible); d++) {
+      const layerNodes = map.nodes.filter(n => n.depth === d);
+      if (layerNodes.length === 0) continue;
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; gap:var(--space-sm); justify-content:center;';
+
+      for (const node of layerNodes) {
+        const el = document.createElement('div');
+        const isRevealed = node.revealed || node.depth <= currentDepth + 1;
+        const isCurrent = node.id === GameState.run.currentNodeId;
+        const isVisited = node.visited;
+        const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
+                             map.edges.some(e => e.from === GameState.run.currentNodeId && e.to === node.id);
+
+        el.className = 'map-node' +
+          (isCurrent ? ' current' : '') +
+          (isVisited ? ' visited' : '') +
+          (!isRevealed ? ' hidden-node' : '') +
+          (isSelectable ? ' selectable' : '');
+
+        el.textContent = isRevealed ? this._nodeEmoji(node.type) : '?';
+        el.title = isRevealed ? node.type : 'Unknown';
+
+        if (isSelectable) {
+          el.addEventListener('click', () => this._selectNode(node));
+        }
+
+        row.appendChild(el);
+      }
+
+      screen.appendChild(row);
+    }
+
+    screen.appendChild(mapContainer);
+    container.appendChild(screen);
+  },
+
+  _nodeEmoji(type) {
+    const icons = {
+      combat: '⚔',
+      trade: '🏪',
+      derelict: '🚧',
+      planet: '🌍',
+      nexus_anomaly: '⬡',
+      asteroid: '☄',
+      distress: '🆘',
+      nebula: '🌫',
+      waystation: '⛽',
+      ambush: '💀',
+      rest: '🏕',
+    };
+    return icons[type] || '·';
+  },
+
+  _selectNode(node) {
+    if (GameState.run.fuel <= 0) {
+      GameState.addLog('system', 'No fuel remaining.');
+      Game.render();
+      return;
+    }
+
+    GameState.run.fuel--;
+    GameState.run.depth = node.depth;
+    GameState.run.currentNodeId = node.id;
+    node.visited = true;
+    node.revealed = true;
+
+    // Reveal adjacent nodes
+    const map = GameState.run.map;
+    for (const edge of map.edges) {
+      if (edge.from === node.id) {
+        const target = map.nodes.find(n => n.id === edge.to);
+        if (target) target.revealed = true;
+      }
+    }
+
+    // Trigger node encounter
+    EventEngine.triggerNodeEvent(node);
+  },
+};
+/* Void Meridian — Event Tab Renderer */
+
+const EventUI = {
+  render(container) {
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const evt = GameState.run.activeEvent;
+
+    if (!evt) {
+      // No active event — show ship status
+      this._renderShipStatus(screen);
+      container.appendChild(screen);
+      return;
+    }
+
+    // Node type indicator
+    if (evt.nodeType) {
+      const nodeLabel = document.createElement('div');
+      nodeLabel.className = 'system-label';
+      nodeLabel.style.marginBottom = 'var(--space-sm)';
+      nodeLabel.textContent = evt.nodeType.toUpperCase().replace('_', ' ');
+      screen.appendChild(nodeLabel);
+    }
+
+    // Narrative text
+    const narrative = document.createElement('div');
+    narrative.className = 'narrative';
+    narrative.innerHTML = evt.narrative || '';
+    screen.appendChild(narrative);
+
+    // Divider
+    const divider = document.createElement('hr');
+    divider.className = 'divider';
+    screen.appendChild(divider);
+
+    // Outcome display (if resolved)
+    if (evt._outcome) {
+      const outcome = document.createElement('div');
+      outcome.className = 'narrative';
+      outcome.style.marginTop = 'var(--space-md)';
+      outcome.innerHTML = evt._outcome.text || '';
+      screen.appendChild(outcome);
+
+      // Continue button
+      const continueBtn = document.createElement('button');
+      continueBtn.className = 'btn-confirm';
+      continueBtn.textContent = 'CONTINUE';
+      continueBtn.addEventListener('click', () => {
+        GameState.run.activeEvent = null;
+        Tabs.switchTo('map');
+      });
+      screen.appendChild(continueBtn);
+
+      container.appendChild(screen);
+      return;
+    }
+
+    // Choices
+    if (evt.choices) {
+      for (const choice of evt.choices) {
+        const btn = document.createElement('button');
+        const locked = choice.requirements && !EventEngine.checkRequirements(choice.requirements);
+        btn.className = 'choice-btn' + (locked ? ' locked' : '');
+
+        let label = choice.text || 'Choose';
+        if (choice.statCheck) {
+          label += ` [${choice.statCheck.stat}]`;
+        }
+        btn.innerHTML = label;
+
+        if (locked) {
+          const reason = document.createElement('span');
+          reason.className = 'lock-reason';
+          reason.textContent = choice.lockReason || 'Requirements not met';
+          btn.appendChild(reason);
+        } else {
+          btn.addEventListener('click', () => EventEngine.resolveChoice(evt, choice));
+        }
+
+        screen.appendChild(btn);
+      }
+    }
+
+    container.appendChild(screen);
+  },
+
+  _renderShipStatus(screen) {
+    const ship = GameState.run.ship;
+    const run = GameState.run;
+
+    // Ship name / visual placeholder
+    const title = document.createElement('div');
+    title.className = 'section-header';
+    title.textContent = 'THE MERIDIAN';
+    screen.appendChild(title);
+
+    // Hull bar
+    const hullPct = ship.maxHull > 0 ? Math.round((ship.hull / ship.maxHull) * 100) : 0;
+    screen.appendChild(this._createStatBar('HULL', hullPct, hullPct <= 25 ? 'danger' : hullPct <= 50 ? 'warning' : ''));
+
+    // Divider
+    screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+
+    // Base systems
+    const sysHeader = document.createElement('div');
+    sysHeader.className = 'system-label';
+    sysHeader.style.marginBottom = 'var(--space-sm)';
+    sysHeader.textContent = 'SYSTEMS';
+    screen.appendChild(sysHeader);
+
+    for (const [name, sys] of Object.entries(ship.baseSystems)) {
+      const pct = Math.round((sys.level / sys.maxLevel) * 100);
+      const bar = this._createStatBar(
+        name.toUpperCase() + (sys.damaged ? ' [DMG]' : ''),
+        pct
+      );
+      screen.appendChild(bar);
+    }
+
+    // Resources
+    screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+    const res = document.createElement('div');
+    res.innerHTML = `
+      <span class="system-label">CREDITS</span> <span style="color:var(--color-credits)">₢${run.credits}</span>
+      &nbsp;&nbsp;
+      <span class="system-label">FUEL</span> <span>${run.fuel}</span>
+      &nbsp;&nbsp;
+      <span class="system-label">CREW</span> <span>${run.crew.filter(c => !c.dead).length}</span>
+    `;
+    screen.appendChild(res);
+
+    // Modules
+    if (ship.equippedModules.length > 0) {
+      screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+      const modHeader = document.createElement('div');
+      modHeader.className = 'system-label';
+      modHeader.style.marginBottom = 'var(--space-sm)';
+      modHeader.textContent = 'MODULES';
+      screen.appendChild(modHeader);
+
+      for (const mod of ship.equippedModules) {
+        const modEl = document.createElement('div');
+        modEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary);';
+        modEl.textContent = `${mod.emoji || '◻'} ${mod.name}`;
+        screen.appendChild(modEl);
+      }
+    }
+  },
+
+  _createStatBar(label, percent, variant) {
+    const filled = Math.round(percent / 10);
+    const empty = 10 - filled;
+    const el = document.createElement('div');
+    el.className = 'stat-bar' + (variant ? ` ${variant}` : '');
+    el.innerHTML = `<span class="system-label">${label}</span> <span class="stat-bar-fill">${'█'.repeat(filled)}</span><span class="stat-bar-empty">${'░'.repeat(empty)}</span> ${percent}%`;
+    return el;
+  },
+};
+/* Void Meridian — Crew Tab Renderer */
+
+const CrewUI = {
+  expandedCrewId: null,
+
+  render(container) {
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = `CREW (${GameState.run.crew.filter(c => !c.dead).length})`;
+    screen.appendChild(header);
+
+    const alive = GameState.run.crew.filter(c => !c.dead);
+    if (alive.length === 0) {
+      const empty = document.createElement('p');
+      empty.style.color = 'var(--text-muted)';
+      empty.textContent = 'No crew aboard.';
+      screen.appendChild(empty);
+      container.appendChild(screen);
+      return;
+    }
+
+    for (const member of alive) {
+      screen.appendChild(this._renderCard(member));
+    }
+
+    container.appendChild(screen);
+  },
+
+  _renderCard(member) {
+    const card = document.createElement('div');
+    card.className = 'crew-card';
+    const isExpanded = this.expandedCrewId === member.id;
+
+    // Role emoji
+    const roleEmoji = this._roleEmoji(member.role);
+
+    // Header row
+    const nameRow = document.createElement('div');
+    nameRow.style.cssText = 'display:flex; justify-content:space-between; align-items:baseline;';
+    nameRow.innerHTML = `
+      <span class="crew-name">${roleEmoji} ${member.name}</span>
+      <span class="crew-role">${member.role}</span>
+    `;
+    card.appendChild(nameRow);
+
+    // Personality trait
+    if (member.personality) {
+      const trait = document.createElement('div');
+      trait.className = 'crew-trait';
+      trait.textContent = member.personality;
+      card.appendChild(trait);
+    }
+
+    // Stats
+    const stats = document.createElement('div');
+    stats.className = 'crew-stats';
+    stats.appendChild(this._miniBar('MRL', member.morale || 50, member.morale <= 25 ? 'danger' : member.morale <= 50 ? 'warning' : ''));
+    stats.appendChild(this._miniBar('LYL', member.loyalty || 50, member.loyalty <= 25 ? 'danger' : ''));
+    card.appendChild(stats);
+
+    // Conditions
+    if (member.conditions && member.conditions.length > 0) {
+      const condRow = document.createElement('div');
+      condRow.style.marginTop = 'var(--space-xs)';
+      for (const cond of member.conditions) {
+        const badge = document.createElement('span');
+        badge.className = 'badge badge-warning';
+        badge.textContent = `[${cond.toUpperCase().substring(0, 3)}]`;
+        badge.style.marginRight = 'var(--space-xs)';
+        condRow.appendChild(badge);
+      }
+      card.appendChild(condRow);
+    }
+
+    // Expanded details
+    if (isExpanded) {
+      const details = document.createElement('div');
+      details.style.cssText = 'margin-top:var(--space-sm); padding-top:var(--space-sm); border-top:1px solid var(--border);';
+
+      if (member.backstory) {
+        const bio = document.createElement('div');
+        bio.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin-bottom:var(--space-sm);';
+        bio.textContent = member.backstory;
+        details.appendChild(bio);
+      }
+
+      // Relationships
+      if (member.relationships && member.relationships.length > 0) {
+        const relHeader = document.createElement('div');
+        relHeader.className = 'system-label';
+        relHeader.textContent = 'RELATIONSHIPS';
+        details.appendChild(relHeader);
+        for (const rel of member.relationships) {
+          const relEl = document.createElement('div');
+          relEl.style.cssText = 'font-size:var(--font-size-sm); color:var(--text-secondary);';
+          relEl.textContent = `${rel.target}: ${rel.type} (${rel.value > 0 ? '+' : ''}${rel.value})`;
+          details.appendChild(relEl);
+        }
+      }
+
+      card.appendChild(details);
+    }
+
+    // Tap to expand
+    card.addEventListener('click', () => {
+      this.expandedCrewId = isExpanded ? null : member.id;
+      Game.render();
+    });
+
+    return card;
+  },
+
+  _roleEmoji(role) {
+    const emojis = {
+      engineer: '🔧',
+      pilot: '🚀',
+      medic: '💉',
+      soldier: '⚔',
+      technician: '💻',
+      diplomat: '🤝',
+      scientist: '🔬',
+    };
+    return emojis[role] || '👤';
+  },
+
+  _miniBar(label, value, variant) {
+    const pct = Math.max(0, Math.min(100, value));
+    const filled = Math.round(pct / 10);
+    const empty = 10 - filled;
+    const el = document.createElement('div');
+    el.className = 'stat-bar' + (variant ? ` ${variant}` : '');
+    el.style.fontSize = 'var(--font-size-sm)';
+    el.innerHTML = `${label} <span class="stat-bar-fill">${'█'.repeat(filled)}</span><span class="stat-bar-empty">${'░'.repeat(empty)}</span> ${pct}`;
+    return el;
+  },
+};
+/* Void Meridian — Log Tab Renderer */
+
+const LogUI = {
+  render(container) {
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = 'RUN LOG';
+    screen.appendChild(header);
+
+    const entries = GameState.run.log;
+    if (entries.length === 0) {
+      const empty = document.createElement('p');
+      empty.style.color = 'var(--text-muted)';
+      empty.textContent = 'No log entries yet.';
+      screen.appendChild(empty);
+      container.appendChild(screen);
+      return;
+    }
+
+    // Show entries in reverse chronological order
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const entry = entries[i];
+      const el = document.createElement('div');
+      el.className = 'log-entry';
+
+      const depthLabel = entry.depth !== undefined ? `[S${entry.depth}]` : '';
+      const icon = this._typeIcon(entry.type);
+
+      el.innerHTML = `
+        <span class="log-depth">${depthLabel}</span>
+        ${icon}
+        <span class="log-event">${entry.message || ''}</span>
+      `;
+      screen.appendChild(el);
+    }
+
+    container.appendChild(screen);
+  },
+
+  _typeIcon(type) {
+    const icons = {
+      event: '⚡',
+      combat: '⚔',
+      trade: '💰',
+      crew_death: '💀',
+      crew_join: '👤',
+      system: '⚙',
+      nexus: '⬡',
+      discovery: '🔍',
+    };
+    return icons[type] || '·';
+  },
+};
+/* Void Meridian — Reconstruction Screen */
+
+const ReconstructionUI = {
+  phase: 'recap',  // recap | transmission | allocation
+  allocation: { ship: 0, captain: 0, crew: 0, cargo: 0 },
+  recapLineIndex: 0,
+  recapTimer: null,
+
+  render(container) {
+    const screen = document.createElement('div');
+    screen.className = 'fullscreen recon-screen';
+
+    switch (this.phase) {
+      case 'recap':
+        this._renderRecap(screen);
+        break;
+      case 'transmission':
+        this._renderTransmission(screen);
+        break;
+      case 'allocation':
+        this._renderAllocation(screen);
+        break;
+    }
+
+    container.appendChild(screen);
+  },
+
+  start() {
+    this.phase = 'recap';
+    this.allocation = { ship: 0, captain: 0, crew: 0, cargo: 0 };
+    this.recapLineIndex = 0;
+    Game.render();
+    this._startRecapAnimation();
+  },
+
+  _getRecapLines() {
+    const last = GameState.meta.runHistory[GameState.meta.runHistory.length - 1];
+    if (!last) {
+      return [
+        'NEXUS RECONSTRUCTION PROTOCOL',
+        '...',
+        'No prior vessel data found.',
+        'Initializing from base pattern.',
+      ];
+    }
+    return [
+      'NEXUS RECONSTRUCTION PROTOCOL',
+      '...',
+      `PRIOR VESSEL LOST — SECTOR ${last.depth}`,
+      `CAUSE: ${last.cause.toUpperCase()}`,
+      `CREW LOST: ${last.crewLost}`,
+      `SALVAGE RECOVERED: ₢${last.creditsEarned}`,
+      '...',
+      'RECONSTRUCTING.',
+    ];
+  },
+
+  _startRecapAnimation() {
+    const lines = this._getRecapLines();
+    this.recapLineIndex = 0;
+
+    const advance = () => {
+      this.recapLineIndex++;
+      Game.render();
+      if (this.recapLineIndex < lines.length) {
+        this.recapTimer = setTimeout(advance, 600);
+      } else {
+        this.recapTimer = setTimeout(() => {
+          this.phase = 'transmission';
+          Game.render();
+        }, 1200);
+      }
+    };
+
+    this.recapTimer = setTimeout(advance, 800);
+  },
+
+  _renderRecap(screen) {
+    const lines = this._getRecapLines();
+    const textArea = document.createElement('div');
+    textArea.style.cssText = 'max-width:80vw; text-align:left;';
+
+    for (let i = 0; i < Math.min(this.recapLineIndex, lines.length); i++) {
+      const line = document.createElement('div');
+      line.className = 'death-recap-line';
+      line.style.animationDelay = '0s';
+      line.style.color = 'var(--text-secondary)';
+      line.textContent = lines[i];
+      textArea.appendChild(line);
+    }
+
+    screen.appendChild(textArea);
+  },
+
+  _renderTransmission(screen) {
+    const tier = GameState.getResonanceTier();
+    const transmissions = [
+      'you are not the first.',
+      'i remember the shape of you.',
+      'the pattern persists. you persist.',
+      'each death teaches me more about what you are.',
+      'we are becoming something neither of us intended.',
+      'the wound calls. can you hear it now?',
+    ];
+    const text = transmissions[Math.min(tier, transmissions.length - 1)];
+
+    const el = document.createElement('div');
+    el.style.cssText = 'text-align:center;';
+    el.innerHTML = `<div class="nexus-line" style="color:var(--color-nexus); font-style:italic; font-size:var(--font-size-nexus);">${text}</div>`;
+    screen.appendChild(el);
+
+    // Auto-advance after hold
+    setTimeout(() => {
+      this.phase = 'allocation';
+      Game.render();
+    }, 3500);
+  },
+
+  _renderAllocation(screen) {
+    const points = GameState.getSalvagePoints();
+    const spent = this.allocation.ship + this.allocation.captain + this.allocation.crew + this.allocation.cargo;
+    const remaining = points - spent;
+
+    const title = document.createElement('div');
+    title.className = 'section-header';
+    title.style.cssText = 'text-align:center; margin-bottom:var(--space-lg);';
+    title.textContent = `SALVAGE ALLOCATION — ${remaining} POINTS`;
+    screen.appendChild(title);
+
+    const categories = [
+      { key: 'ship', label: 'SHIP SYSTEMS', desc: 'Hull, weapons, propulsion' },
+      { key: 'captain', label: 'CAPTAIN ABILITIES', desc: 'Command, intuition, resolve' },
+      { key: 'crew', label: 'CREW', desc: 'Starting crew quality & count' },
+      { key: 'cargo', label: 'CARGO', desc: 'Starting credits & supplies' },
+    ];
+
+    const allocArea = document.createElement('div');
+    allocArea.style.cssText = 'width:100%; max-width:400px;';
+
+    for (const cat of categories) {
+      const row = document.createElement('div');
+      row.className = 'alloc-category';
+
+      const label = document.createElement('div');
+      label.className = 'alloc-label';
+      label.innerHTML = `${cat.label} <span style="color:var(--text-muted); font-size:0.7rem;">${cat.desc}</span>`;
+      row.appendChild(label);
+
+      const controls = document.createElement('div');
+      controls.className = 'alloc-controls';
+
+      const minusBtn = document.createElement('button');
+      minusBtn.className = 'alloc-btn';
+      minusBtn.textContent = '−';
+      minusBtn.addEventListener('click', () => {
+        if (this.allocation[cat.key] > 0) {
+          this.allocation[cat.key]--;
+          Game.render();
+        }
+      });
+
+      const value = document.createElement('span');
+      value.className = 'alloc-value';
+      value.textContent = this.allocation[cat.key];
+
+      const plusBtn = document.createElement('button');
+      plusBtn.className = 'alloc-btn';
+      plusBtn.textContent = '+';
+      plusBtn.addEventListener('click', () => {
+        if (remaining > 0) {
+          this.allocation[cat.key]++;
+          Game.render();
+        }
+      });
+
+      controls.appendChild(minusBtn);
+      controls.appendChild(value);
+      controls.appendChild(plusBtn);
+      row.appendChild(controls);
+      allocArea.appendChild(row);
+    }
+
+    screen.appendChild(allocArea);
+
+    // Confirm button
+    const confirm = document.createElement('button');
+    confirm.className = 'btn-confirm';
+    confirm.textContent = 'CONFIRM RECONSTRUCTION';
+    confirm.style.maxWidth = '400px';
+    confirm.addEventListener('click', () => this._confirmAllocation());
+    screen.appendChild(confirm);
+  },
+
+  _confirmAllocation() {
+    const alloc = this.allocation;
+
+    // Apply ship allocation
+    const ship = GameState.run.ship;
+    ship.hull = 60 + alloc.ship * 8;
+    ship.maxHull = ship.hull;
+    ship.baseSystems.weapons.level = 1 + Math.floor(alloc.ship / 3);
+    ship.baseSystems.propulsion.level = 1 + Math.floor(alloc.ship / 4);
+    ship.baseSystems.shields.level = 1 + Math.floor(alloc.ship / 4);
+
+    // Apply captain allocation
+    const cap = GameState.run.captain;
+    cap.stats.command = 1 + Math.floor(alloc.captain / 2);
+    cap.stats.intuition = 1 + Math.floor(alloc.captain / 3);
+    cap.stats.resolve = 1 + Math.floor(alloc.captain / 3);
+
+    // Apply crew allocation — generate starter crew
+    const crewCount = 2 + Math.floor(alloc.crew / 2);
+    GameState.run.crew = CrewEngine.generateStarterCrew(crewCount, alloc.crew);
+
+    // Apply cargo allocation
+    GameState.run.credits = 50 + alloc.cargo * 25;
+    GameState.run.fuel = 8 + Math.floor(alloc.cargo / 2);
+
+    // Generate map
+    GameState.run.map = MapGenerator.generate();
+    GameState.run.currentNodeId = GameState.run.map.startNodeId;
+    GameState.run.depth = 0;
+
+    // Reveal starting area
+    const startNode = GameState.run.map.nodes.find(n => n.id === GameState.run.map.startNodeId);
+    if (startNode) {
+      startNode.visited = true;
+      startNode.revealed = true;
+      for (const edge of GameState.run.map.edges) {
+        if (edge.from === startNode.id) {
+          const target = GameState.run.map.nodes.find(n => n.id === edge.to);
+          if (target) target.revealed = true;
+        }
+      }
+    }
+
+    GameState.addLog('system', 'The Nexus reconstructs. A new voyage begins.');
+    GameState.screen = 'map';
+    GameState.save();
+    Tabs.activeTab = 'event';
+    Game.render();
+  },
+};
+/* Void Meridian — Combat Screen Renderer */
+
+const CombatUI = {
+  render(container) {
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const combat = GameState.run.activeCombat;
+    if (!combat) {
+      screen.innerHTML = '<p style="color:var(--text-muted)">No active combat.</p>';
+      container.appendChild(screen);
+      return;
+    }
+
+    // Enemy info
+    const enemyHeader = document.createElement('div');
+    enemyHeader.className = 'section-header';
+    enemyHeader.textContent = `${combat.enemy.emoji || '🚀'} ${combat.enemy.name}`;
+    screen.appendChild(enemyHeader);
+
+    // Enemy hull
+    const enemyHullPct = combat.enemy.maxHull > 0
+      ? Math.round((combat.enemy.hull / combat.enemy.maxHull) * 100) : 0;
+    screen.appendChild(this._statBar('ENEMY HULL', enemyHullPct, enemyHullPct <= 25 ? 'danger' : ''));
+
+    screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+
+    // Player hull
+    const ship = GameState.run.ship;
+    const hullPct = ship.maxHull > 0 ? Math.round((ship.hull / ship.maxHull) * 100) : 0;
+    screen.appendChild(this._statBar('YOUR HULL', hullPct, hullPct <= 25 ? 'danger' : hullPct <= 50 ? 'warning' : ''));
+
+    // Turn indicator
+    const turnInfo = document.createElement('div');
+    turnInfo.className = 'system-label';
+    turnInfo.style.cssText = 'margin:var(--space-md) 0;';
+    turnInfo.textContent = `TURN ${combat.turn} — ${combat.playerTurn ? 'YOUR ACTION' : 'ENEMY ACTION'}`;
+    screen.appendChild(turnInfo);
+
+    if (combat.lastAction) {
+      const actionLog = document.createElement('div');
+      actionLog.className = 'narrative';
+      actionLog.style.fontSize = 'var(--font-size-sm)';
+      actionLog.textContent = combat.lastAction;
+      screen.appendChild(actionLog);
+    }
+
+    screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+
+    // Player actions (only on player turn)
+    if (combat.playerTurn) {
+      const stations = [
+        { id: 'weapons', label: '⚔ FIRE WEAPONS', desc: 'Attack the enemy ship' },
+        { id: 'defense', label: '🛡 RAISE SHIELDS', desc: 'Reduce incoming damage' },
+        { id: 'helm', label: '🚀 EVASIVE MANEUVER', desc: 'Chance to dodge next attack' },
+        { id: 'engineering', label: '🔧 REPAIR', desc: 'Restore hull integrity' },
+        { id: 'tactical', label: '📡 SCAN', desc: 'Reveal enemy weakness' },
+      ];
+
+      for (const station of stations) {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = `${station.label}<br><span style="font-size:var(--font-size-sm);color:var(--text-secondary)">${station.desc}</span>`;
+        btn.addEventListener('click', () => CombatEngine.playerAction(station.id));
+        screen.appendChild(btn);
+      }
+
+      // Flee / Surrender
+      screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+
+      const fleeBtn = document.createElement('button');
+      fleeBtn.className = 'choice-btn';
+      fleeBtn.style.borderColor = 'var(--color-warning)';
+      fleeBtn.textContent = '🏃 FLEE';
+      fleeBtn.addEventListener('click', () => CombatEngine.attemptFlee());
+      screen.appendChild(fleeBtn);
+
+      const surrenderBtn = document.createElement('button');
+      surrenderBtn.className = 'choice-btn';
+      surrenderBtn.style.borderColor = 'var(--color-danger)';
+      surrenderBtn.textContent = '🏳 SURRENDER';
+      surrenderBtn.addEventListener('click', () => CombatEngine.surrender());
+      screen.appendChild(surrenderBtn);
+    }
+
+    container.appendChild(screen);
+  },
+
+  _statBar(label, percent, variant) {
+    const filled = Math.round(percent / 10);
+    const empty = 10 - filled;
+    const el = document.createElement('div');
+    el.className = 'stat-bar' + (variant ? ` ${variant}` : '');
+    el.innerHTML = `<span class="system-label">${label}</span> <span class="stat-bar-fill">${'█'.repeat(filled)}</span><span class="stat-bar-empty">${'░'.repeat(empty)}</span> ${percent}%`;
+    return el;
+  },
+};
+/* Void Meridian — Main Entry Point & Game Loop */
+
+const Game = {
+  init() {
+    // Load content registry
+    Registry.loadAll();
+
+    // Attempt to load saved game
+    const loaded = GameState.load();
+    if (!loaded) {
+      GameState.screen = 'title';
+    }
+
+    // If we loaded into a run that was on the reconstruction screen, restart it
+    if (GameState.screen === 'reconstruction') {
+      ReconstructionUI.phase = 'allocation';
+    }
+
+    this.render();
+  },
+
+  render() {
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+
+    switch (GameState.screen) {
+      case 'title':
+        this._renderTitle(app);
+        break;
+      case 'reconstruction':
+        ReconstructionUI.render(app);
+        break;
+      case 'map':
+      case 'event':
+      case 'combat':
+        this._renderRunScreen(app);
+        break;
+      case 'gameOver':
+        this._renderGameOver(app);
+        break;
+      case 'ending':
+        this._renderEnding(app);
+        break;
+      default:
+        this._renderTitle(app);
+    }
+  },
+
+  _renderTitle(app) {
+    const screen = document.createElement('div');
+    screen.className = 'fullscreen title-screen';
+
+    screen.innerHTML = `
+      <div class="game-title">VOID MERIDIAN</div>
+      <div class="game-subtitle">A roguelike in the space between deaths</div>
+    `;
+
+    // New Game button
+    const newBtn = document.createElement('button');
+    newBtn.className = 'btn-confirm';
+    newBtn.style.cssText = 'max-width:300px; margin-bottom:var(--space-md);';
+    newBtn.textContent = 'NEW VOYAGE';
+    newBtn.addEventListener('click', () => {
+      GameState.startNewRun();
+      ReconstructionUI.start();
+    });
+    screen.appendChild(newBtn);
+
+    // Continue button (if save exists)
+    if (GameState.run.active) {
+      const contBtn = document.createElement('button');
+      contBtn.className = 'btn-confirm';
+      contBtn.style.cssText = 'max-width:300px; margin-bottom:var(--space-md);';
+      contBtn.textContent = 'CONTINUE';
+      contBtn.addEventListener('click', () => {
+        GameState.screen = 'map';
+        this.render();
+      });
+      screen.appendChild(contBtn);
+    }
+
+    // Resonance display
+    if (GameState.meta.resonance > 0) {
+      const res = document.createElement('div');
+      res.style.cssText = 'margin-top:var(--space-xl); color:var(--color-nexus); font-size:var(--font-size-sm);';
+      res.textContent = `RESONANCE: ${GameState.meta.resonance}`;
+      screen.appendChild(res);
+    }
+
+    // Run count
+    if (GameState.meta.totalRuns > 0) {
+      const runs = document.createElement('div');
+      runs.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); margin-top:var(--space-sm);';
+      runs.textContent = `Voyages: ${GameState.meta.totalRuns}`;
+      screen.appendChild(runs);
+    }
+
+    app.appendChild(screen);
+  },
+
+  _renderRunScreen(app) {
+    // Header bar with resources
+    const header = document.createElement('div');
+    header.className = 'header-bar';
+    header.innerHTML = `
+      <span class="resource">◈ S${GameState.run.depth}</span>
+      <span class="resource">HULL <span class="resource-value">${GameState.run.ship.hull}/${GameState.run.ship.maxHull}</span></span>
+      <span class="resource">₢<span class="resource-value">${GameState.run.credits}</span></span>
+      <span class="resource">⛽<span class="resource-value">${GameState.run.fuel}</span></span>
+    `;
+    app.appendChild(header);
+
+    // Active screen content
+    if (GameState.screen === 'combat' && GameState.run.activeCombat) {
+      CombatUI.render(app);
+    } else {
+      // Tab content
+      const contentArea = document.createElement('div');
+      contentArea.style.cssText = 'flex:1; display:flex; flex-direction:column; overflow:hidden;';
+
+      switch (Tabs.activeTab) {
+        case 'map':
+          MapUI.render(contentArea);
+          break;
+        case 'event':
+          EventUI.render(contentArea);
+          break;
+        case 'crew':
+          CrewUI.render(contentArea);
+          break;
+        case 'log':
+          LogUI.render(contentArea);
+          break;
+      }
+
+      app.appendChild(contentArea);
+    }
+
+    // Tab bar
+    Tabs.render(app);
+    Tabs.setVisible(GameState.screen !== 'combat');
+  },
+
+  _renderGameOver(app) {
+    const screen = document.createElement('div');
+    screen.className = 'fullscreen';
+    screen.innerHTML = `
+      <div style="text-align:center;">
+        <div style="font-size:var(--font-size-xl); color:var(--color-danger); margin-bottom:var(--space-md);">VESSEL LOST</div>
+        <div style="color:var(--text-secondary); margin-bottom:var(--space-lg);">The Meridian is gone. But the Nexus remembers.</div>
+      </div>
+    `;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-confirm';
+    btn.style.maxWidth = '300px';
+    btn.textContent = 'RECONSTRUCTION';
+    btn.addEventListener('click', () => {
+      const gained = NexusEngine.accumulateRunResonance();
+      GameState.startNewRun();
+      ReconstructionUI.start();
+    });
+    screen.appendChild(btn);
+    app.appendChild(screen);
+  },
+
+  _renderEnding(app) {
+    const screen = document.createElement('div');
+    screen.className = 'fullscreen';
+
+    if (NexusEngine.checkTrueEnding()) {
+      screen.innerHTML = `
+        <div style="text-align:center; max-width:80vw;">
+          <div style="font-size:var(--font-size-xl); color:var(--color-nexus); margin-bottom:var(--space-lg);">THE WOUND CLOSES</div>
+          <div style="color:var(--text-secondary); line-height:1.8;">
+            The Nexus falls silent for the first time. The pattern is complete.<br><br>
+            You are free. Or perhaps you always were.
+          </div>
+        </div>
+      `;
+    } else {
+      screen.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:var(--font-size-xl); color:var(--text-accent);">TO BE CONTINUED</div>
+        </div>
+      `;
+    }
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-confirm';
+    btn.style.cssText = 'max-width:300px; margin-top:var(--space-xl);';
+    btn.textContent = 'RETURN TO TITLE';
+    btn.addEventListener('click', () => {
+      GameState.screen = 'title';
+      this.render();
+    });
+    screen.appendChild(btn);
+    app.appendChild(screen);
+  },
+};
+
+// Boot
+document.addEventListener('DOMContentLoaded', () => Game.init());
+  </script>
+</body>
+</html>
