@@ -1,7 +1,7 @@
 /* Void Meridian — Economy & Faction System */
 
 const EconomyEngine = {
-  FACTIONS: ['concord', 'vreth', 'drifter', 'remnant'],
+  FACTIONS: ['concord_assembly', 'vreth_dominion', 'drifter_compact', 'remnant_collective'],
   REP_MIN: -3,
   REP_MAX: 3,
 
@@ -21,7 +21,18 @@ const EconomyEngine = {
     GameState.run.factions[faction] = Math.max(this.REP_MIN, Math.min(this.REP_MAX, current + delta));
 
     const label = this.getRepLabel(faction);
-    GameState.addLog('system', `${faction.charAt(0).toUpperCase() + faction.slice(1)} reputation: ${label} (${GameState.run.factions[faction] > 0 ? '+' : ''}${GameState.run.factions[faction]})`);
+    const displayName = this.getFactionDisplayName(faction);
+    GameState.addLog('system', `${displayName} reputation: ${label} (${GameState.run.factions[faction] > 0 ? '+' : ''}${GameState.run.factions[faction]})`);
+  },
+
+  getFactionDisplayName(faction) {
+    const names = {
+      concord_assembly: 'Concord Assembly',
+      vreth_dominion: 'Vreth Dominion',
+      drifter_compact: 'Drifter Compact',
+      remnant_collective: 'Remnant Collective',
+    };
+    return names[faction] || faction;
   },
 
   getRepLabel(faction) {

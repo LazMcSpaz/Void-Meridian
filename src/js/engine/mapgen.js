@@ -1,17 +1,33 @@
 /* Void Meridian — Star Map Generator */
 
 const MapGenerator = {
+  // Node types matching events_master.json schema
   NODE_TYPES: [
-    'combat', 'trade', 'derelict', 'planet', 'nexus_anomaly',
-    'asteroid', 'distress', 'nebula', 'waystation', 'ambush', 'rest',
+    'combat', 'trade_post', 'derelict', 'planet_exploration',
+    'nexus_anomaly', 'anomalous_signal', 'faction_territory', 'dead_zone',
   ],
 
   // Weights for node type distribution by depth zone
   ZONE_WEIGHTS: {
-    early: { combat: 2, trade: 3, derelict: 2, planet: 1, distress: 2, rest: 3, waystation: 2, nebula: 1, asteroid: 1, ambush: 0, nexus_anomaly: 0 },
-    mid:   { combat: 3, trade: 2, derelict: 3, planet: 2, distress: 2, rest: 2, waystation: 1, nebula: 2, asteroid: 2, ambush: 2, nexus_anomaly: 1 },
-    late:  { combat: 4, trade: 1, derelict: 2, planet: 2, distress: 1, rest: 1, waystation: 1, nebula: 2, asteroid: 3, ambush: 3, nexus_anomaly: 2 },
+    early: {
+      combat: 2, trade_post: 3, derelict: 2, planet_exploration: 1,
+      anomalous_signal: 2, dead_zone: 1, faction_territory: 2,
+      nexus_anomaly: 0,
+    },
+    mid: {
+      combat: 3, trade_post: 2, derelict: 3, planet_exploration: 2,
+      anomalous_signal: 2, dead_zone: 2, faction_territory: 2,
+      nexus_anomaly: 1,
+    },
+    late: {
+      combat: 4, trade_post: 1, derelict: 2, planet_exploration: 2,
+      anomalous_signal: 2, dead_zone: 3, faction_territory: 1,
+      nexus_anomaly: 2,
+    },
   },
+
+  // Faction assignment for faction_territory nodes
+  FACTIONS: ['concord_assembly', 'vreth_dominion', 'drifter_compact', 'remnant_collective'],
 
   generate() {
     const totalDepth = 15 + Math.floor(Math.random() * 16); // 15-30
@@ -23,10 +39,11 @@ const MapGenerator = {
     nodes.push({
       id: 'node_0',
       depth: 0,
-      type: 'waystation',
+      type: 'trade_post',
       revealed: true,
       visited: false,
       x: 0.5,
+      faction: null,
     });
 
     // Generate layers
@@ -37,6 +54,10 @@ const MapGenerator = {
       for (let i = 0; i < nodesInLayer; i++) {
         nodeId++;
         const type = this._pickNodeType(zone);
+        const faction = type === 'faction_territory'
+          ? this.FACTIONS[Math.floor(Math.random() * this.FACTIONS.length)]
+          : null;
+
         nodes.push({
           id: `node_${nodeId}`,
           depth: d,
@@ -44,6 +65,7 @@ const MapGenerator = {
           revealed: false,
           visited: false,
           x: (i + 0.5) / nodesInLayer,
+          faction,
         });
       }
     }
@@ -55,7 +77,6 @@ const MapGenerator = {
       if (nextLayer.length === 0) continue;
 
       for (const node of currentLayer) {
-        // Connect to 1-2 nodes in the next layer (prefer nearest by x position)
         const sorted = [...nextLayer].sort((a, b) =>
           Math.abs(a.x - node.x) - Math.abs(b.x - node.x)
         );
@@ -70,7 +91,6 @@ const MapGenerator = {
       for (const next of nextLayer) {
         const hasIncoming = edges.some(e => e.to === next.id);
         if (!hasIncoming) {
-          // Connect from nearest current-layer node
           const nearest = currentLayer.reduce((best, n) =>
             Math.abs(n.x - next.x) < Math.abs(best.x - next.x) ? n : best
           , currentLayer[0]);

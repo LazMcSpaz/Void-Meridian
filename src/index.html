@@ -14,6 +14,29 @@
 <body>
   <div id="app"></div>
   <!-- JS_INJECT -->
+  <script>
+    // Load JSON data files for dev mode (synchronous XHR)
+    var DATA_EVENTS_MASTER = null;
+    var DATA_VM_WEAPONS = null;
+    var DATA_VM_MODULES = null;
+    var DATA_VM_CREW = null;
+    (function() {
+      var files = {
+        'data/events_master.json': 'DATA_EVENTS_MASTER',
+        'data/vm_weapons.json': 'DATA_VM_WEAPONS',
+        'data/vm_modules.json': 'DATA_VM_MODULES',
+        'data/vm_crew.json': 'DATA_VM_CREW',
+      };
+      for (var path in files) {
+        try {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', path, false);
+          xhr.send();
+          if (xhr.status === 200) window[files[path]] = JSON.parse(xhr.responseText);
+        } catch(e) { console.warn('Failed to load ' + path, e); }
+      }
+    })();
+  </script>
   <script src="js/state.js"></script>
   <script src="js/registry.js"></script>
   <script src="js/engine/mapgen.js"></script>

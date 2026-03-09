@@ -1,279 +1,399 @@
-/* Void Meridian — Event Resolution Engine */
+/* Void Meridian — Event Resolution Engine (events_master.json schema) */
 
 const EventEngine = {
+
+  // ─── Trigger an event at a map node ────────────────────────
+
   triggerNodeEvent(node) {
-    const context = Registry.buildEventContext(node.type);
-    const eligible = Registry.getEligibleEvents(context);
+    const factionContext = node.faction || 'none';
+    const eligible = Registry.getEligibleEvents(node.type, factionContext);
 
     let event;
     if (eligible.length > 0) {
-      // Pick a random eligible event
       event = eligible[Math.floor(Math.random() * eligible.length)];
-      // Deep clone so we don't mutate registry data
-      event = JSON.parse(JSON.stringify(event));
+      event = JSON.parse(JSON.stringify(event)); // deep clone
     } else {
-      // Fallback generic event
-      event = this._fallbackEvent(node.type);
+      // Relaxed fallback: ignore depth_zone
+      const relaxed = (Registry.eventsByType[node.type] || []).filter(evt => {
+        if (evt.faction_context && evt.faction_context !== 'none' && evt.faction_context !== factionContext) return false;
+        if ((evt.min_resonance || 0) > GameState.meta.resonance) return false;
+        if (GameState.run.seenEventIds && GameState.run.seenEventIds.includes(evt.id)) return false;
+        return true;
+      });
+      if (relaxed.length > 0) {
+        event = JSON.parse(JSON.stringify(relaxed[Math.floor(Math.random() * relaxed.length)]));
+      } else {
+        event = this._placeholderEvent();
+      }
     }
 
-    event._nodeType = node.type;
     GameState.run.activeEvent = event;
-    GameState.addLog('event', event.narrative ? event.narrative.substring(0, 60) + '...' : `Entered ${node.type} node`);
+    GameState.run.activeEventStep = 0;
+    GameState.run.lastStepOutcomes = {};
+    GameState.addLog('event', event.setup_text ? event.setup_text.substring(0, 80) + '...' : `Entered ${node.type} node`);
     GameState.screen = 'event';
     Tabs.activeTab = 'event';
+    GameState.save();
     Game.render();
   },
 
-  resolveChoice(event, choice) {
-    let outcomeKey = 'success';
+  // ─── Check if an option is available ──────────────────────
 
-    // Run stat check if present
-    if (choice.statCheck) {
-      const result = this._rollStatCheck(choice.statCheck);
-      outcomeKey = result;
+  checkOptionAvailability(option) {
+    const run = GameState.run;
+
+    if (option.requires_crew_role) {
+      if (!run.crew.some(c => !c.dead && c.role === option.requires_crew_role)) {
+        return { available: false, hint: option.locked_hint || '' };
+      }
     }
 
-    const outcomes = choice.outcomes || {};
-    const outcome = outcomes[outcomeKey] || outcomes.success || { text: 'Something happens.' };
-
-    // Apply effects
-    if (outcome.effects) {
-      this._applyEffects(outcome.effects);
+    if (option.requires_module) {
+      const reqMod = option.requires_module;
+      if (!run.ship.equippedModules.some(m => m.id === reqMod || m.id === 'mod_' + reqMod)) {
+        return { available: false, hint: option.locked_hint || '' };
+      }
     }
 
-    // Set flags
-    if (outcome.flags) {
-      for (const flag of outcome.flags) {
+    if (option.requires_rep) {
+      const faction = option.requires_rep.faction;
+      const minTier = parseInt(option.requires_rep.min_tier, 10);
+      const currentRep = run.factions[faction] || 0;
+      if (currentRep < minTier) {
+        return { available: false, hint: option.locked_hint || '' };
+      }
+    }
+
+    if (option.requires_flag) {
+      if (!run.runFlags.includes(option.requires_flag)) {
+        return { available: false, hint: option.locked_hint || '' };
+      }
+    }
+
+    if (option.requires_ability) {
+      if (!run.captain.abilities.includes(option.requires_ability)) {
+        return { available: false, hint: option.locked_hint || '' };
+      }
+    }
+
+    return { available: true, hint: '' };
+  },
+
+  // ─── Resolve a check for a chosen option ──────────────────
+
+  resolveCheck(option) {
+    if (!option.check_type || option.check_type === 'none') {
+      return 'success';
+    }
+
+    const run = GameState.run;
+    let skillValue = 0;
+
+    if (option.check_type === 'skill' && option.check_target) {
+      // Find best crew member with the matching role
+      const crewMember = run.crew.find(c => !c.dead && c.role === option.check_target);
+      if (crewMember) {
+        // Base role bonus: having the right role gives 30 points
+        skillValue = 30;
+        // Morale modifier: (morale - 50) * 0.2 gives -10 to +10
+        skillValue += (crewMember.morale - 50) * 0.2;
+      } else {
+        // No matching role crew — attempt with lower skill
+        skillValue = 10;
+      }
+    } else if (option.check_type === 'stat' && option.check_target) {
+      // Captain ability check
+      const statVal = run.captain.stats[option.check_target] || 0;
+      skillValue = statVal * 10;
+      // Average morale modifier
+      const livingCrew = run.crew.filter(c => !c.dead);
+      if (livingCrew.length > 0) {
+        const avgMorale = livingCrew.reduce((sum, c) => sum + c.morale, 0) / livingCrew.length;
+        skillValue += (avgMorale - 50) * 0.2;
+      }
+    }
+
+    skillValue = Math.max(0, Math.min(100, skillValue));
+
+    const thresholds = {
+      easy:     { success: 40, partial: 20 },
+      medium:   { success: 60, partial: 35 },
+      hard:     { success: 75, partial: 50 },
+      critical: { success: 90, partial: 70 },
+    };
+
+    const t = thresholds[option.difficulty] || thresholds.medium;
+    const roll = Math.random() * 100;
+
+    if (roll + skillValue >= t.success) return 'success';
+    if (roll + skillValue >= t.partial) return 'partial';
+    return 'failure';
+  },
+
+  // ─── Select option and resolve outcome ────────────────────
+
+  selectOption(optionIndex) {
+    const event = GameState.run.activeEvent;
+    if (!event) return;
+
+    const stepIdx = GameState.run.activeEventStep;
+    const step = this._getCurrentStep(event, stepIdx);
+    if (!step || !step.options || optionIndex >= step.options.length) return;
+
+    const option = step.options[optionIndex];
+    const outcomeLevel = this.resolveCheck(option);
+    const outcome = option.outcomes[outcomeLevel];
+
+    if (!outcome) {
+      // Fallback to success if outcome level missing
+      const fallback = option.outcomes.success;
+      if (fallback) {
+        this._applyOutcome(fallback, event);
+      }
+    } else {
+      this._applyOutcome(outcome, event);
+    }
+
+    // Store step outcome for conditional branching
+    GameState.run.lastStepOutcomes[step.step_number] = outcomeLevel;
+
+    // Store for UI display
+    event._lastOutcome = outcome || option.outcomes.success;
+    event._lastOutcomeLevel = outcomeLevel;
+    event._lastChoiceLabel = option.label;
+    event._resolved = true;
+
+    GameState.addLog('event', `Chose: "${option.label}" → ${outcomeLevel}`);
+    GameState.save();
+    Game.render();
+  },
+
+  // ─── Advance to next step or finish event ─────────────────
+
+  advanceEvent() {
+    const event = GameState.run.activeEvent;
+    if (!event) return;
+
+    event._resolved = false;
+    event._lastOutcome = null;
+
+    const nextStepIdx = GameState.run.activeEventStep + 1;
+
+    // Look for the next valid step
+    for (let i = nextStepIdx; i < event.steps.length; i++) {
+      const step = event.steps[i];
+      if (this._stepConditionMet(step)) {
+        GameState.run.activeEventStep = i;
+        GameState.save();
+        Game.render();
+        return;
+      }
+    }
+
+    // No more steps — finish event
+    this._finishEvent(event);
+  },
+
+  _stepConditionMet(step) {
+    if (!step.condition) return true;
+    const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
+    return priorOutcome === step.condition.outcome;
+  },
+
+  _getCurrentStep(event, stepIdx) {
+    if (!event.steps || stepIdx >= event.steps.length) return null;
+    return event.steps[stepIdx];
+  },
+
+  _finishEvent(event) {
+    // Mark event as seen
+    if (event.id && event.id !== 'PLACEHOLDER') {
+      if (!GameState.run.seenEventIds.includes(event.id)) {
+        GameState.run.seenEventIds.push(event.id);
+      }
+    }
+
+    GameState.run.activeEvent = null;
+    GameState.run.activeEventStep = 0;
+    GameState.run.lastStepOutcomes = {};
+
+    // Crew tick after event
+    CrewEngine.tickAfterEvent();
+
+    // Ship visual update
+    ShipEngine.updateVisualStage();
+
+    // Check for hull death
+    if (GameState.run.ship.hull <= 0) {
+      GameState.endRun('hull_destroyed');
+      NexusEngine.accumulateRunResonance();
+      GameState.screen = 'gameOver';
+    } else {
+      Tabs.switchTo('map');
+    }
+
+    GameState.save();
+    Game.render();
+  },
+
+  // ─── Apply outcome effects ────────────────────────────────
+
+  _applyOutcome(outcome, event) {
+    // 1. Hull delta
+    if (outcome.hull_delta) {
+      const ship = GameState.run.ship;
+      ship.hull = Math.max(1, Math.min(ship.maxHull, ship.hull + outcome.hull_delta));
+    }
+
+    // 2. Morale delta (applied to all crew)
+    if (outcome.morale_delta) {
+      CrewEngine.adjustMoraleAll(outcome.morale_delta);
+    }
+
+    // 3. Loyalty delta (applied to all crew for non-assignment events)
+    if (outcome.loyalty_delta) {
+      for (const member of GameState.run.crew) {
+        if (!member.dead) {
+          CrewEngine.adjustLoyalty(member, outcome.loyalty_delta);
+        }
+      }
+    }
+
+    // 4. Resonance delta (meta-currency, persists across runs)
+    if (outcome.resonance_delta) {
+      GameState.meta.resonance += outcome.resonance_delta;
+    }
+
+    // 5. Process rewards array
+    if (outcome.rewards && outcome.rewards.length > 0) {
+      for (const reward of outcome.rewards) {
+        this._processReward(reward);
+      }
+    }
+
+    // 6. Set flag
+    if (outcome.sets_flag) {
+      if (!GameState.run.runFlags.includes(outcome.sets_flag)) {
+        GameState.run.runFlags.push(outcome.sets_flag);
+      }
+    }
+
+    // 7. Additional flags
+    if (outcome.additional_flags) {
+      for (const flag of outcome.additional_flags) {
         if (!GameState.run.runFlags.includes(flag)) {
           GameState.run.runFlags.push(flag);
         }
       }
     }
 
-    // Store outcome on event for display
-    event._outcome = outcome;
-    event._chosenText = choice.text;
-
-    GameState.addLog('event', `Chose: "${choice.text}" → ${outcomeKey}`);
-    GameState.save();
-    Game.render();
+    // 8. Clear flag
+    if (outcome.clears_flag) {
+      const idx = GameState.run.runFlags.indexOf(outcome.clears_flag);
+      if (idx !== -1) GameState.run.runFlags.splice(idx, 1);
+    }
   },
 
-  checkRequirements(requirements) {
-    if (!requirements) return true;
+  _processReward(reward) {
     const run = GameState.run;
+    switch (reward.type) {
+      case 'credits':
+        run.credits = Math.max(0, run.credits + reward.value);
+        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} credits`);
+        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} credits`);
+        break;
 
-    for (const req of requirements) {
-      switch (req.type) {
-        case 'hasRole':
-          if (!run.crew.some(c => !c.dead && c.role === req.role)) return false;
-          break;
-        case 'minCredits':
-          if (run.credits < req.value) return false;
-          break;
-        case 'hasFlag':
-          if (!run.runFlags.includes(req.flag)) return false;
-          break;
-        case 'minFuel':
-          if (run.fuel < req.value) return false;
-          break;
-        case 'captainStat':
-          if ((run.captain.stats[req.stat] || 0) < req.value) return false;
-          break;
-        case 'hasModule':
-          if (!run.ship.equippedModules.some(m => m.id === req.moduleId)) return false;
-          break;
-      }
-    }
-    return true;
-  },
+      case 'fuel':
+        run.fuel = Math.max(0, run.fuel + reward.value);
+        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} fuel`);
+        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} fuel`);
+        break;
 
-  _rollStatCheck(check) {
-    // check: { stat, difficulty, crewRole? }
-    let value = 0;
+      case 'hull_repair':
+        ShipEngine.repair(reward.value);
+        GameState.addLog('event', `Hull repaired by ${reward.value}%`);
+        break;
 
-    // Captain stat
-    if (check.stat && GameState.run.captain.stats[check.stat]) {
-      value += GameState.run.captain.stats[check.stat];
-    }
+      case 'module':
+        ShipEngine.addModule(reward.value);
+        break;
 
-    // Crew bonus from relevant role
-    if (check.crewRole) {
-      const crewMember = GameState.run.crew.find(c => !c.dead && c.role === check.crewRole);
-      if (crewMember) {
-        value += 2;
-        // Morale bonus/penalty
-        if (crewMember.morale >= 75) value += 1;
-        else if (crewMember.morale <= 25) value -= 1;
-      }
-    }
+      case 'crew_recruit':
+        CrewEngine.addCrewFromTemplate(reward.value);
+        break;
 
-    // Roll d6
-    const roll = 1 + Math.floor(Math.random() * 6);
-    const total = value + roll;
-    const difficulty = check.difficulty || 7;
+      case 'rep_up':
+        EconomyEngine.adjustReputation(reward.value, 1);
+        break;
 
-    if (total >= difficulty + 3) return 'success';
-    if (total >= difficulty) return 'partial';
-    return 'failure';
-  },
+      case 'rep_down':
+        EconomyEngine.adjustReputation(reward.value, -1);
+        break;
 
-  _applyEffects(effects) {
-    for (const effect of effects) {
-      switch (effect.type) {
-        case 'hullDamage':
-          ShipEngine.takeDamage(effect.value);
-          break;
-        case 'hullRepair':
-          ShipEngine.repair(effect.value);
-          break;
-        case 'credits':
-          GameState.run.credits = Math.max(0, GameState.run.credits + effect.value);
-          break;
-        case 'fuel':
-          GameState.run.fuel = Math.max(0, GameState.run.fuel + effect.value);
-          break;
-        case 'morale':
-          CrewEngine.adjustMoraleAll(effect.value);
-          break;
-        case 'crewMorale':
-          if (effect.role) {
-            const member = GameState.run.crew.find(c => !c.dead && c.role === effect.role);
-            if (member) CrewEngine.adjustMorale(member, effect.value);
-          }
-          break;
-        case 'loyalty':
-          if (effect.role) {
-            const member = GameState.run.crew.find(c => !c.dead && c.role === effect.role);
-            if (member) CrewEngine.adjustLoyalty(member, effect.value);
-          }
-          break;
-        case 'factionRep':
-          EconomyEngine.adjustReputation(effect.faction, effect.value);
-          break;
-        case 'addCrew':
-          CrewEngine.addCrewFromTemplate(effect.crewId);
-          break;
-        case 'killCrew':
-          CrewEngine.killCrewMember(effect.role || effect.crewId);
-          break;
-        case 'addModule':
-          ShipEngine.addModule(effect.moduleId);
-          break;
-        case 'systemDamage':
-          ShipEngine.damageSystem(effect.system);
-          break;
-        case 'startCombat':
-          CombatEngine.startCombat(effect.enemyId);
-          break;
-        case 'resonance':
-          GameState.meta.resonance += effect.value;
-          break;
-      }
+      case 'resonance':
+        GameState.meta.resonance += reward.value;
+        GameState.addLog('nexus', `Resonance +${reward.value}`);
+        break;
+
+      case 'run_flag':
+        if (!run.runFlags.includes(reward.value)) {
+          run.runFlags.push(reward.value);
+        }
+        break;
+
+      case 'cargo':
+        run.ship.cargo.push(reward.value);
+        GameState.addLog('event', `Acquired cargo: ${reward.description || reward.value}`);
+        break;
+
+      case 'lore_fragment':
+        GameState.addLog('discovery', reward.description || `Lore fragment: ${reward.value}`);
+        break;
+
+      case 'unlock_hint':
+        // Dev/internal only — no player-facing effect
+        break;
     }
   },
 
-  _fallbackEvent(nodeType) {
-    const fallbacks = {
-      combat: {
-        id: '_fallback_combat',
-        nodeType: 'combat',
-        narrative: 'Sensors detect a hostile vessel emerging from behind an asteroid. Their weapons are already charging.',
-        choices: [
-          {
-            text: 'Battle stations!',
-            outcomes: {
-              success: { text: 'Combat engaged.', effects: [{ type: 'startCombat', enemyId: '_generic_fighter' }] },
-            },
-          },
-          {
-            text: 'Attempt to flee',
-            statCheck: { stat: 'intuition', difficulty: 7 },
-            outcomes: {
-              success: { text: 'You slip away before they can lock on.', effects: [{ type: 'fuel', value: -1 }] },
-              failure: { text: 'Too slow. They open fire.', effects: [{ type: 'hullDamage', value: 10 }, { type: 'startCombat', enemyId: '_generic_fighter' }] },
-            },
-          },
-        ],
-      },
-      trade: {
-        id: '_fallback_trade',
-        nodeType: 'trade',
-        narrative: 'A battered trading post hangs in the void, its beacon flickering. A few merchants eye your ship with cautious interest.',
-        choices: [
-          {
-            text: 'Browse the wares',
-            outcomes: { success: { text: 'You trade with the merchants. A fair deal, nothing more.' } },
-          },
-          {
-            text: 'Move on',
-            outcomes: { success: { text: 'You leave the trading post behind.' } },
-          },
-        ],
-      },
-      derelict: {
-        id: '_fallback_derelict',
-        nodeType: 'derelict',
-        narrative: 'A dead ship drifts ahead, its hull torn open. Emergency lights still pulse inside — a rhythm like a heartbeat.',
-        choices: [
-          {
-            text: 'Send a boarding party',
-            statCheck: { stat: 'resolve', difficulty: 6, crewRole: 'engineer' },
-            outcomes: {
-              success: { text: 'Your crew finds useful salvage.', effects: [{ type: 'credits', value: 30 }] },
-              partial: { text: 'Some salvage recovered, but one of the crew was injured.', effects: [{ type: 'credits', value: 15 }] },
-              failure: { text: 'The structure is unstable. You barely get everyone out.', effects: [{ type: 'hullDamage', value: 5 }] },
-            },
-          },
-          {
-            text: 'Pass by',
-            outcomes: { success: { text: 'The derelict fades into the dark behind you.' } },
-          },
-        ],
-      },
-      planet: {
-        id: '_fallback_planet',
-        nodeType: 'planet',
-        narrative: 'A terrestrial world — atmosphere breathable, surface scarred by ancient construction. Someone built here once.',
-        choices: [
-          {
-            text: 'Land and explore',
-            statCheck: { stat: 'intuition', difficulty: 6 },
-            outcomes: {
-              success: { text: 'You find remnants of value.', effects: [{ type: 'credits', value: 20 }, { type: 'fuel', value: 2 }] },
-              partial: { text: 'Nothing of value, but at least it was peaceful.', effects: [{ type: 'morale', value: 5 }] },
-              failure: { text: 'Something in the ruins spooked the crew.', effects: [{ type: 'morale', value: -10 }] },
-            },
-          },
-          {
-            text: 'Orbit and scan',
-            outcomes: { success: { text: 'Scans complete. Nothing actionable detected.' } },
-          },
-        ],
-      },
-      rest: {
-        id: '_fallback_rest',
-        nodeType: 'rest',
-        narrative: 'A quiet pocket of space. No threats on sensors. The crew exhales for the first time in hours.',
-        choices: [
-          {
-            text: 'Rest and repair',
-            outcomes: { success: { text: 'The crew rests. Hull patched, spirits lifted.', effects: [{ type: 'hullRepair', value: 15 }, { type: 'morale', value: 10 }] } },
-          },
-        ],
-      },
-    };
+  // ─── Placeholder event for empty pools ────────────────────
 
-    return fallbacks[nodeType] || {
-      id: '_fallback_generic',
-      nodeType,
-      narrative: 'You arrive at the coordinates. The void stretches in all directions.',
-      choices: [
-        {
-          text: 'Investigate',
-          outcomes: { success: { text: 'Nothing of note. You move on.' } },
-        },
-      ],
+  _placeholderEvent() {
+    return {
+      id: 'PLACEHOLDER',
+      node_type: 'unknown',
+      setup_text: 'Nothing of interest here. You move on.',
+      steps: [{
+        step_number: 1,
+        condition: null,
+        setup_text: '',
+        options: [{
+          label: 'Continue.',
+          check_type: 'none',
+          requires_crew_role: null,
+          requires_module: null,
+          requires_rep: null,
+          requires_flag: null,
+          requires_ability: null,
+          locked_hint: '',
+          difficulty: 'medium',
+          outcomes: {
+            success: {
+              level: 'success',
+              narrative: 'You continue on.',
+              rewards: [],
+              sets_flag: null,
+              clears_flag: null,
+              morale_delta: 0,
+              loyalty_delta: 0,
+              hull_delta: 0,
+              resonance_delta: 0,
+            },
+            partial: null,
+            failure: null,
+          },
+        }],
+      }],
     };
   },
 };

@@ -73,16 +73,13 @@ const MapUI = {
   _nodeEmoji(type) {
     const icons = {
       combat: '⚔',
-      trade: '🏪',
+      trade_post: '🏪',
       derelict: '🚧',
-      planet: '🌍',
+      planet_exploration: '🌍',
       nexus_anomaly: '⬡',
-      asteroid: '☄',
-      distress: '🆘',
-      nebula: '🌫',
-      waystation: '⛽',
-      ambush: '💀',
-      rest: '🏕',
+      anomalous_signal: '📡',
+      faction_territory: '🏛',
+      dead_zone: '💀',
     };
     return icons[type] || '·';
   },

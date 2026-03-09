@@ -11,6 +11,7 @@ function createMetaState() {
     milestoneFlags: [],
     runHistory: [],
     crewGraveyard: [],
+    namedCrewState: {},   // { [id]: { encountered, secret_revealed } }
     trueEndingReached: false,
     totalRuns: 0,
   };
@@ -22,14 +23,15 @@ function createShipState() {
     maxHull: 100,
     visualStage: 1,
     baseSystems: {
-      weapons:    { level: 1, maxLevel: 5, damaged: false },
-      propulsion: { level: 1, maxLevel: 5, damaged: false },
-      sensors:    { level: 1, maxLevel: 5, damaged: false },
-      shields:    { level: 1, maxLevel: 5, damaged: false },
-      cargo:      { level: 1, maxLevel: 5, damaged: false },
-      quarters:   { level: 1, maxLevel: 5, damaged: false },
+      weapons:       { level: 1, maxLevel: 5, damaged: false },
+      propulsion:    { level: 1, maxLevel: 5, damaged: false },
+      sensors:       { level: 1, maxLevel: 5, damaged: false },
+      shields_armor: { level: 1, maxLevel: 5, damaged: false },
+      cargo_hold:    { level: 1, maxLevel: 5, damaged: false },
+      crew_quarters: { level: 1, maxLevel: 5, damaged: false },
     },
-    equippedModules: [],
+    equippedWeapons: [],    // weapon instances from vm_weapons format
+    equippedModules: [],    // module instances from vm_modules format
     cargo: [],
     nexusIntegrations: [],
   };
@@ -48,10 +50,10 @@ function createCaptainState() {
 
 function createFactionReputation() {
   return {
-    concord: 0,   // -3 to +3
-    vreth: 0,
-    drifter: 0,
-    remnant: 0,
+    concord_assembly: 0,    // -3 to +3
+    vreth_dominion: 0,
+    drifter_compact: 0,
+    remnant_collective: 0,
   };
 }
 
@@ -67,9 +69,12 @@ function createRunState() {
     fuel: 10,
     depth: 0,
     runFlags: [],
+    seenEventIds: [],
     log: [],
     currentNodeId: null,
     activeEvent: null,
+    activeEventStep: 0,
+    lastStepOutcomes: {},
     activeCombat: null,
   };
 }
