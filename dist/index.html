@@ -8972,8 +8972,11 @@ const MapUI = {
         const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
                              map.edges.some(e => e.from === GameState.run.currentNodeId && e.to === node.id);
 
-        // Sensor check: need sensors level 3+ or Scanner Array module to identify node types
-        const canIdentify = isVisited || nexusCortexReveal ||
+        // Some nodes broadcast their presence (no sensors needed)
+        const broadcasts = node.type === 'trade_post' || node.type === 'dead_zone' ||
+          node.type === 'faction_territory';
+        // Sensor check: need sensors level 3+ or Scanner Array module to identify other nodes
+        const canIdentify = isVisited || (isRevealed && broadcasts) || nexusCortexReveal ||
           (isRevealed && sensorsWorking && (sensors.level >= 3 || hasScanner));
 
         el.className = 'map-node' +
