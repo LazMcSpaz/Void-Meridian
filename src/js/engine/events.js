@@ -76,6 +76,15 @@ const EventEngine = {
       }
     }
 
+    // Skill checks targeting a crew role require that role aboard
+    if (option.check_type === 'skill' && option.check_target) {
+      const role = option.check_target;
+      const roles = ['pilot', 'soldier', 'technician', 'medic', 'engineer', 'diplomat'];
+      if (roles.includes(role) && !run.crew.some(c => !c.dead && c.role === role)) {
+        return { available: false, hint: `Requires ${role}` };
+      }
+    }
+
     return { available: true, hint: '' };
   },
 
@@ -196,8 +205,16 @@ const EventEngine = {
 
   _stepConditionMet(step) {
     if (!step.condition) return true;
-    const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
-    return priorOutcome === step.condition.outcome;
+    // Flag-based condition: step only appears if a run flag is set
+    if (step.condition.requires_flag) {
+      if (!GameState.run.runFlags.includes(step.condition.requires_flag)) return false;
+    }
+    // Prior step outcome condition
+    if (step.condition.prior_step != null && step.condition.outcome) {
+      const priorOutcome = GameState.run.lastStepOutcomes[step.condition.prior_step];
+      if (priorOutcome !== step.condition.outcome) return false;
+    }
+    return true;
   },
 
   _getCurrentStep(event, stepIdx) {

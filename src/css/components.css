@@ -83,6 +83,8 @@
 .choice-btn.locked {
   opacity: 0.4;
   cursor: default;
+  pointer-events: none;
+  font-size: var(--font-size-base);
 }
 
 .choice-btn.locked .lock-reason {
