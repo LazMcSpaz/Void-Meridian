@@ -1,0 +1,705 @@
+{
+  "heard_prior_captain_rumor": {
+    "description": "Merchant at Yura mentioned a prior Nexus-bearing ship",
+    "set_by": [
+      "TRADE_001"
+    ],
+    "read_by": [
+      "DEAD_001",
+      "NEXUS_xxx"
+    ]
+  },
+  "concord_flagged_nexus_sighting_yura": {
+    "description": "Concord Assembly officers noted the Nexus at Yura station",
+    "set_by": [
+      "TRADE_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "yura_black_market_contact": {
+    "description": "Merchant at Yura gave a contact for off-manifest trades",
+    "set_by": [
+      "TRADE_001"
+    ],
+    "read_by": [
+      "TRADE_xxx"
+    ]
+  },
+  "scanned_caduceus_osha_survivor": {
+    "description": "Scanned the Caduceus-7 and identified Osha before boarding",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "DEREL_001"
+    ]
+  },
+  "hailed_caduceus_osha_response": {
+    "description": "Osha responded to hail and asked not to be boarded",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "DEREL_001"
+    ]
+  },
+  "osha_pathogen_immunity_known": {
+    "description": "Player knows Osha is immune to the pathogen",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "FACTION_REM_xxx",
+      "NEXUS_xxx"
+    ]
+  },
+  "osha_has_treatment_supply": {
+    "description": "Osha has synthesized bulk treatment for the pathogen",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "TRADE_xxx",
+      "PLANET_xxx"
+    ]
+  },
+  "osha_recruited": {
+    "description": "Dr. Yema Osha joined the crew",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "multiple \u2014 Osha dialogue throughout"
+    ]
+  },
+  "remnant_bioweapon_evidence": {
+    "description": "Evidence that the pathogen is ancient Remnant biotech",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "FACTION_REM_xxx",
+      "NEXUS_xxx"
+    ]
+  },
+  "carrying_pathogen_samples": {
+    "description": "Sealed pathogen samples in cargo \u2014 Concord scans will flag",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx",
+      "TRADE_xxx"
+    ]
+  },
+  "destroyed_caduceus_7": {
+    "description": "Player destroyed the Caduceus-7 to contain pathogen",
+    "set_by": [
+      "DEREL_001"
+    ],
+    "read_by": [
+      "FACTION_DRI_xxx \u2014 Drifters may have questions about missing ship"
+    ]
+  },
+  "transmission_third_captain_received": {
+    "description": "Player received the third captain ghost transmission",
+    "set_by": [
+      "DEAD_001"
+    ],
+    "read_by": [
+      "NEXUS_xxx",
+      "DEAD_xxx \u2014 deeper transmission logs"
+    ]
+  },
+  "nexus_course_corrections": {
+    "description": "Player is aware the Nexus makes subtle navigation adjustments",
+    "set_by": [
+      "DEAD_001"
+    ],
+    "read_by": [
+      "NEXUS_xxx",
+      "MAP_system"
+    ]
+  },
+  "concord_clean_inspection_logged": {
+    "description": "Clean Concord inspection on record \u2014 unlocks discount",
+    "set_by": [
+      "TRADE_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "concord_camera_tampering_flagged": {
+    "description": "Camera tampering attempt at Concord station logged",
+    "set_by": [
+      "TRADE_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "took_passage_seekers_anesh": {
+    "description": "Took the three passage-seekers from Freeport Anesh",
+    "set_by": [
+      "TRADE_003"
+    ],
+    "read_by": [
+      "FACTION_DRI_002",
+      "FACTION_DRI_xxx"
+    ]
+  },
+  "knows_passage_seekers_vreth_history": {
+    "description": "Knows the passage-seekers fled Vreth Dominion",
+    "set_by": [
+      "TRADE_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "abandoned_passage_seekers_anesh": {
+    "description": "Did not take the passage-seekers \u2014 word will travel",
+    "set_by": [
+      "TRADE_003"
+    ],
+    "read_by": [
+      "FACTION_DRI_xxx"
+    ]
+  },
+  "maren_drive_signature_talent_noted": {
+    "description": "Maren has unusual talent for reading drive signatures",
+    "set_by": [
+      "TRADE_003"
+    ],
+    "read_by": [
+      "crew_events_maren"
+    ]
+  },
+  "found_voting_ship_reclam_note": {
+    "description": "Found the 'RECLAM' note on the dead Concord courier",
+    "set_by": [
+      "DEREL_002"
+    ],
+    "read_by": [
+      "FACTION_CON_002"
+    ]
+  },
+  "voting_ship_transmitting_home": {
+    "description": "The courier's data core was actively pinging Concord",
+    "set_by": [
+      "DEREL_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "carrying_comptroller_blackbox": {
+    "description": "Dead Comptroller's data core in cargo \u2014 Concord wants it",
+    "set_by": [
+      "DEREL_002"
+    ],
+    "read_by": [
+      "FACTION_CON_002"
+    ]
+  },
+  "avoided_concord_trap_courier": {
+    "description": "Left the Concord courier without taking anything",
+    "set_by": [
+      "DEREL_002"
+    ],
+    "read_by": []
+  },
+  "read_vreth_captain_full_log": {
+    "description": "Read the full log of the Vreth captain who died at the mirror object",
+    "set_by": [
+      "DEREL_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "recovered_vreth_nexus_fragment": {
+    "description": "Recovered the Nexus-resonant fragment from the Vreth derelict",
+    "set_by": [
+      "DEREL_003"
+    ],
+    "read_by": [
+      "NEXUS_xxx"
+    ]
+  },
+  "stripped_vreth_patrol_unreported": {
+    "description": "Stripped a Vreth patrol vessel without reporting it",
+    "set_by": [
+      "DEREL_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "carrying_tannen_colonial_record": {
+    "description": "Tannen IV data core in cargo \u2014 politically explosive",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx",
+      "FACTION_DRI_xxx"
+    ]
+  },
+  "rescued_tannen_three": {
+    "description": "All three Tannen colonists taken aboard",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": [
+      "crew_events"
+    ]
+  },
+  "left_two_tannen_colonists": {
+    "description": "Only took Nils \u2014 left the medic and botanist behind",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": [
+      "crew_events_nils"
+    ]
+  },
+  "concord_noted_tannen_presence": {
+    "description": "Concord noted Meridian at Tannen IV post-declaration",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "concord_pursuit_logged_tannen": {
+    "description": "Fled Concord compliance contact at Tannen \u2014 person of interest",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "declined_tannen_colony_request": {
+    "description": "Refused to take the colonial data core",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": []
+  },
+  "concord_inspection_demanded_post_tannen": {
+    "description": "Concord demanded inspection after Tannen \u2014 unresolved",
+    "set_by": [
+      "PLANET_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "ruins_point_to_wound_discovered": {
+    "description": "Ruins aligned to The Wound \u2014 True Ending milestone",
+    "set_by": [
+      "PLANET_002"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "nexus_reactive_component_aboard": {
+    "description": "Nexus-reactive ancient component in cargo",
+    "set_by": [
+      "PLANET_002"
+    ],
+    "read_by": [
+      "NEXUS_xxx"
+    ]
+  },
+  "ruins_left_undisturbed": {
+    "description": "Left the Indicator ruins undisturbed \u2014 Remnant favor",
+    "set_by": [
+      "PLANET_002"
+    ],
+    "read_by": [
+      "FACTION_REM_xxx"
+    ]
+  },
+  "brennar_vi_vreth_buried": {
+    "description": "Knows the Brennar VI colonists killed Vreth soldiers",
+    "set_by": [
+      "PLANET_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "warned_brennar_vi_of_patrol": {
+    "description": "Warned the colony about incoming Vreth patrol",
+    "set_by": [
+      "PLANET_003"
+    ],
+    "read_by": [
+      "FACTION_DRI_xxx"
+    ]
+  },
+  "reported_brennar_vi_to_vreth": {
+    "description": "Informed Vreth Dominion about the colony's actions",
+    "set_by": [
+      "PLANET_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx",
+      "crew_events"
+    ]
+  },
+  "vreth_captain_debt_owed": {
+    "description": "Owe a debt to the Vreth captain from the Ashfield sector",
+    "set_by": [
+      "COMBAT_001"
+    ],
+    "read_by": [
+      "COMBAT_003"
+    ]
+  },
+  "attacked_vreth_observer": {
+    "description": "Attacked the Vreth observer without provocation",
+    "set_by": [
+      "COMBAT_001"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "spared_vreth_observer": {
+    "description": "Let the Vreth observer go \u2014 she noted it as honorable",
+    "set_by": [
+      "COMBAT_001"
+    ],
+    "read_by": [
+      "COMBAT_003"
+    ]
+  },
+  "vreth_nexus_eleven_captains": {
+    "description": "Knows Vreth records show 11 captains carried Nexus to The Wound",
+    "set_by": [
+      "COMBAT_001"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "engaged_ashfield_pirates": {
+    "description": "Engaged pirates in the Ashfield debris field",
+    "set_by": [
+      "COMBAT_002"
+    ],
+    "read_by": []
+  },
+  "vreth_courier_retrieval_active": {
+    "description": "Active mission to retrieve stolen Vreth data from Concord courier",
+    "set_by": [
+      "COMBAT_003"
+    ],
+    "read_by": [
+      "COMBAT_xxx",
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "vreth_debt_escalated": {
+    "description": "Failed to resolve Vreth debt \u2014 next territory entry hostile",
+    "set_by": [
+      "COMBAT_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "vreth_debt_reduced_to_goods": {
+    "description": "Debt reduced to payment in goods rather than mission",
+    "set_by": [
+      "COMBAT_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "attacked_vreth_captain_parley": {
+    "description": "Attacked Vreth captain under flag of parley \u2014 major honor violation",
+    "set_by": [
+      "COMBAT_003"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx"
+    ]
+  },
+  "nexus_transmission_cartographer_received": {
+    "description": "Received first Nexus anomaly transmission (the Cartographer)",
+    "set_by": [
+      "NEXUS_001"
+    ],
+    "read_by": [
+      "NEXUS_xxx",
+      "FACTION_VRE_001"
+    ]
+  },
+  "nexus_gift_module_installed": {
+    "description": "Unknown Nexus-gifted module installed \u2014 activates automatically",
+    "set_by": [
+      "NEXUS_002"
+    ],
+    "read_by": [
+      "combat_events",
+      "NEXUS_xxx"
+    ]
+  },
+  "knows_eleven_captains_arrived": {
+    "description": "Knows 11 captains reached The Wound and chose something \u2014 True Ending gate",
+    "set_by": [
+      "NEXUS_003"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "oss_recruited": {
+    "description": "Oss (Drifter navigator) joined as Pilot",
+    "set_by": [
+      "SIGNAL_001"
+    ],
+    "read_by": [
+      "FACTION_DRI_xxx"
+    ]
+  },
+  "knows_oss_concord_witness": {
+    "description": "Knows Oss witnessed a Concord/Drifter intelligence operation",
+    "set_by": [
+      "SIGNAL_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "concord_false_flag_detected": {
+    "description": "Detected Concord military using Vreth cover for neutral space ops",
+    "set_by": [
+      "SIGNAL_002"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx",
+      "FACTION_CON_xxx"
+    ]
+  },
+  "concord_intelligence_evidence_aboard": {
+    "description": "Evidence of Concord false-flag ops in cargo \u2014 leverage",
+    "set_by": [
+      "SIGNAL_002"
+    ],
+    "read_by": [
+      "FACTION_VRE_xxx",
+      "FACTION_DRI_xxx"
+    ]
+  },
+  "vel_recruited": {
+    "description": "Vel (Remnant crew, 300 years old) joined as Scientist",
+    "set_by": [
+      "SIGNAL_003"
+    ],
+    "read_by": [
+      "FACTION_REM_002",
+      "NEXUS_xxx"
+    ]
+  },
+  "knows_nexus_original_purpose_hint": {
+    "description": "Vel hinted at knowing Nexus original purpose",
+    "set_by": [
+      "SIGNAL_003"
+    ],
+    "read_by": [
+      "FACTION_REM_002"
+    ]
+  },
+  "concord_noted_dark_runner": {
+    "description": "Concord noted thermal signature of dark-running vessel",
+    "set_by": [
+      "FACTION_CON_001"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "sold_blackbox_to_reclamation": {
+    "description": "Sold the Comptroller data core to Reclamation Division",
+    "set_by": [
+      "FACTION_CON_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "refused_reclamation_division": {
+    "description": "Refused Reclamation Division's offer for the data core",
+    "set_by": [
+      "FACTION_CON_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "identified_reclamation_vessel": {
+    "description": "Traced and identified the Reclamation Division operational vessel",
+    "set_by": [
+      "FACTION_CON_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  },
+  "vreth_nexus_escort_provided": {
+    "description": "Vreth provided escort for Nexus vessel through their space",
+    "set_by": [
+      "FACTION_VRE_001"
+    ],
+    "read_by": []
+  },
+  "vreth_saa_recovery_quest_offered": {
+    "description": "Commander Vreth-Saa offered the dark vessel recovery mission",
+    "set_by": [
+      "FACTION_VRE_002"
+    ],
+    "read_by": [
+      "quest_vreth_allied"
+    ]
+  },
+  "vreth_saa_recovery_quest_terms_set": {
+    "description": "Negotiated open terms for the Vreth-Saa recovery mission",
+    "set_by": [
+      "FACTION_VRE_002"
+    ],
+    "read_by": [
+      "quest_vreth_allied"
+    ]
+  },
+  "someone_asking_after_meridian": {
+    "description": "Someone in Compact space is asking after a ship matching Meridian",
+    "set_by": [
+      "FACTION_DRI_001"
+    ],
+    "read_by": [
+      "FACTION_DRI_xxx",
+      "FACTION_CON_xxx"
+    ]
+  },
+  "compact_recommended_captain": {
+    "description": "Listed as recommended captain in Drifter Compact network",
+    "set_by": [
+      "FACTION_DRI_002"
+    ],
+    "read_by": [
+      "FACTION_DRI_xxx",
+      "quest_drifter_allied"
+    ]
+  },
+  "remnant_acknowledged_nexus_passage": {
+    "description": "Remnant vessel acknowledged the Nexus and granted passage",
+    "set_by": [
+      "FACTION_REM_001"
+    ],
+    "read_by": [
+      "FACTION_REM_xxx"
+    ]
+  },
+  "remnant_vessel_tracking_meridian": {
+    "description": "A Remnant vessel is tracking the Meridian at sensor edge",
+    "set_by": [
+      "FACTION_REM_001"
+    ],
+    "read_by": [
+      "FACTION_REM_xxx",
+      "NEXUS_xxx"
+    ]
+  },
+  "read_archivist_full_record": {
+    "description": "Read the Remnant Archivist's full record of all 11 captains \u2014 True Ending gate",
+    "set_by": [
+      "FACTION_REM_002"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "knows_wound_is_door": {
+    "description": "Knows The Wound is a door \u2014 True Ending gate",
+    "set_by": [
+      "FACTION_REM_002"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "nexus_remembers_builders_known": {
+    "description": "Knows the Nexus remembers being built and by whom",
+    "set_by": [
+      "FACTION_REM_002"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "transmission_first_captain_received": {
+    "description": "Received the first captain's ghost transmission \u2014 True Ending milestone",
+    "set_by": [
+      "DEAD_002"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "crew_given_full_choice": {
+    "description": "Captain told crew everything and gave them choice to leave \u2014 True Ending gate",
+    "set_by": [
+      "DEAD_003"
+    ],
+    "read_by": [
+      "TRUE_ENDING"
+    ]
+  },
+  "crew_chose_to_continue": {
+    "description": "All crew chose to continue after being given full information",
+    "set_by": [
+      "DEAD_003"
+    ],
+    "read_by": [
+      "TRUE_ENDING",
+      "wound_event"
+    ]
+  },
+  "crew_not_given_choice": {
+    "description": "Captain did not give crew the choice about continuing",
+    "set_by": [
+      "DEAD_003"
+    ],
+    "read_by": [
+      "wound_event"
+    ]
+  },
+  "concord_false_flag_partial_detected": {
+    "description": "Detected one ambush ship at false-flag site (partial detection)",
+    "set_by": [
+      "SIGNAL_002"
+    ],
+    "read_by": []
+  },
+  "caught_in_concord_false_flag": {
+    "description": "Entered the Concord ambush triangle before detecting it",
+    "set_by": [
+      "SIGNAL_002"
+    ],
+    "read_by": [
+      "FACTION_CON_xxx"
+    ]
+  }
+}

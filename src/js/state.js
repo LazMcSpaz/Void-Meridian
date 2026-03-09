@@ -48,10 +48,10 @@ function createCaptainState() {
 
 function createFactionReputation() {
   return {
-    concord: 0,   // -3 to +3
-    vreth: 0,
-    drifter: 0,
-    remnant: 0,
+    concord_assembly: 0,    // -3 to +3
+    vreth_dominion: 0,
+    drifter_compact: 0,
+    remnant_collective: 0,
   };
 }
 
@@ -67,9 +67,12 @@ function createRunState() {
     fuel: 10,
     depth: 0,
     runFlags: [],
+    seenEventIds: [],
     log: [],
     currentNodeId: null,
     activeEvent: null,
+    activeEventStep: 0,
+    lastStepOutcomes: {},
     activeCombat: null,
   };
 }
