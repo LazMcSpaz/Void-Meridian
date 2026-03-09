@@ -64,6 +64,7 @@ JS_FILES=(
   "$SRC/js/ui/overlay.js"
   "$SRC/js/ui/tabs.js"
   "$SRC/js/ui/map.js"
+  "$SRC/js/ui/depot.js"
   "$SRC/js/ui/event.js"
   "$SRC/js/ui/crew.js"
   "$SRC/js/ui/log.js"
