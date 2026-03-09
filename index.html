@@ -10579,6 +10579,11 @@ const Game = {
       GameState.screen = 'title';
     }
 
+    // Always show title on fresh page load so player can choose Continue or Restart
+    if (GameState.run.active) {
+      GameState.screen = 'title';
+    }
+
     // If we loaded into a run that was on the reconstruction screen, restart it
     if (GameState.screen === 'reconstruction') {
       ReconstructionUI.phase = 'allocation';
