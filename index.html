@@ -8965,7 +8965,7 @@ const MapUI = {
 
         // Sensor check: need functional sensors to identify node types
         const sensors = GameState.run.ship.baseSystems.sensors;
-        const sensorsOnline = sensors && !sensors.damaged && sensors.level > 0;
+        const sensorsOnline = sensors && !sensors.damaged;
         const canIdentify = isVisited || (isRevealed && sensorsOnline);
 
         el.className = 'map-node' +
