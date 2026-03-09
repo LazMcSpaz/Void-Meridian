@@ -1,0 +1,169 @@
+[
+  {
+    "id": "wpn_pulse_cannon",
+    "name": "Pulse Cannon",
+    "type": "energy",
+    "tier": 1,
+    "emoji": "⚡",
+    "stats": { "damage": 8, "speed_modifier": 0, "range": 2, "ammo": null, "special_charges": 0 },
+    "flavor": "Standard-issue energy projector. Reliable if unexciting.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_autocannon",
+    "name": "Autocannon",
+    "type": "ballistic",
+    "tier": 1,
+    "emoji": "🔫",
+    "stats": { "damage": 10, "speed_modifier": -1, "range": 2, "ammo": 30, "special_charges": 0 },
+    "flavor": "Kinetic slugs shred hull plating. Mind the ammo.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_missile_pod",
+    "name": "Missile Pod",
+    "type": "missile",
+    "tier": 1,
+    "emoji": "🚀",
+    "stats": { "damage": 14, "speed_modifier": -2, "range": 3, "ammo": 8, "special_charges": 0 },
+    "flavor": "Lock-on warheads that bypass shields. Limited payload.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_emp_lance",
+    "name": "EMP Lance",
+    "type": "emp",
+    "tier": 1,
+    "emoji": "⚡",
+    "stats": { "damage": 5, "speed_modifier": 1, "range": 3, "ammo": null, "special_charges": 2 },
+    "flavor": "Disables enemy systems. Low damage, high utility.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_beam_cutter",
+    "name": "Beam Cutter",
+    "type": "energy",
+    "tier": 1,
+    "emoji": "✂",
+    "stats": { "damage": 6, "speed_modifier": 1, "range": 1, "ammo": null, "special_charges": 0 },
+    "flavor": "Industrial cutting laser repurposed for combat. Precise, close, and personal.",
+    "gating": { "source": ["run_start_choice", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_flak_array",
+    "name": "Flak Array",
+    "type": "ballistic",
+    "tier": 1,
+    "emoji": "✸",
+    "stats": { "damage": 7, "speed_modifier": 0, "range": 1, "ammo": 24, "special_charges": 0 },
+    "flavor": "Fills the space between you and them with shrapnel. Not elegant. Effective.",
+    "gating": { "source": ["run_start_choice", "trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_plasma_torch",
+    "name": "Plasma Torch",
+    "type": "energy",
+    "tier": 1,
+    "emoji": "🔥",
+    "stats": { "damage": 11, "speed_modifier": -1, "range": 1, "ammo": null, "special_charges": 0 },
+    "flavor": "Superheated plasma at knife-fight range. Melts armor like opinion.",
+    "gating": { "source": ["trade_post", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_scatter_laser",
+    "name": "Scatter Laser",
+    "type": "energy",
+    "tier": 2,
+    "emoji": "✦",
+    "stats": { "damage": 12, "speed_modifier": 0, "range": 1, "ammo": null, "special_charges": 0 },
+    "flavor": "Diffused beam tears through close targets.",
+    "gating": { "source": ["trade_post", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_railgun",
+    "name": "Railgun",
+    "type": "ballistic",
+    "tier": 2,
+    "emoji": "⟐",
+    "stats": { "damage": 20, "speed_modifier": -3, "range": 4, "ammo": 12, "special_charges": 0 },
+    "flavor": "Magnetic acceleration. One shot, one hole.",
+    "gating": { "source": ["trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_heavy_lance",
+    "name": "Heavy Lance",
+    "type": "energy",
+    "tier": 2,
+    "emoji": "⫸",
+    "stats": { "damage": 16, "speed_modifier": -2, "range": 4, "ammo": null, "special_charges": 0 },
+    "flavor": "Concentrated beam at maximum distance. Hold still and pray they don't.",
+    "gating": { "source": ["trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_concussion_battery",
+    "name": "Concussion Battery",
+    "type": "ballistic",
+    "tier": 2,
+    "emoji": "💥",
+    "stats": { "damage": 15, "speed_modifier": -2, "range": 2, "ammo": 16, "special_charges": 0 },
+    "flavor": "Impact rounds designed to buckle structural supports. The hull screams.",
+    "gating": { "source": ["trade_post", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_phase_disruptor",
+    "name": "Phase Disruptor",
+    "type": "emp",
+    "tier": 2,
+    "emoji": "◇",
+    "stats": { "damage": 8, "speed_modifier": 0, "range": 3, "ammo": null, "special_charges": 3 },
+    "flavor": "Scrambles targeting systems and navigation. Three pulses before the capacitor needs a full cycle.",
+    "gating": { "source": ["trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_vreth_honor_blade",
+    "name": "Vreth Honor Blade Array",
+    "type": "ballistic",
+    "tier": 2,
+    "emoji": "⚔",
+    "stats": { "damage": 18, "speed_modifier": -1, "range": 2, "ammo": 20, "special_charges": 0 },
+    "flavor": "Dominion-forged kinetic blades launched in ritual patterns. Every shot is a statement.",
+    "gating": { "source": ["trade_post"], "requires": [{ "type": "faction_reputation", "faction": "vreth_dominion", "minimum": 1 }] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_remnant_resonance_bow",
+    "name": "Remnant Resonance Bow",
+    "type": "nexus_energy",
+    "tier": 3,
+    "emoji": "◉",
+    "stats": { "damage": 15, "speed_modifier": 1, "range": 3, "ammo": null, "special_charges": 4 },
+    "flavor": "it remembers the shape of what it destroys. each firing is a small grief.",
+    "nexus_flavor": "the bow was here before the ship. the ship grew to hold it.",
+    "gating": { "source": ["reconstruction_screen_resonance"], "requires": [{ "type": "resonance_total", "minimum": 60 }] },
+    "irremovable": true
+  },
+  {
+    "id": "wpn_nexus_tendril",
+    "name": "Nexus Tendril",
+    "type": "nexus_energy",
+    "tier": 3,
+    "emoji": "◈",
+    "stats": { "damage": 18, "speed_modifier": 2, "range": 2, "ammo": null, "special_charges": 3 },
+    "flavor": "it grew from the hull. it fires when you think about firing.",
+    "nexus_flavor": "this is a gift. do not question what it costs.",
+    "gating": { "source": ["reconstruction_screen_resonance"], "requires": [{ "type": "resonance_total", "minimum": 80 }] },
+    "irremovable": true
+  }
+]

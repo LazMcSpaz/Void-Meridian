@@ -1,0 +1,158 @@
+[
+  {
+    "id": "mod_hull_patch",
+    "name": "Hull Patch Kit",
+    "slots_onto": "cargo_hold",
+    "tier": 1,
+    "effect": "Restores 10 Hull when used at a station.",
+    "station_action": "repair_10",
+    "flavor": "Sealant, prayer, and duct tape.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_scanner_array",
+    "name": "Scanner Array",
+    "slots_onto": "sensors",
+    "tier": 1,
+    "effect": "Reveals adjacent nodes on the map.",
+    "crew_synergy": "scientist",
+    "flavor": "See further. Know more. Fear everything.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_reinforced_bulkhead",
+    "name": "Reinforced Bulkhead",
+    "slots_onto": "shields_armor",
+    "tier": 1,
+    "effect": "+15 Max Hull.",
+    "flavor": "Extra plating welded over the weak points.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_fuel_recycler",
+    "name": "Fuel Recycler",
+    "slots_onto": "propulsion",
+    "tier": 1,
+    "effect": "15% chance to not consume fuel on jump.",
+    "flavor": "Reclaims trace elements from exhaust.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_med_bay",
+    "name": "Med Bay",
+    "slots_onto": "crew_quarters",
+    "tier": 1,
+    "effect": "Crew heal conditions 1 node faster. +5 morale on recruit.",
+    "flavor": "Clean beds and better drugs.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_cargo_expander",
+    "name": "Cargo Expander",
+    "slots_onto": "cargo_hold",
+    "tier": 1,
+    "effect": "+2 cargo capacity.",
+    "flavor": "Magnetic clamps and a prayer that the inertial dampeners hold.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_comms_array",
+    "name": "Comms Array",
+    "slots_onto": "sensors",
+    "tier": 1,
+    "effect": "Unlocks hailing options in events. Intercepts nearby transmissions.",
+    "crew_synergy": "diplomat",
+    "flavor": "Hear everything. Say the right thing. Or at least say something.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_nav_assist",
+    "name": "Navigation Assist",
+    "slots_onto": "propulsion",
+    "tier": 1,
+    "effect": "Reveals 2 additional nodes ahead on the map.",
+    "crew_synergy": "pilot",
+    "flavor": "Predictive routing. Not prediction — just very fast math.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_crew_quarters_upgrade",
+    "name": "Improved Quarters",
+    "slots_onto": "crew_quarters",
+    "tier": 1,
+    "effect": "+5 morale on crew recruit. Crew morale decay reduced.",
+    "flavor": "Actual mattresses. The luxury of a closed door.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_targeting_computer",
+    "name": "Targeting Computer",
+    "slots_onto": "weapons",
+    "tier": 2,
+    "effect": "+2 damage to all equipped weapons.",
+    "crew_synergy": "soldier",
+    "flavor": "It does the math so you can do the violence.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_signal_jammer",
+    "name": "Signal Jammer",
+    "slots_onto": "sensors",
+    "tier": 2,
+    "effect": "Blocks enemy reinforcement calls in combat. Hides your transponder.",
+    "crew_synergy": "technician",
+    "flavor": "They can't call for help if they can't call.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_trade_cipher",
+    "name": "Trade Cipher",
+    "slots_onto": "cargo_hold",
+    "tier": 2,
+    "effect": "+15% sell prices at trade posts. Access to restricted market listings.",
+    "crew_synergy": "diplomat",
+    "flavor": "The right codes open the right doors. The wrong codes open the airlock.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_shield_harmonics",
+    "name": "Shield Harmonics",
+    "slots_onto": "shields_armor",
+    "tier": 2,
+    "effect": "Shields now partially block ballistic weapons (-2 damage). Energy weapons still fully blocked.",
+    "flavor": "Frequency modulation turns kinetic impacts into heat dissipation. Mostly.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_advanced_med_bay",
+    "name": "Advanced Med Bay",
+    "slots_onto": "crew_quarters",
+    "tier": 2,
+    "effect": "Crew heal all conditions between nodes. Can stabilize critically wounded crew.",
+    "crew_synergy": "medic",
+    "flavor": "Surgical suite, cryopod, and a medic who knows which is which.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_remnant_memory_core",
+    "name": "Remnant Memory Core",
+    "slots_onto": "sensors",
+    "tier": 3,
+    "effect": "Generates 1 Resonance per node. Ancient data fragments surface unpredictably.",
+    "flavor": "it remembers things that haven't happened yet. or things that already did, somewhere else.",
+    "nexus_integrated": true,
+    "irremovable": true,
+    "gating_requires": [{ "type": "resonance_total", "minimum": 40 }]
+  },
+  {
+    "id": "mod_nexus_cortex",
+    "name": "Nexus Cortex",
+    "slots_onto": "sensors",
+    "tier": 3,
+    "effect": "Generates 2 Resonance per node. Reveals Nexus Anomaly nodes.",
+    "flavor": "it sees what you see. it remembers what you forget.",
+    "nexus_integrated": true,
+    "irremovable": true,
+    "gating_requires": [{ "type": "resonance_total", "minimum": 50 }]
+  }
+]
