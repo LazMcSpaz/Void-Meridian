@@ -1,7 +1,7 @@
 /* Void Meridian — Reconstruction Screen */
 
 const ReconstructionUI = {
-  phase: 'recap',  // recap | transmission | systems | captain | crew_pick | supplies | weapon_select | confirm
+  phase: 'recap',  // recap | transmission | systems | captain | crew_pick | supplies | weapon_select | confirm | launch_sequence
   recapLineIndex: 0,
   recapTimer: null,
 
@@ -54,17 +54,29 @@ const ReconstructionUI = {
     screen.className = 'fullscreen recon-screen';
 
     switch (this.phase) {
-      case 'recap':        this._renderRecap(screen); break;
-      case 'transmission': this._renderTransmission(screen); break;
-      case 'systems':      this._renderSystems(screen); break;
-      case 'captain':      this._renderCaptain(screen); break;
-      case 'crew_pick':    this._renderCrewPick(screen); break;
-      case 'supplies':     this._renderSupplies(screen); break;
-      case 'weapon_select':this._renderWeaponSelect(screen); break;
-      case 'confirm':      this._renderConfirm(screen); break;
+      case 'recap':          this._renderRecap(screen); break;
+      case 'transmission':   this._renderTransmission(screen); break;
+      case 'systems':        this._renderSystems(screen); break;
+      case 'captain':        this._renderCaptain(screen); break;
+      case 'crew_pick':      this._renderCrewPick(screen); break;
+      case 'supplies':       this._renderSupplies(screen); break;
+      case 'weapon_select':  this._renderWeaponSelect(screen); break;
+      case 'confirm':        this._renderConfirm(screen); break;
+      case 'launch_sequence':this._renderLaunchSequence(screen); break;
     }
 
     container.appendChild(screen);
+  },
+
+  // Re-render preserving scroll position (used by +/- buttons)
+  _rerender() {
+    const scrollEl = document.querySelector('[data-recon-scroll]');
+    const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
+    Game.render();
+    requestAnimationFrame(() => {
+      const newScrollEl = document.querySelector('[data-recon-scroll]');
+      if (newScrollEl) newScrollEl.scrollTop = scrollPos;
+    });
   },
 
   start() {
@@ -219,9 +231,11 @@ const ReconstructionUI = {
   // ─── Phase 1: Ship Systems ─────────────────────────────────────
 
   _renderSystems(screen) {
-    this._renderPhaseHeader(screen, 'SHIP SYSTEMS', 'Allocate points to upgrade your vessel\'s base systems. Each point = +1 system level.');
+    this._renderPhaseHeader(screen, 'SHIP SYSTEMS',
+      `You have ${this.totalPoints} salvage points to spend across all phases: systems, captain, crew, and supplies. Use [−] and [+] to allocate. Each system point raises that system by one level (max 5).`);
 
     const area = document.createElement('div');
+    area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1;';
 
     for (const [key, info] of Object.entries(this.SYSTEM_INFO)) {
@@ -249,7 +263,7 @@ const ReconstructionUI = {
         if (this.systems[key] > 0) {
           this.systems[key]--;
           this._refundPoint();
-          Game.render();
+          this._rerender();
         }
       });
 
@@ -268,7 +282,7 @@ const ReconstructionUI = {
         if (this.systems[key] < 4 && this._getRemaining() > 0) {
           this.systems[key]++;
           this._spendPoint();
-          Game.render();
+          this._rerender();
         }
       });
 
@@ -286,15 +300,17 @@ const ReconstructionUI = {
   // ─── Phase 2: Captain ──────────────────────────────────────────
 
   _renderCaptain(screen) {
-    this._renderPhaseHeader(screen, 'CAPTAIN', 'Invest in your captain\'s stats and choose one starting ability.');
+    this._renderPhaseHeader(screen, 'CAPTAIN',
+      'Your captain\'s stats affect skill checks throughout the game. Stats also cost salvage points. You must choose one starting ability before proceeding.');
 
     const area = document.createElement('div');
+    area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1;';
 
     // Stats
     const statsHeader = document.createElement('div');
     statsHeader.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:var(--space-sm);';
-    statsHeader.textContent = 'STATS';
+    statsHeader.textContent = 'STATS (1 pt each)';
     area.appendChild(statsHeader);
 
     for (const [key, info] of Object.entries(this.CAPTAIN_STAT_INFO)) {
@@ -322,7 +338,7 @@ const ReconstructionUI = {
         if (this.captainStats[key] > 0) {
           this.captainStats[key]--;
           this._refundPoint();
-          Game.render();
+          this._rerender();
         }
       });
 
@@ -337,7 +353,7 @@ const ReconstructionUI = {
         if (this.captainStats[key] < 5 && this._getRemaining() > 0) {
           this.captainStats[key]++;
           this._spendPoint();
-          Game.render();
+          this._rerender();
         }
       });
 
@@ -351,8 +367,15 @@ const ReconstructionUI = {
     // Ability selection
     const abilityHeader = document.createElement('div');
     abilityHeader.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); text-transform:uppercase; letter-spacing:0.1em; margin:var(--space-md) 0 var(--space-sm);';
-    abilityHeader.textContent = 'STARTING ABILITY (choose one)';
+    abilityHeader.textContent = 'STARTING ABILITY (required — choose one)';
     area.appendChild(abilityHeader);
+
+    if (!this.captainAbility) {
+      const hint = document.createElement('div');
+      hint.style.cssText = 'color:var(--color-warning); font-size:var(--font-size-sm); margin-bottom:var(--space-sm);';
+      hint.textContent = 'Select an ability to continue.';
+      area.appendChild(hint);
+    }
 
     for (const ability of this.CAPTAIN_ABILITIES) {
       const card = document.createElement('div');
@@ -369,23 +392,49 @@ const ReconstructionUI = {
 
       card.addEventListener('click', () => {
         this.captainAbility = ability.id;
-        Game.render();
+        this._rerender();
       });
 
       area.appendChild(card);
     }
 
     screen.appendChild(area);
-    this._renderNavButtons(screen, 'systems', 'crew_pick', 'CREW →');
+
+    // Custom nav — disable NEXT if no ability selected
+    const nav = document.createElement('div');
+    nav.style.cssText = 'display:flex; gap:var(--space-sm); width:100%; max-width:400px; margin-top:var(--space-lg);';
+
+    const back = document.createElement('button');
+    back.className = 'btn-confirm';
+    back.style.cssText = 'flex:1; border-color:var(--border); color:var(--text-secondary);';
+    back.textContent = '← BACK';
+    back.addEventListener('click', () => { this.phase = 'systems'; Game.render(); });
+    nav.appendChild(back);
+
+    const next = document.createElement('button');
+    next.className = 'btn-confirm';
+    next.style.cssText = 'flex:2;';
+    if (!this.captainAbility) {
+      next.style.opacity = '0.3';
+      next.style.pointerEvents = 'none';
+      next.textContent = 'SELECT ABILITY';
+    } else {
+      next.textContent = 'CREW →';
+      next.addEventListener('click', () => { this.phase = 'crew_pick'; Game.render(); });
+    }
+    nav.appendChild(next);
+    screen.appendChild(nav);
   },
 
   // ─── Phase 3: Crew Selection ───────────────────────────────────
 
   _renderCrewPick(screen) {
     const maxCrew = 2 + Math.floor((this.systems.crew_quarters || 0) / 2);
-    this._renderPhaseHeader(screen, 'CREW ROSTER', `Pick up to ${maxCrew} starting crew. Each crew member costs 1 point.`);
+    this._renderPhaseHeader(screen, 'CREW ROSTER',
+      `Choose up to ${maxCrew} crew members (1 pt each). Each role unlocks unique dialogue options and skill checks during events. You can also recruit crew at trade depots later.`);
 
     const area = document.createElement('div');
+    area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1;';
 
     // Current crew picks
@@ -411,7 +460,7 @@ const ReconstructionUI = {
         removeBtn.addEventListener('click', () => {
           this.crewChoices.splice(idx, 1);
           this._refundPoint();
-          Game.render();
+          this._rerender();
         });
         row.appendChild(removeBtn);
         picked.appendChild(row);
@@ -445,7 +494,7 @@ const ReconstructionUI = {
           card.addEventListener('click', () => {
             if (this.crewChoices.length < maxCrew && this._spendPoint()) {
               this.crewChoices.push({ role });
-              Game.render();
+              this._rerender();
             }
           });
         }
@@ -461,9 +510,11 @@ const ReconstructionUI = {
   // ─── Phase 4: Supplies ─────────────────────────────────────────
 
   _renderSupplies(screen) {
-    this._renderPhaseHeader(screen, 'STARTING SUPPLIES', 'Spend remaining points on credits and fuel.');
+    this._renderPhaseHeader(screen, 'STARTING SUPPLIES',
+      'Credits buy equipment, repairs, and crew at trade depots. Fuel is consumed each time you jump to a new node. Spend remaining points here or go back to invest them elsewhere.');
 
     const area = document.createElement('div');
+    area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px;';
 
     const items = [
@@ -497,7 +548,7 @@ const ReconstructionUI = {
         if (this.supplies[item.key] > 0) {
           this.supplies[item.key]--;
           this._refundPoint();
-          Game.render();
+          this._rerender();
         }
       });
 
@@ -512,7 +563,7 @@ const ReconstructionUI = {
         if (this._getRemaining() > 0) {
           this.supplies[item.key]++;
           this._spendPoint();
-          Game.render();
+          this._rerender();
         }
       });
 
@@ -530,7 +581,8 @@ const ReconstructionUI = {
   // ─── Phase 5: Weapon Select ────────────────────────────────────
 
   _renderWeaponSelect(screen) {
-    this._renderPhaseHeader(screen, 'STARTING WEAPON', 'Choose your primary weapon for this run.');
+    this._renderPhaseHeader(screen, 'STARTING WEAPON',
+      'Your weapon determines combat style. Energy weapons have unlimited ammo, ballistic weapons hit harder but run out, and missiles bypass shields. Choose wisely — you can find more at trade depots.');
 
     // Get tier 1 weapons available via run_start_choice
     let startWeapons = Registry.getWeaponsBySource('run_start_choice');
@@ -551,6 +603,7 @@ const ReconstructionUI = {
     }
 
     const weaponArea = document.createElement('div');
+    weaponArea.setAttribute('data-recon-scroll', '');
     weaponArea.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1;';
 
     const SHIELD_HINT = { ballistic: 'Partial vs shields', energy: 'Blocked by shields', missile: 'Bypasses shields', emp: 'Bypasses shields', nexus_energy: 'Bypasses shields' };
@@ -578,7 +631,7 @@ const ReconstructionUI = {
 
       card.addEventListener('click', () => {
         this.selectedWeaponId = wpn.id;
-        Game.render();
+        this._rerender();
       });
 
       weaponArea.appendChild(card);
@@ -601,6 +654,7 @@ const ReconstructionUI = {
     screen.appendChild(hdr);
 
     const area = document.createElement('div');
+    area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1; font-size:var(--font-size-sm);';
 
     // Systems summary
@@ -722,9 +776,120 @@ const ReconstructionUI = {
     }
 
     GameState.addLog('system', 'The Nexus reconstructs. A new voyage begins.');
-    GameState.screen = 'map';
     GameState.save();
-    Tabs.activeTab = 'event';
+
+    // Show launch sequence before entering the map
+    this.phase = 'launch_sequence';
+    this._launchLineIndex = 0;
+    GameState.screen = 'reconstruction';
     Game.render();
+    this._startLaunchAnimation();
+  },
+
+  // ─── Launch Sequence ─────────────────────────────────────────────
+
+  _launchLineIndex: 0,
+  _launchTimer: null,
+
+  _getLaunchLines() {
+    const runNum = GameState.meta.totalRuns;
+    const tier = GameState.getResonanceTier();
+
+    if (runNum <= 1 && tier === 0) {
+      // First run — establish the premise
+      return [
+        'DOCKING CLAMPS RELEASED.',
+        '...',
+        'They call it the Void Meridian — the boundary between',
+        'charted space and whatever lies beyond.',
+        '',
+        'No one knows what opened the Wound.',
+        'No one who\'s reached it has come back to explain.',
+        '',
+        'But the Nexus chose you. It rebuilt your ship.',
+        'It remembers things you haven\'t done yet.',
+        '',
+        'The only way forward is through.',
+      ];
+    }
+
+    // Returning players — shorter, more urgent
+    const lines = [
+      'DOCKING CLAMPS RELEASED.',
+      '...',
+    ];
+
+    if (tier >= 3) {
+      lines.push('The Nexus hums louder now. It knows the way.');
+      lines.push('You\'ve been here before. The Wound is waiting.');
+    } else if (tier >= 1) {
+      lines.push('Another reconstruction. Another chance.');
+      lines.push('The Wound hasn\'t closed. The pattern demands completion.');
+    } else {
+      lines.push('The ship is rebuilt. The crew is ready.');
+      lines.push('Somewhere beyond the Meridian, the Wound still bleeds.');
+    }
+
+    lines.push('');
+    lines.push('Push deeper this time.');
+
+    return lines;
+  },
+
+  _startLaunchAnimation() {
+    const lines = this._getLaunchLines();
+    this._launchLineIndex = 0;
+
+    const advance = () => {
+      this._launchLineIndex++;
+      Game.render();
+      if (this._launchLineIndex < lines.length) {
+        const delay = lines[this._launchLineIndex - 1] === '' ? 400 : 700;
+        this._launchTimer = setTimeout(advance, delay);
+      }
+      // After all lines shown, player clicks to continue
+    };
+
+    this._launchTimer = setTimeout(advance, 900);
+  },
+
+  _renderLaunchSequence(screen) {
+    const lines = this._getLaunchLines();
+    const shown = Math.min(this._launchLineIndex, lines.length);
+
+    const textArea = document.createElement('div');
+    textArea.style.cssText = 'max-width:80vw; text-align:left;';
+
+    for (let i = 0; i < shown; i++) {
+      const line = document.createElement('div');
+      line.className = 'death-recap-line';
+      line.style.animationDelay = '0s';
+      if (lines[i] === '') {
+        line.style.height = 'var(--space-md)';
+      } else if (lines[i] === '...' || lines[i].startsWith('DOCKING')) {
+        line.style.color = 'var(--text-muted)';
+        line.textContent = lines[i];
+      } else {
+        line.style.color = 'var(--text-secondary)';
+        line.textContent = lines[i];
+      }
+      textArea.appendChild(line);
+    }
+
+    screen.appendChild(textArea);
+
+    // Show ENTER button after all lines are shown
+    if (shown >= lines.length) {
+      const btn = document.createElement('button');
+      btn.className = 'btn-confirm';
+      btn.style.cssText = 'max-width:300px; margin-top:var(--space-xl);';
+      btn.textContent = 'ENTER THE VOID';
+      btn.addEventListener('click', () => {
+        GameState.screen = 'map';
+        Tabs.activeTab = 'event';
+        Game.render();
+      });
+      screen.appendChild(btn);
+    }
   },
 };
