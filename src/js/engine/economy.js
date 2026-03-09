@@ -43,7 +43,12 @@ const EconomyEngine = {
   getPriceModifier(faction) {
     const rep = GameState.run.factions[faction] || 0;
     // Friendly factions give discounts, hostile charge more
-    return 1 - rep * 0.1; // +3 = 0.7x, -3 = 1.3x
+    let modifier = 1 - rep * 0.1; // +3 = 0.7x, -3 = 1.3x
+    // Scavenger's Eye: additional 15% discount
+    if (GameState.run.captain.abilities.includes('scavenger_eye')) {
+      modifier -= 0.15;
+    }
+    return Math.max(0.3, modifier);
   },
 
   canAfford(cost) {

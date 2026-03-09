@@ -201,6 +201,16 @@ const CrewEngine = {
 
     if (!member) return null;
 
+    // Iron Will: prevent one crew death per run
+    if (GameState.run.captain.abilities.includes('iron_will') &&
+        !GameState.run.runFlags.includes('iron_will_used')) {
+      GameState.run.runFlags.push('iron_will_used');
+      GameState.addLog('crew', `${member.name} should have died — but your iron will kept them alive.`);
+      this.adjustMorale(member, -20);
+      member.conditions.push('shaken');
+      return null;
+    }
+
     member.dead = true;
     member.conditions = ['dead'];
     GameState.addLog('crew', `${member.name} (${member.role}) was lost.`);
@@ -247,6 +257,89 @@ const CrewEngine = {
     if (Math.random() < 0.1) {
       GameState.addLog('system', `${member.name} is on the verge of mutiny!`);
     }
+  },
+
+  // ─── Crew Barks (reactions to events) ────────────────────────────
+
+  BARK_LINES: {
+    // Keyed by trait, sub-keyed by outcome context
+    reckless: {
+      success:  ['"Ha! Told you it\'d work."', '"That\'s what I\'m talking about."', '"Easy. Too easy."'],
+      failure:  ['"Well that went sideways."', '"...worth a shot."', '"I\'d do it again."'],
+      danger:   ['"Now THIS is what I signed up for."', '"Bring it."', '"My kind of odds."'],
+      loss:     ['"Damn."', '"...didn\'t see that coming."'],
+      gain:     ['"Score."', '"That\'ll keep us flying."'],
+    },
+    stoic: {
+      success:  ['"Noted."', '"As expected."', '"Acceptable outcome."'],
+      failure:  ['"We adapt."', '"It happens."', '"Moving on."'],
+      danger:   ['"Stay focused."', '"Steady."'],
+      loss:     ['"We endure."', '"There will be more."'],
+      gain:     ['"Good. We needed that."'],
+    },
+    vocal: {
+      success:  ['"YES! Did everyone see that?!"', '"I KNEW we\'d pull through!"', '"We\'re unstoppable!"'],
+      failure:  ['"This is bad. This is really bad."', '"I don\'t like this at all."', '"We need a new plan."'],
+      danger:   ['"Oh no oh no oh no—"', '"Does ANYONE have a plan?!"'],
+      loss:     ['"That\'s... that\'s not good."', '"We can\'t keep losing like this."'],
+      gain:     ['"Finally some good news!"', '"See? Things are looking up!"'],
+    },
+    curious: {
+      success:  ['"Fascinating. I wonder why that worked."', '"Interesting outcome."', '"I want to study this further."'],
+      failure:  ['"Hmm. What went wrong?"', '"We can learn from this."'],
+      danger:   ['"I\'ve never seen anything like this."', '"Remarkable, if terrifying."'],
+      loss:     ['"A setback, but an informative one."'],
+      gain:     ['"Excellent. More data."', '"This could be useful."'],
+    },
+    haunted: {
+      success:  ['"...this time."', '"Don\'t get comfortable."', '"I\'ve seen this go wrong before."'],
+      failure:  ['"I knew it."', '"It always ends like this."', '"...just like last time."'],
+      danger:   ['"I remember this feeling."', '"...not again."'],
+      loss:     ['"Of course."', '"We were never going to keep that."'],
+      gain:     ['"It won\'t last."', '"...enjoy it while you can."'],
+    },
+    pragmatic: {
+      success:  ['"Good. Efficient."', '"That\'s the smart play."', '"Exactly as planned."'],
+      failure:  ['"We need to cut our losses."', '"Regroup. Reassess."'],
+      danger:   ['"Calculate the odds. Then act."', '"What are our options?"'],
+      loss:     ['"Factor it into the budget."', '"Could be worse."'],
+      gain:     ['"That improves our margins."', '"Smart investment."'],
+    },
+    idealistic: {
+      success:  ['"We did the right thing."', '"This is why we keep going."', '"There\'s still good out here."'],
+      failure:  ['"We can\'t give up."', '"There has to be another way."'],
+      danger:   ['"We have to protect the crew."', '"No one gets left behind."'],
+      loss:     ['"We\'ll find a way."', '"This isn\'t over."'],
+      gain:     ['"For the crew."', '"This will help everyone."'],
+    },
+  },
+
+  getEventBark(outcomeLevel, outcome) {
+    const living = GameState.run.crew.filter(c => !c.dead);
+    if (living.length === 0) return null;
+
+    // Pick a random living crew member
+    const speaker = living[Math.floor(Math.random() * living.length)];
+    const traitLines = this.BARK_LINES[speaker.trait];
+    if (!traitLines) return null;
+
+    // Determine bark context from outcome
+    let context = outcomeLevel; // success, partial → success; failure → failure
+    if (outcomeLevel === 'partial') context = 'success';
+
+    // Override context based on outcome effects
+    if (outcome) {
+      if (outcome.hull_delta < -10 || outcome.morale_delta < -10) context = 'danger';
+      if (outcome.hull_delta < 0 || outcome.morale_delta < 0) context = context === 'danger' ? 'danger' : 'loss';
+      if (outcome.rewards && outcome.rewards.some(r => r.value > 0)) context = 'gain';
+      if (outcomeLevel === 'failure') context = 'failure';
+    }
+
+    const lines = traitLines[context] || traitLines.success;
+    if (!lines || lines.length === 0) return null;
+
+    const line = lines[Math.floor(Math.random() * lines.length)];
+    return { speaker, line };
   },
 
   // ─── Helpers ──────────────────────────────────────────────────

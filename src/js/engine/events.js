@@ -120,6 +120,14 @@ const EventEngine = {
         const avgMorale = livingCrew.reduce((sum, c) => sum + c.morale, 0) / livingCrew.length;
         skillValue += (avgMorale - 50) * 0.2;
       }
+      // Captain ability bonus: +10 if captain has a matching ability
+      const abilityStats = { rally_cry: 'command', gut_feeling: 'intuition', iron_will: 'resolve', scavenger_eye: 'intuition' };
+      for (const ab of run.captain.abilities) {
+        if (abilityStats[ab] === option.check_target) {
+          skillValue += 10;
+          break;
+        }
+      }
     }
 
     skillValue = Math.max(0, Math.min(100, skillValue));
@@ -318,18 +326,29 @@ const EventEngine = {
 
   _processReward(reward) {
     const run = GameState.run;
-    switch (reward.type) {
-      case 'credits':
-        run.credits = Math.max(0, run.credits + reward.value);
-        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} credits`);
-        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} credits`);
-        break;
 
-      case 'fuel':
-        run.fuel = Math.max(0, run.fuel + reward.value);
-        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} fuel`);
-        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} fuel`);
+    // Scavenger's Eye: +25% credits/fuel gains at derelict nodes
+    const scavengerBonus = run.captain.abilities.includes('scavenger_eye') &&
+      run.activeEvent && run.activeEvent.node_type === 'derelict' && reward.value > 0;
+
+    switch (reward.type) {
+      case 'credits': {
+        let val = reward.value;
+        if (scavengerBonus) val = Math.round(val * 1.25);
+        run.credits = Math.max(0, run.credits + val);
+        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} credits`);
         break;
+      }
+
+      case 'fuel': {
+        let val = reward.value;
+        if (scavengerBonus) val = Math.round(val * 1.25);
+        run.fuel = Math.max(0, run.fuel + val);
+        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} fuel`);
+        break;
+      }
 
       case 'hull_repair':
         ShipEngine.repair(reward.value);

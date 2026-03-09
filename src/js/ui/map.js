@@ -152,6 +152,16 @@ const MapUI = {
     node.visited = true;
     node.revealed = true;
 
+    // Rally Cry: +10 crew morale every 5 nodes traversed
+    if (GameState.run.captain.abilities.includes('rally_cry')) {
+      GameState.run._rallyCryCounter = (GameState.run._rallyCryCounter || 0) + 1;
+      if (GameState.run._rallyCryCounter >= 5) {
+        GameState.run._rallyCryCounter = 0;
+        CrewEngine.adjustMoraleAll(10);
+        GameState.addLog('system', 'Rally Cry! The captain\'s words lift the crew\'s spirits. (+10 morale)');
+      }
+    }
+
     // Reveal adjacent nodes
     const map = GameState.run.map;
     for (const edge of map.edges) {

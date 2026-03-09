@@ -165,11 +165,36 @@ const EventUI = {
 
     // Render options
     if (step.options) {
+      // Gut Feeling: reveal one hidden option (no hint = normally invisible)
+      const hasGutFeeling = GameState.run.captain.abilities.includes('gut_feeling');
+      let gutFeelingRevealed = false;
+
       for (let i = 0; i < step.options.length; i++) {
         const option = step.options[i];
         const { available, hint } = EventEngine.checkOptionAvailability(option);
 
-        if (!available && !hint) continue;
+        // Normally hidden options (unavailable with no hint) — Gut Feeling can reveal one
+        if (!available && !hint) {
+          if (hasGutFeeling && !gutFeelingRevealed) {
+            gutFeelingRevealed = true;
+            // Show as a revealed-by-intuition option
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn locked';
+            btn.style.borderColor = 'var(--color-nexus)';
+            let label = option.label || 'Choose';
+            if (option.check_type && option.check_type !== 'none') {
+              label += ` [${option.check_target || option.check_type}]`;
+            }
+            btn.textContent = label;
+            const reason = document.createElement('span');
+            reason.className = 'lock-reason';
+            reason.style.color = 'var(--color-nexus)';
+            reason.textContent = '⟡ Gut Feeling — requirements not met';
+            btn.appendChild(reason);
+            screen.appendChild(btn);
+          }
+          continue;
+        }
 
         const btn = document.createElement('button');
         btn.className = 'choice-btn' + (!available ? ' locked' : '');
@@ -232,6 +257,16 @@ const EventUI = {
       effectsEl.style.cssText = 'margin-top:var(--space-sm); color:var(--text-muted); font-size:var(--font-size-sm);';
       effectsEl.innerHTML = effects.join('<br>');
       screen.appendChild(effectsEl);
+    }
+
+    // Crew bark — a crew member reacts to the outcome
+    const bark = CrewEngine.getEventBark(evt._lastOutcomeLevel, outcome);
+    if (bark) {
+      const barkEl = document.createElement('div');
+      barkEl.style.cssText = 'margin-top:var(--space-md); padding:var(--space-sm) var(--space-md); border-left:2px solid var(--text-muted); color:var(--text-secondary); font-size:var(--font-size-sm);';
+      const nameSpan = `<span style="color:var(--text-accent)">${bark.speaker.emoji} ${bark.speaker.name}</span>`;
+      barkEl.innerHTML = `${nameSpan}<br><span style="font-style:italic">${bark.line}</span>`;
+      screen.appendChild(barkEl);
     }
 
     // Continue button

@@ -7594,6 +7594,14 @@ const EventEngine = {
         const avgMorale = livingCrew.reduce((sum, c) => sum + c.morale, 0) / livingCrew.length;
         skillValue += (avgMorale - 50) * 0.2;
       }
+      // Captain ability bonus: +10 if captain has a matching ability
+      const abilityStats = { rally_cry: 'command', gut_feeling: 'intuition', iron_will: 'resolve', scavenger_eye: 'intuition' };
+      for (const ab of run.captain.abilities) {
+        if (abilityStats[ab] === option.check_target) {
+          skillValue += 10;
+          break;
+        }
+      }
     }
 
     skillValue = Math.max(0, Math.min(100, skillValue));
@@ -7792,18 +7800,29 @@ const EventEngine = {
 
   _processReward(reward) {
     const run = GameState.run;
-    switch (reward.type) {
-      case 'credits':
-        run.credits = Math.max(0, run.credits + reward.value);
-        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} credits`);
-        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} credits`);
-        break;
 
-      case 'fuel':
-        run.fuel = Math.max(0, run.fuel + reward.value);
-        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} fuel`);
-        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} fuel`);
+    // Scavenger's Eye: +25% credits/fuel gains at derelict nodes
+    const scavengerBonus = run.captain.abilities.includes('scavenger_eye') &&
+      run.activeEvent && run.activeEvent.node_type === 'derelict' && reward.value > 0;
+
+    switch (reward.type) {
+      case 'credits': {
+        let val = reward.value;
+        if (scavengerBonus) val = Math.round(val * 1.25);
+        run.credits = Math.max(0, run.credits + val);
+        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} credits`);
         break;
+      }
+
+      case 'fuel': {
+        let val = reward.value;
+        if (scavengerBonus) val = Math.round(val * 1.25);
+        run.fuel = Math.max(0, run.fuel + val);
+        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} fuel`);
+        break;
+      }
 
       case 'hull_repair':
         ShipEngine.repair(reward.value);
@@ -8245,7 +8264,12 @@ const EconomyEngine = {
   getPriceModifier(faction) {
     const rep = GameState.run.factions[faction] || 0;
     // Friendly factions give discounts, hostile charge more
-    return 1 - rep * 0.1; // +3 = 0.7x, -3 = 1.3x
+    let modifier = 1 - rep * 0.1; // +3 = 0.7x, -3 = 1.3x
+    // Scavenger's Eye: additional 15% discount
+    if (GameState.run.captain.abilities.includes('scavenger_eye')) {
+      modifier -= 0.15;
+    }
+    return Math.max(0.3, modifier);
   },
 
   canAfford(cost) {
@@ -8466,6 +8490,16 @@ const CrewEngine = {
 
     if (!member) return null;
 
+    // Iron Will: prevent one crew death per run
+    if (GameState.run.captain.abilities.includes('iron_will') &&
+        !GameState.run.runFlags.includes('iron_will_used')) {
+      GameState.run.runFlags.push('iron_will_used');
+      GameState.addLog('crew', `${member.name} should have died — but your iron will kept them alive.`);
+      this.adjustMorale(member, -20);
+      member.conditions.push('shaken');
+      return null;
+    }
+
     member.dead = true;
     member.conditions = ['dead'];
     GameState.addLog('crew', `${member.name} (${member.role}) was lost.`);
@@ -8512,6 +8546,89 @@ const CrewEngine = {
     if (Math.random() < 0.1) {
       GameState.addLog('system', `${member.name} is on the verge of mutiny!`);
     }
+  },
+
+  // ─── Crew Barks (reactions to events) ────────────────────────────
+
+  BARK_LINES: {
+    // Keyed by trait, sub-keyed by outcome context
+    reckless: {
+      success:  ['"Ha! Told you it\'d work."', '"That\'s what I\'m talking about."', '"Easy. Too easy."'],
+      failure:  ['"Well that went sideways."', '"...worth a shot."', '"I\'d do it again."'],
+      danger:   ['"Now THIS is what I signed up for."', '"Bring it."', '"My kind of odds."'],
+      loss:     ['"Damn."', '"...didn\'t see that coming."'],
+      gain:     ['"Score."', '"That\'ll keep us flying."'],
+    },
+    stoic: {
+      success:  ['"Noted."', '"As expected."', '"Acceptable outcome."'],
+      failure:  ['"We adapt."', '"It happens."', '"Moving on."'],
+      danger:   ['"Stay focused."', '"Steady."'],
+      loss:     ['"We endure."', '"There will be more."'],
+      gain:     ['"Good. We needed that."'],
+    },
+    vocal: {
+      success:  ['"YES! Did everyone see that?!"', '"I KNEW we\'d pull through!"', '"We\'re unstoppable!"'],
+      failure:  ['"This is bad. This is really bad."', '"I don\'t like this at all."', '"We need a new plan."'],
+      danger:   ['"Oh no oh no oh no—"', '"Does ANYONE have a plan?!"'],
+      loss:     ['"That\'s... that\'s not good."', '"We can\'t keep losing like this."'],
+      gain:     ['"Finally some good news!"', '"See? Things are looking up!"'],
+    },
+    curious: {
+      success:  ['"Fascinating. I wonder why that worked."', '"Interesting outcome."', '"I want to study this further."'],
+      failure:  ['"Hmm. What went wrong?"', '"We can learn from this."'],
+      danger:   ['"I\'ve never seen anything like this."', '"Remarkable, if terrifying."'],
+      loss:     ['"A setback, but an informative one."'],
+      gain:     ['"Excellent. More data."', '"This could be useful."'],
+    },
+    haunted: {
+      success:  ['"...this time."', '"Don\'t get comfortable."', '"I\'ve seen this go wrong before."'],
+      failure:  ['"I knew it."', '"It always ends like this."', '"...just like last time."'],
+      danger:   ['"I remember this feeling."', '"...not again."'],
+      loss:     ['"Of course."', '"We were never going to keep that."'],
+      gain:     ['"It won\'t last."', '"...enjoy it while you can."'],
+    },
+    pragmatic: {
+      success:  ['"Good. Efficient."', '"That\'s the smart play."', '"Exactly as planned."'],
+      failure:  ['"We need to cut our losses."', '"Regroup. Reassess."'],
+      danger:   ['"Calculate the odds. Then act."', '"What are our options?"'],
+      loss:     ['"Factor it into the budget."', '"Could be worse."'],
+      gain:     ['"That improves our margins."', '"Smart investment."'],
+    },
+    idealistic: {
+      success:  ['"We did the right thing."', '"This is why we keep going."', '"There\'s still good out here."'],
+      failure:  ['"We can\'t give up."', '"There has to be another way."'],
+      danger:   ['"We have to protect the crew."', '"No one gets left behind."'],
+      loss:     ['"We\'ll find a way."', '"This isn\'t over."'],
+      gain:     ['"For the crew."', '"This will help everyone."'],
+    },
+  },
+
+  getEventBark(outcomeLevel, outcome) {
+    const living = GameState.run.crew.filter(c => !c.dead);
+    if (living.length === 0) return null;
+
+    // Pick a random living crew member
+    const speaker = living[Math.floor(Math.random() * living.length)];
+    const traitLines = this.BARK_LINES[speaker.trait];
+    if (!traitLines) return null;
+
+    // Determine bark context from outcome
+    let context = outcomeLevel; // success, partial → success; failure → failure
+    if (outcomeLevel === 'partial') context = 'success';
+
+    // Override context based on outcome effects
+    if (outcome) {
+      if (outcome.hull_delta < -10 || outcome.morale_delta < -10) context = 'danger';
+      if (outcome.hull_delta < 0 || outcome.morale_delta < 0) context = context === 'danger' ? 'danger' : 'loss';
+      if (outcome.rewards && outcome.rewards.some(r => r.value > 0)) context = 'gain';
+      if (outcomeLevel === 'failure') context = 'failure';
+    }
+
+    const lines = traitLines[context] || traitLines.success;
+    if (!lines || lines.length === 0) return null;
+
+    const line = lines[Math.floor(Math.random() * lines.length)];
+    return { speaker, line };
   },
 
   // ─── Helpers ──────────────────────────────────────────────────
@@ -9144,6 +9261,16 @@ const MapUI = {
     GameState.run.currentNodeId = node.id;
     node.visited = true;
     node.revealed = true;
+
+    // Rally Cry: +10 crew morale every 5 nodes traversed
+    if (GameState.run.captain.abilities.includes('rally_cry')) {
+      GameState.run._rallyCryCounter = (GameState.run._rallyCryCounter || 0) + 1;
+      if (GameState.run._rallyCryCounter >= 5) {
+        GameState.run._rallyCryCounter = 0;
+        CrewEngine.adjustMoraleAll(10);
+        GameState.addLog('system', 'Rally Cry! The captain\'s words lift the crew\'s spirits. (+10 morale)');
+      }
+    }
 
     // Reveal adjacent nodes
     const map = GameState.run.map;
@@ -10018,11 +10145,36 @@ const EventUI = {
 
     // Render options
     if (step.options) {
+      // Gut Feeling: reveal one hidden option (no hint = normally invisible)
+      const hasGutFeeling = GameState.run.captain.abilities.includes('gut_feeling');
+      let gutFeelingRevealed = false;
+
       for (let i = 0; i < step.options.length; i++) {
         const option = step.options[i];
         const { available, hint } = EventEngine.checkOptionAvailability(option);
 
-        if (!available && !hint) continue;
+        // Normally hidden options (unavailable with no hint) — Gut Feeling can reveal one
+        if (!available && !hint) {
+          if (hasGutFeeling && !gutFeelingRevealed) {
+            gutFeelingRevealed = true;
+            // Show as a revealed-by-intuition option
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn locked';
+            btn.style.borderColor = 'var(--color-nexus)';
+            let label = option.label || 'Choose';
+            if (option.check_type && option.check_type !== 'none') {
+              label += ` [${option.check_target || option.check_type}]`;
+            }
+            btn.textContent = label;
+            const reason = document.createElement('span');
+            reason.className = 'lock-reason';
+            reason.style.color = 'var(--color-nexus)';
+            reason.textContent = '⟡ Gut Feeling — requirements not met';
+            btn.appendChild(reason);
+            screen.appendChild(btn);
+          }
+          continue;
+        }
 
         const btn = document.createElement('button');
         btn.className = 'choice-btn' + (!available ? ' locked' : '');
@@ -10085,6 +10237,16 @@ const EventUI = {
       effectsEl.style.cssText = 'margin-top:var(--space-sm); color:var(--text-muted); font-size:var(--font-size-sm);';
       effectsEl.innerHTML = effects.join('<br>');
       screen.appendChild(effectsEl);
+    }
+
+    // Crew bark — a crew member reacts to the outcome
+    const bark = CrewEngine.getEventBark(evt._lastOutcomeLevel, outcome);
+    if (bark) {
+      const barkEl = document.createElement('div');
+      barkEl.style.cssText = 'margin-top:var(--space-md); padding:var(--space-sm) var(--space-md); border-left:2px solid var(--text-muted); color:var(--text-secondary); font-size:var(--font-size-sm);';
+      const nameSpan = `<span style="color:var(--text-accent)">${bark.speaker.emoji} ${bark.speaker.name}</span>`;
+      barkEl.innerHTML = `${nameSpan}<br><span style="font-style:italic">${bark.line}</span>`;
+      screen.appendChild(barkEl);
     }
 
     // Continue button
