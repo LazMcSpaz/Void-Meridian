@@ -3,7 +3,7 @@
     "game": "Void Meridian",
     "version": "0.1",
     "exported_at": "2026-03-09T06:03:44.745563",
-    "event_count": 78
+    "event_count": 102
   },
   "flag_registry": {
     "heard_prior_captain_rumor": {
@@ -941,7 +941,10 @@
       "notes": "vreth_captain_debt_owed should trigger a specific faction territory event in Vreth space — she finds you and collects. The debt can be paid in information, cargo, or a combat favor. spared_vreth_observer gives a +1 rep nudge and sets up the debt collection event from a different angle — she owes you instead. vreth_nexus_eleven_captains is a major lore fragment for the True Ending requirements.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_002",
@@ -1033,7 +1036,7 @@
               "locked_hint": "Requires Pilot crew member",
               "check_type": "skill",
               "check_target": "pilot",
-              "difficulty": "medium",
+              "difficulty": "easy",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -1093,7 +1096,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "engineer",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -1185,7 +1188,10 @@
       "notes": "Early combat benchmark — should feel challenging but survivable for a well-prepared run. The Ashfield pirate base lore fragment can create complications at a Drifter Compact station (they'll want to know who gave you that information). The pirate's comment about the Nexus ('don't activate it, we've heard things') reinforces that the Nexus's reputation precedes the Meridian even in criminal networks.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_003",
@@ -1385,7 +1391,12 @@
       "notes": "This event requires vreth_captain_debt_owed flag — it only appears if COMBAT_001 resolution set that flag. It's a mid-game payoff event. vreth_courier_retrieval_active opens a secondary quest thread — finding the Concord courier and retrieving the data without triggering a Concord incident. Completing it moves Vreth rep to +1 minimum. vreth_debt_escalated makes the next Vreth territory encounter hostile regardless of prior rep.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": [
+        "vreth_captain_debt_owed"
+      ]
     },
     {
       "id": "DEAD_001",
@@ -1484,7 +1495,10 @@
       "notes": "This transmission should be gated behind min_resonance 5 — not the very first run, but before the player is deep in the mystery. Flag: transmission_third_captain_received gates deeper dialogue options with the Nexus Anomaly events. The 'third captain' framing implies there were at least two before the player — their logs should appear in later Dead Zone events at higher resonance thresholds. The unnamed node added to the star map is cosmetic foreshadowing — it cannot be navigated to until much later.",
       "created_at": "2026-03-09T05:28:18.939748",
       "updated_at": "2026-03-09T05:28:18.939748",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEAD_002",
@@ -1594,7 +1608,10 @@
       "notes": "Companion to DEAD_001 (third captain). These transmissions trace the Nexus's history through different captains. The first captain was a solo salvager — the original. Their origin story (finding hull plating in debris) should connect to early run lore about how the Nexus arrived in its current form. The 'honest answer' advice is a foreshadowing of the True Ending choice. transmission_first_captain_received is a True Ending milestone flag.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEAD_003",
@@ -1680,7 +1697,10 @@
       "notes": "This is an emotional climax event for the late game. crew_given_full_choice is a True Ending milestone flag — the player must give their crew the choice before reaching The Wound. The loyalty boost from telling them everything is the largest single loyalty gain in the game — it's mechanically significant. The Nexus transmitting 'let them choose' is one of its most directive messages — by this point players should read it as genuine guidance, not manipulation.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_001",
@@ -1712,7 +1732,7 @@
               "locked_hint": "Requires Scanner Array module",
               "check_type": "skill",
               "check_target": "technician",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -1786,7 +1806,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "pilot",
-              "difficulty": "medium",
+              "difficulty": "hard",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -2091,7 +2111,10 @@
       "notes": "Dr. Yema Osha is a named unique character — her recruitment flag (osha_recruited) should unlock her portrait and unique dialogue threads in future runs. The remnant_bioweapon_evidence flag is a major lore thread that should intersect with Remnant Collective faction content and eventually with Nexus anomaly transmissions. Flag: carrying_pathogen_samples should create event complications at Concord Assembly territory entry (they scan for biological hazards).",
       "created_at": "2026-03-09T05:28:18.939748",
       "updated_at": "2026-03-09T05:28:18.939748",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_002",
@@ -2123,7 +2146,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "pilot",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -2275,7 +2298,7 @@
               "locked_hint": "Requires Technician",
               "check_type": "skill",
               "check_target": "technician",
-              "difficulty": "hard",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -2362,7 +2385,10 @@
       "notes": "The 'RECLAM' note is a dangling thread — it refers to the Concord Assembly's Reclamation Division, an internal enforcement body never mentioned in official faction documentation. Should surface in a late-game Concord faction territory event. carrying_comptroller_blackbox creates complications at Concord territory entry (they scan for it specifically). It can be sold to Drifter Compact or Vreth intelligence for significant credits and rep. voting_ship_transmitting_home means the Concord rapid-response ship has the Meridian's approach signature.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_003",
@@ -2394,7 +2420,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "technician",
-              "difficulty": "medium",
+              "difficulty": "hard",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -2524,7 +2550,10 @@
       "notes": "The 'mirror object' is a Nexus fragment — this should be one of several scattered across derelict events that, when combined, trigger a late-game Nexus anomaly interaction. read_vreth_captain_full_log gates a unique dialogue option with the Vreth Dominion at next territory entry — they respect captains who honored their dead. stripped_vreth_patrol_unreported creates a -1 Vreth rep nudge when they eventually find the gutted ship.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_CON_001",
@@ -2708,7 +2737,10 @@
       "notes": "Standard Concord entry — establishes the toll system and gives players three meaningful approaches. The dark runner route requires specific investment to unlock and reflects a committed playstyle choice.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_CON_002",
@@ -2897,7 +2929,12 @@
       "notes": "Requires carrying_comptroller_blackbox from DEREL_002. The Reclamation Division is the Assembly's shadow enforcement arm — a major late-game lore thread. sold_blackbox_to_reclamation closes this thread but opens a Concord quest chain. refused_reclamation_division makes future Concord territory entries more hostile without affecting official rep.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": [
+        "carrying_comptroller_blackbox"
+      ]
     },
     {
       "id": "FACTION_DRI_001",
@@ -3028,7 +3065,10 @@
       "notes": "Establishes Drifter Compact as information-economy focused. someone_asking_after_meridian is a tension seed — could be Concord intelligence, a Vreth observer, or something less institutional. Jen can recur at subsequent Drifter waypoints as a network contact.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_DRI_002",
@@ -3103,7 +3143,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "diplomat",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -3137,7 +3177,12 @@
       "notes": "Reads took_passage_seekers_anesh and oss_recruited flags as prerequisites. This is a reward event — should only appear if the player has at least one positive Drifter interaction flag. compact_recommended_captain should be a gating flag for the Drifter Allied quest chain.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": [
+        "took_passage_seekers_anesh"
+      ]
     },
     {
       "id": "FACTION_REM_001",
@@ -3303,7 +3348,10 @@
       "notes": "Establishes Remnant as genuinely strange and powerful. remnant_vessel_tracking_meridian creates ambient tension for subsequent sectors. The 'old bone' terminology should recur in later Remnant lore — it's how the Remnant refer to the Nexus in their own vocabulary.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_REM_002",
@@ -3457,7 +3505,10 @@
       "notes": "This is a True Ending gate event — reads_archivist_full_record, knows_wound_is_door, and vel_archivist_exchange_complete are all milestone flags for the True Ending checklist. At least one of these outcomes should be achieved. The revelation that the Remnant built the Nexus recontextualizes the entire game — this should land in late game only (min_resonance 25). Note: sets_flag2 used again — handle as additional sets_flag entry.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_VRE_001",
@@ -3604,7 +3655,10 @@
       "notes": "Establishes Vreth Dominion as competent, direct, and specifically aware of the Nexus. The escort mechanic (vreth_nexus_escort_provided) should reduce combat encounter probability for the next 2 sectors. The 'invoke the Nexus' option should only appear if the player has encountered at least one Nexus transmission — consider adding a requires_flag check for any nexus transmission flag.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_VRE_002",
@@ -3713,7 +3767,10 @@
       "notes": "Seeds the Vreth Allied quest chain — the recovery mission spans 2-3 sectors and requires finding the dark vessel and making decisions about what they were doing unofficially. Commander Vreth-Saa should appear as a recurring character if the quest is accepted — her daughter being aboard is the emotional hook.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_001",
@@ -3817,7 +3874,10 @@
       "notes": "First Nexus anomaly — designed to land early and establish the transmission voice. The revelation that the Nexus limits memory intentionally reframes the roguelike structure as narrative fact. The coordinates added to the map are a breadcrumb toward a mid-game Nexus anomaly event.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_002",
@@ -3921,7 +3981,10 @@
       "notes": "The 'gift module' is a narrative device — it should activate automatically during a later near-death combat scenario and save the ship. When it activates, the Nexus gets a transmission slot to explain what it did. This event requires min_resonance 15 to ensure the player is mid-game before the Nexus begins acting autonomously.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_003",
@@ -4030,7 +4093,10 @@
       "notes": "This is a True Ending gate event — knows_eleven_captains_arrived is one of the required milestone flags. The revelation that prior captains 'arrived' rather than died reframes everything. The 'twelfth captain' framing sets up the player's choice at The Wound. min_resonance 40 ensures this only appears in deep late-game runs.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_001",
@@ -4355,7 +4421,10 @@
       "notes": "The Tannen colonial record is a key political item — it can be delivered to Drifter Compact (significant rep gain, credits) or to Concord Reclamation Division as leverage (faction quest branch). The event seeds three potential crew members with a moral weight attached. Nils specifically should have the 'haunted' personality trait — she left two colleagues behind and knows it.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_002",
@@ -4642,7 +4711,10 @@
       "notes": "The Indicator is a major lore node — ruins_point_to_wound_discovered is one of the milestone flags required for the True Ending. ruins_left_undisturbed should give a significant Remnant rep boost if the player later encounters them and can reference it. nexus_reactive_component_aboard should trigger a Nexus transmission at the next sector jump.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_003",
@@ -4935,7 +5007,10 @@
       "notes": "The reported_brennar_vi_to_vreth flag should have lasting crew morale and loyalty consequences — crew members with Idealistic trait should have a specific dialogue reaction. warned_brennar_vi_of_patrol can trigger a future event where a Drifter Compact contact thanks you for word getting around. The event introduces the Vreth expansion dynamic as a background threat without direct Vreth combat in this encounter.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_001",
@@ -5062,7 +5137,10 @@
       "notes": "Oss is a valuable named Pilot character — his Drifter background gives unique dialogue in Compact territory events. knows_oss_concord_witness creates an ongoing tension — Concord intelligence knows he survived, and eventually they'll come looking.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_002",
@@ -5208,7 +5286,10 @@
       "notes": "concord_intelligence_evidence_aboard is leverage against Concord — it can be sold to Vreth Dominion for significant rep and credits, used to negotiate reduced penalties for Concord violations, or handed to Drifter Compact journalists for rep gain. The false-flag operation thread connects to the Comptroller blackbox from DEREL_002 — they're parts of the same Concord internal corruption arc.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_003",
@@ -5316,7 +5397,7 @@
               "locked_hint": "Requires Scientist crew member",
               "check_type": "skill",
               "check_target": "scientist",
-              "difficulty": "medium",
+              "difficulty": "hard",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -5353,7 +5434,10 @@
       "notes": "Vel is a major named character — the only Remnant crew member available. Their ancient knowledge unlocks unique dialogue at Nexus anomalies and a special branch at The Wound itself. vel_recruited is a milestone flag. knows_nexus_original_purpose_hint is a True Ending gate flag — Vel's knowledge is required for the full resolution. Note: sets_flag2 is not standard schema — handle as additional sets_flag entry.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_001",
@@ -5536,7 +5620,10 @@
       "notes": "Introductory event — designed to land early and establish that the Nexus is visible and known to some. The 'prior captain' rumor thread (flag: heard_prior_captain_rumor) should be picked up in a later Dead Zone ghost transmission. The Concord flag (concord_flagged_nexus_sighting_yura) can nudge Concord rep slightly at next territory entry.",
       "created_at": "2026-03-09T05:28:18.939748",
       "updated_at": "2026-03-09T05:28:18.939748",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_002",
@@ -5601,7 +5688,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "diplomat",
-              "difficulty": "medium",
+              "difficulty": "easy",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -5671,7 +5758,7 @@
               "locked_hint": "Requires Technician crew member",
               "check_type": "skill",
               "check_target": "technician",
-              "difficulty": "hard",
+              "difficulty": "easy",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -5731,7 +5818,10 @@
       "notes": "Establishes Concord Assembly as bureaucratic but not toothless. concord_clean_inspection_logged should unlock a small discount at the next Concord trade post. concord_camera_tampering_flagged should nudge Concord rep -1 and add a customs alert at next territory entry.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_003",
@@ -6011,7 +6101,10 @@
       "notes": "Dorin and Sera are named characters with unique dialogue — their recruitment flags should unlock specialist portraits. Maren (maren_drive_signature_talent_noted) is a seed for a later event where she can become a Pilot apprentice. abandoned_passage_seekers_anesh should echo in a later Drifter territory event — word gets around on freeports. knows_passage_seekers_vreth_history gates a Vreth-specific event variant where a patrol recognizes your passengers.",
       "created_at": "2026-03-09T06:03:16.733382+00:00",
       "updated_at": "2026-03-09T06:03:16.733382+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_004",
@@ -6108,7 +6201,7 @@
               "locked_hint": "Requires Diplomat crew member",
               "check_type": "skill",
               "check_target": "diplomat",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -6163,7 +6256,10 @@
       "notes": "Early-game economy pressure event. Teaches players that combat isn't always the best option and that crew roles have practical value outside combat.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_005",
@@ -6232,7 +6328,7 @@
               "locked_hint": "Requires Pilot crew member",
               "check_type": "skill",
               "check_target": "pilot",
-              "difficulty": "medium",
+              "difficulty": "easy",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -6312,7 +6408,10 @@
       "notes": "Teaches players about the Pilot crew role's evasion utility and that intimidation is a viable combat strategy. Scavenger ambushes are a recurring early-game threat.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_006",
@@ -6522,7 +6621,10 @@
       "notes": "Mid-game Concord encounter that teaches faction reputation consequences. Running creates a warrant flag that will make future Concord territory harder. Compliance is the safe option. Diplomat check rewards having the right crew.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_007",
@@ -6592,7 +6694,7 @@
               "locked_hint": "Requires Scanner Array module",
               "check_type": "skill",
               "check_target": "scientist",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -6653,7 +6755,10 @@
       "notes": "Subversion of the pirate trap trope — this one is actually real. Players who have been burned by trap events will be tempted to ignore it, but the reward for trusting is substantial morale boost. Scanner Array provides a safe path to the good outcome.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_008",
@@ -6854,7 +6959,10 @@
       "notes": "Late-game Nexus combat event. The 'hold fire' option is the best mechanical outcome — rewarding trust and patience. The Scientist path unlocks the most lore. decoded_hollow_ship_navigation is a True Ending breadcrumb flag. This event should feel eerie, not hostile.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_009",
@@ -6957,7 +7065,7 @@
               "locked_hint": "Requires Diplomat crew member",
               "check_type": "skill",
               "check_target": "diplomat",
-              "difficulty": "medium",
+              "difficulty": "critical",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -7022,7 +7130,10 @@
       "notes": "Late-game moral choice. The 'good' option has the best long-term payoff (Drifter rep + high morale) but costs immediate resources. helped_drifter_salvager_torrin should be read by a future Drifter territory event where Torrin returns the favor.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "COMBAT_010",
@@ -7167,7 +7278,10 @@
       "notes": "Any-depth zone hazard event. Demonstrates that doing nothing is sometimes the smartest option. Technician path is the most rewarding. Hacked_automated_sentry flag can be read by future derelict events in the same sector.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_004",
@@ -7303,7 +7417,10 @@
       "notes": "Early-game information event. Each choice has distinct value. The third option costs no credits but provides lore — rewarding curiosity over caution. knows_prior_captain_harenn is a lore seed that should connect to DEAD zone events about prior captains.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_005",
@@ -7423,7 +7540,10 @@
       "notes": "Pure crew management event. No combat, no lore, no complications — just the simple question of whether you treat your people well. The mechanical choice is obvious (shore leave = morale), but denying leave saves credits and time.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_006",
@@ -7591,7 +7711,10 @@
       "notes": "Mid-game economy event. First event to use Trade Cipher module as a gate — rewards players who invested in trade infrastructure. Vasik is a recurring NPC type. The weapon rewards are cargo items that the player can equip at a station.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_007",
@@ -7757,7 +7880,10 @@
       "notes": "Political event with clear faction implications. Supporting workers = Drifter Compact approval. Crossing the line = credits but moral cost. Diplomat path is the best outcome. The Vreth military cargo detail is a worldbuilding hook.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_008",
@@ -7865,7 +7991,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "diplomat",
-              "difficulty": "easy",
+              "difficulty": "hard",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -7958,7 +8084,10 @@
       "notes": "Late-game resupply and atmosphere event. Mira is a worldbuilding character who represents the frontier. The X on her chart is the Wound. mira_warned_about_deep_sectors is lore flavor for late-game atmosphere.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_009",
@@ -8122,7 +8251,10 @@
       "notes": "Late-game weapons shop disguised as an event. Gives players a last chance to upgrade before the endgame. Weapons are delivered as cargo items that can be equipped at a station. No skill checks — pure economic decision.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "TRADE_010",
@@ -8247,7 +8379,10 @@
       "notes": "Rook recruitment event. The Med Bay gate option provides the best version of the recruit (higher starting loyalty). This is one of the events that makes module investment feel worthwhile. Rook's secret and backstory are defined in vm_crew.json.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_CON_003",
@@ -8345,7 +8480,7 @@
               "locked_hint": "Requires Diplomat crew member",
               "check_type": "skill",
               "check_target": "diplomat",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -8384,7 +8519,10 @@
       "notes": "Early-game Concord introduction. Teaches players that Concord space is bureaucratic but navigable. Diplomat bonus reinforces crew role investment.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_CON_004",
@@ -8543,7 +8681,10 @@
       "notes": "Kess recruitment event. She's defined in vm_crew.json as a Concord defector diplomat. The 'work her passage' option leads to recruitment. The paid passage option provides intel instead. This is the primary way to get a Diplomat if you don't have one.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_CON_005",
@@ -8718,7 +8859,10 @@
       "notes": "Heavy moral choice event. Reporting the defectors is mechanically rewarding (rep + credits) but devastating to morale and loyalty. Sheltering them provides critical lore about Concord tracking Nexus vessels. The third option is designed to feel bad even when it pays well.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_VRE_003",
@@ -8864,7 +9008,10 @@
       "notes": "Vreth cultural introduction. Teaches players that Vreth have a distinct economic philosophy. Haggling is possible but has rep consequences. Respecting the system earns rep. Browsing without buying is neutral — not penalized.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_VRE_004",
@@ -8987,7 +9134,7 @@
               "locked_hint": "Requires Soldier crew member",
               "check_type": "skill",
               "check_target": "soldier",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -9059,7 +9206,10 @@
       "notes": "Vreth cultural event centered on their combat philosophy. Three tiers of victory: clean fight (good), prepared fight (great), and studied fight (exceptional). Even losing has positive outcomes because Vreth respect willingness.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_VRE_005",
@@ -9224,7 +9374,10 @@
       "notes": "Late-game Vreth political event. Mirrors FACTION_CON_005 structure: three options ranging from helpful to betrayal. The betrayal option is mechanically rich but morally devastating. carrying_vreth_rebellion_message should gate a future event where you deliver the message.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_DRI_003",
@@ -9361,7 +9514,10 @@
       "notes": "Drifter cultural introduction. Teaches players that the Compact values information exchange over pure commerce. Full disclosure gets the best repair. The event establishes the Drifter economy-of-stories worldbuilding.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_DRI_004",
@@ -9555,7 +9711,10 @@
       "notes": "Drifter political event with genuine faction consequences. The shelter vote costs Concord rep but gains Drifter rep. Diplomat path offers the best balance. This event establishes the Compact as a democratic institution.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_DRI_005",
@@ -9720,7 +9879,10 @@
       "notes": "Major late-game lore event. The elder is a non-faction character who connects the prior captains lore thread to the Wound endgame. elder_mapped_wound_convergence and knows_seven_prior_captains are True Ending breadcrumb flags. The seven captains she names should connect to the eleven captains referenced elsewhere — she's only met seven of them.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_REM_003",
@@ -9822,7 +9984,7 @@
               "locked_hint": "Requires Scientist crew member",
               "check_type": "skill",
               "check_target": "scientist",
-              "difficulty": "medium",
+              "difficulty": "easy",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -9882,7 +10044,10 @@
       "notes": "Remnant introduction event. Establishes the Collective as ancient, patient, and deeply interested in the Nexus. The 'third generation' detail connects to the builders/Wound lore. Scientist path provides the most information.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_REM_004",
@@ -10062,7 +10227,10 @@
       "notes": "Major lore event. All three options provide different pieces of the endgame puzzle. The Wound option provides the most resonance but the most disturbing knowledge. This event is resonance-gated at 10 to ensure players have some Nexus investment before encountering deep lore.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "FACTION_REM_005",
@@ -10268,7 +10436,10 @@
       "notes": "Late-game Remnant transformation event. The Memory Core integration is a permanent ship upgrade with lore implications. Resonance-gated at 30 to ensure this is a late-game event. The Scientist path provides the best version of the upgrade. nexus_memory_core_integrated should affect Nexus anomaly events going forward.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_004",
@@ -10299,7 +10470,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "soldier",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -10386,7 +10557,7 @@
               "locked_hint": "An engineer could restore partial power to check for hazards.",
               "check_type": "skill",
               "check_target": "engineer",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -10437,7 +10608,10 @@
       "notes": "Introductory derelict event. Low risk, moderate reward. Engineer option provides the best outcome as a soft tutorial for conditional options. Atmospheric but not threatening.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_005",
@@ -10658,7 +10832,10 @@
       "notes": "Mid-tier military derelict. The brute-force approach is high risk/high reward with a real failure state. Technician option is the optimal path. The black box flag can be referenced in later Concord Assembly faction events. Military plating module is a defensive upgrade.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_006",
@@ -10690,7 +10867,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "soldier",
-              "difficulty": "medium",
+              "difficulty": "hard",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -10824,7 +11001,10 @@
       "notes": "Lore-heavy mystery event. Introduces the concept of Nexus entanglement and branching timelines. The mirror_captains_log lore fragment should hint at a critical late-game decision. Resonance-focused rewards rather than material ones. The morale hits on boarding reflect the psychological toll of the encounter.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_007",
@@ -10918,7 +11098,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "pilot",
-              "difficulty": "medium",
+              "difficulty": "critical",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -11072,7 +11252,10 @@
       "notes": "Late-game Remnant encounter. Requires minimum resonance 10 to appear. Heavy resonance rewards across all paths. The scientist path is the optimal route and establishes deep_communion_wreck flag for endgame Remnant content. The living wreck concept ties into the Remnant Collective's biological technology theme. Failure states carry real consequences to make the high rewards feel earned.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEREL_008",
@@ -11314,7 +11497,10 @@
       "notes": "Recruitment event for Tam, a key technician crew member. Available at any depth. The core tension is rescue vs. salvage — most paths that prioritize survivors recruit Tam, while the salvage-first path trades crew loyalty for material rewards. The scanner_array option is the 'best of both worlds' path. The distress relay option is the safe fallback that still recruits Tam. Drifter Compact rep rewards for rescue-focused choices reinforce faction identity.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_004",
@@ -11411,7 +11597,7 @@
               "locked_hint": "You'd need a trained medic on your crew to provide meaningful help here.",
               "check_type": "skill",
               "check_target": "medic",
-              "difficulty": "medium",
+              "difficulty": "easy",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -11499,7 +11685,10 @@
       "notes": "Early-game emotional event. Establishes tone and moral weight. The medic option is the 'best' outcome but donating supplies or using the med bay are strong alternatives. Walking away costs morale. Sets a flag for potential callbacks.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_005",
@@ -11769,7 +11958,10 @@
       "notes": "Mid-game risk/reward event. Brute force is viable but costly. Technician gives the best overall loot. Scientist path trades physical loot for data and resonance. The flanking option is a solid middle ground for crews without specialists.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_006",
@@ -11970,7 +12162,10 @@
       "notes": "Political event with faction implications. Siding with Harken's Bend aligns with Drifter Compact values (decentralized, agrarian). Siding with New Sarai pushes Vreth Dominion influence. The diplomat compromise is the best outcome but hard to achieve. Walking away costs morale — your crew expected leadership.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_007",
@@ -12085,7 +12280,7 @@
               "locked_hint": "An engineer might find ways to extend the colony's remaining time.",
               "check_type": "skill",
               "check_target": "engineer",
-              "difficulty": "hard",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -12167,7 +12362,10 @@
       "notes": "Late-game emotional keystone event. No 'wrong' choices — every option has weight and consequence. The children option is the most impactful but costs the most morale (the crew is haunted by the parents they left behind). The engineer path offers a glimmer of real hope. High resonance rewards reflect the narrative gravity. Morale drops but loyalty surges — shared suffering bonds the crew.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "PLANET_008",
@@ -12368,7 +12566,10 @@
       "notes": "A breather event available at any depth. No combat, no danger, no hard choices — just wonder. Designed to provide morale recovery and tonal contrast after heavier events. The scientist and scanner paths add mechanical depth without undermining the peaceful atmosphere. Every path gives morale; the question is how much you learn.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_004",
@@ -12471,7 +12672,7 @@
               "locked_hint": "An engineer could extract more value from the wreck's systems.",
               "check_type": "skill",
               "check_target": "engineer",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -12531,7 +12732,10 @@
       "notes": "Introductory lore event for early game. Low stakes, rewards exploration. Sets up historical context for the region. The found_old_beacon_data flag can be referenced by later events.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_005",
@@ -12799,7 +13003,10 @@
       "notes": "Mid-game faction diplomacy event. Step 2 only triggers if the technician successfully decodes the message. Creates meaningful faction reputation consequences. The held secret flag can unlock future leverage opportunities.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_006",
@@ -13001,7 +13208,10 @@
       "notes": "Mid-game Nexus mystery event. Requires resonance 10 to encounter, ensuring the player has already engaged with Nexus mechanics. All paths increase resonance further, pulling the player deeper into the Nexus storyline. The self-signal discovery is a major lore revelation. Flags set here should gate future deep-Nexus encounters.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_007",
@@ -13197,7 +13407,10 @@
       "notes": "Late-game Nexus climax event. High resonance gate (25) ensures this appears deep in a run. References the Void Meridian directly and foreshadows SIGNAL_008's music. The future-self voice is intentionally ambiguous — could be genuine temporal transmission or Nexus entity mimicry. Flags here should gate endgame Nexus confrontation events. Heavy morale penalties reflect the psychological weight of the encounter.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "SIGNAL_008",
@@ -13389,7 +13602,10 @@
       "notes": "Pure atmosphere event available at any depth. Designed to be one of the most memorable encounters in the game through narrative quality alone. Minimal mechanical impact but high emotional resonance. The void musician is a persistent mystery — flags set here should be referenced across the game's lore. The music's connection to SIGNAL_007's warning ('when you hear the music') creates a throughline for Nexus-aware players. The comms_array option and pilot option add mechanical depth without breaking the contemplative tone.",
       "created_at": "2026-03-09T08:00:00.000000+00:00",
       "updated_at": "2026-03-09T08:00:00.000000+00:00",
-      "version": 1
+      "version": 1,
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_004",
@@ -13575,7 +13791,10 @@
           ]
         }
       ],
-      "notes": "Mid-game temporal anomaly that introduces the concept of branching timelines as a Nexus mechanic. The 'forward thread' data can seed later event unlocks. The temporal_refraction_mapped flag should gate a shortcut option in a late-game navigation event. The unfamiliar name on the crew manifest is a seed for a future recruitment event — it should match a character the player can encounter two zones later."
+      "notes": "Mid-game temporal anomaly that introduces the concept of branching timelines as a Nexus mechanic. The 'forward thread' data can seed later event unlocks. The temporal_refraction_mapped flag should gate a shortcut option in a late-game navigation event. The unfamiliar name on the crew manifest is a seed for a future recruitment event — it should match a character the player can encounter two zones later.",
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_005",
@@ -13714,7 +13933,10 @@
           ]
         }
       ],
-      "notes": "Defining character moment — the answer sets a flag that gates different dialogue and options throughout late-game events and at the Wound itself. Each answer is mechanically distinct: crew = morale/loyalty, memory = resonance/lore, purpose = fuel/credits. None is 'correct' — they shape the endgame options available. The third captain reference in the memory path connects to NEXUS_003's eleven captains lore."
+      "notes": "Defining character moment — the answer sets a flag that gates different dialogue and options throughout late-game events and at the Wound itself. Each answer is mechanically distinct: crew = morale/loyalty, memory = resonance/lore, purpose = fuel/credits. None is 'correct' — they shape the endgame options available. The third captain reference in the memory path connects to NEXUS_003's eleven captains lore.",
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_006",
@@ -13854,7 +14076,10 @@
           ]
         }
       ],
-      "notes": "Late-game vision event that makes the Wound concrete for the first time. The conditional third option connects NEXUS_001's cartographer coordinates to the endgame navigation — wound_approach_route_known should be a critical flag for the True Ending path. The Cartographer's identity as a prior captain links to NEXUS_003's eleven captains. The morale hit on the endure path reflects the psychological cost of seeing the endgame directly."
+      "notes": "Late-game vision event that makes the Wound concrete for the first time. The conditional third option connects NEXUS_001's cartographer coordinates to the endgame navigation — wound_approach_route_known should be a critical flag for the True Ending path. The Cartographer's identity as a prior captain links to NEXUS_003's eleven captains. The morale hit on the endure path reflects the psychological cost of seeing the endgame directly.",
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "NEXUS_007",
@@ -14031,7 +14256,10 @@
           ]
         }
       ],
-      "notes": "The chorus event is the emotional climax of the Nexus anomaly chain before the Wound itself. chorus_all_eleven_heard is a critical True Ending flag — hearing all eleven captains is one of the conditions for the 'complete answer' path at the Wound. The afraid captain's testimony about losing the capacity for wonder is thematic setup for the final choice: the Wound grants total understanding at the cost of mystery. This mirrors the Nexus's own message from NEXUS_001 about the self that remembers everything becoming something else."
+      "notes": "The chorus event is the emotional climax of the Nexus anomaly chain before the Wound itself. chorus_all_eleven_heard is a critical True Ending flag — hearing all eleven captains is one of the conditions for the 'complete answer' path at the Wound. The afraid captain's testimony about losing the capacity for wonder is thematic setup for the final choice: the Wound grants total understanding at the cost of mystery. This mirrors the Nexus's own message from NEXUS_001 about the self that remembers everything becoming something else.",
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEAD_004",
@@ -14154,7 +14382,10 @@
           ]
         }
       ],
-      "notes": "Early-game resource management event. No resonance requirement — this can be the player's first dead zone encounter. The three options present a clean resource trade-off: spend fuel, spend hull, or bypass with the right module. Shield harmonics is a mid-tier module upgrade, so players who invested in it early get rewarded. The small fuel gain from harmonics is a deliberate feel-good moment to reward preparation. Morale and loyalty deltas are minor — this is a mechanical event, not an emotional one."
+      "notes": "Early-game resource management event. No resonance requirement — this can be the player's first dead zone encounter. The three options present a clean resource trade-off: spend fuel, spend hull, or bypass with the right module. Shield harmonics is a mid-tier module upgrade, so players who invested in it early get rewarded. The small fuel gain from harmonics is a deliberate feel-good moment to reward preparation. Morale and loyalty deltas are minor — this is a mechanical event, not an emotional one.",
+      "complexity_tier": 1,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEAD_005",
@@ -14291,7 +14522,10 @@
           ]
         }
       ],
-      "notes": "Mid-game psychological event. The ghost ship concept establishes that dead zones contain echoes of vessels drawn toward the Wound — this reinforces the prior captain lore from DEAD_001/002. The name-matching detail (ghost crew names matching living crew) is deliberately unexplained and should remain so. The hail option's skill check creates risk/reward tension: success yields lore connecting to the Wound, failure delivers one of the heavier morale hits in the dead zone pool. The passive recording option is the cautious middle path — lore at the cost of prolonged exposure. ghost_registry_hailed and ghost_registry_recorded are non-critical flags that may gate minor dialogue later."
+      "notes": "Mid-game psychological event. The ghost ship concept establishes that dead zones contain echoes of vessels drawn toward the Wound — this reinforces the prior captain lore from DEAD_001/002. The name-matching detail (ghost crew names matching living crew) is deliberately unexplained and should remain so. The hail option's skill check creates risk/reward tension: success yields lore connecting to the Wound, failure delivers one of the heavier morale hits in the dead zone pool. The passive recording option is the cautious middle path — lore at the cost of prolonged exposure. ghost_registry_hailed and ghost_registry_recorded are non-critical flags that may gate minor dialogue later.",
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEAD_006",
@@ -14420,7 +14654,7 @@
               "locked_hint": "Requires a medic on crew",
               "check_type": "skill",
               "check_target": "medic",
-              "difficulty": "easy",
+              "difficulty": "medium",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -14450,7 +14684,10 @@
           ]
         }
       ],
-      "notes": "Mid-game crew psychology event with Nexus undertones. The four options represent a spectrum of control: address it openly, suppress it, surrender to it, or treat it medically. The 'let it play' option has the heaviest morale cost but the highest resonance gain — it's the choice for players who are leaning into the Nexus relationship. The medic option is the pragmatic middle ground for players who invested in crew composition. The visions being personal (not threatening) is deliberate — dead zones in Void Meridian aren't horror; they're melancholy. The folded structure the crew sees in the 'let it play' path is a foreshadowing of the Wound's physical form. Min resonance 10 ensures this appears after the player has some Nexus context."
+      "notes": "Mid-game crew psychology event with Nexus undertones. The four options represent a spectrum of control: address it openly, suppress it, surrender to it, or treat it medically. The 'let it play' option has the heaviest morale cost but the highest resonance gain — it's the choice for players who are leaning into the Nexus relationship. The medic option is the pragmatic middle ground for players who invested in crew composition. The visions being personal (not threatening) is deliberate — dead zones in Void Meridian aren't horror; they're melancholy. The folded structure the crew sees in the 'let it play' path is a foreshadowing of the Wound's physical form. Min resonance 10 ensures this appears after the player has some Nexus context.",
+      "complexity_tier": 2,
+      "repeatable": false,
+      "requires_flags": []
     },
     {
       "id": "DEAD_007",
@@ -14483,7 +14720,7 @@
               "locked_hint": "",
               "check_type": "skill",
               "check_target": "pilot",
-              "difficulty": "hard",
+              "difficulty": "critical",
               "outcomes": {
                 "success": {
                   "level": "success",
@@ -14595,7 +14832,3148 @@
           ]
         }
       ],
-      "notes": "Late-game event near the Wound. This is the first event that explicitly confronts the player with the physical breakdown of space near the Wound — prior dead zone events are psychological; this one is physical. The three options represent the game's core tension: human agency (instinct), human systems (instruments), or Nexus trust (surrender). The Nexus option sets nexus_navigation_surrendered, which is a significant story flag — it represents the player choosing to cede control to the Nexus in a moment of crisis. This flag should be referenced in the endgame and may affect available choices at the Wound. The resonance gain is the highest single-event gain in the dead zone pool, but the morale and loyalty costs reflect crew discomfort with the captain handing the wheel to an alien intelligence. The pilot skill check for the instinct path is hard difficulty — this is late-game broken space, not a routine maneuver."
+      "notes": "Late-game event near the Wound. This is the first event that explicitly confronts the player with the physical breakdown of space near the Wound — prior dead zone events are psychological; this one is physical. The three options represent the game's core tension: human agency (instinct), human systems (instruments), or Nexus trust (surrender). The Nexus option sets nexus_navigation_surrendered, which is a significant story flag — it represents the player choosing to cede control to the Nexus in a moment of crisis. This flag should be referenced in the endgame and may affect available choices at the Wound. The resonance gain is the highest single-event gain in the dead zone pool, but the morale and loyalty costs reflect crew discomfort with the captain handing the wheel to an alien intelligence. The pilot skill check for the instinct path is hard difficulty — this is late-game broken space, not a routine maneuver.",
+      "complexity_tier": 3,
+      "repeatable": false,
+      "requires_flags": []
+    },
+    {
+      "id": "COMBAT_GEN_001",
+      "node_type": "combat",
+      "title": "Patrol Encounter",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Patrol Encounter",
+          "setup_text": "A small patrol vessel moves to intercept, weapons hot but not firing. They're sizing you up — deciding if you're worth the trouble."
+        },
+        {
+          "title": "Sector Sweep",
+          "setup_text": "A routine sector patrol detects your drive signature and changes course to investigate. Standard procedure — or so they claim."
+        },
+        {
+          "title": "Checkpoint Intercept",
+          "setup_text": "An armed cutter drops out of cruise, running lights flashing a challenge code. Someone's been watching this lane."
+        }
+      ],
+      "setup_text": "A small patrol vessel moves to intercept, weapons hot but not firing. They're sizing you up — deciding if you're worth the trouble.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The patrol craft holds position, weapons charged. They haven't fired yet, but they haven't stood down either. Your crew watches the tactical display.",
+          "options": [
+            {
+              "label": "Fight. Clear the lane.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "command",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A brief exchange of fire. The patrol ship takes a hit and pulls back, trailing smoke. They won't be following.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "You trade shots. They withdraw but your hull took a graze.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -5,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "Sloppy engagement. You drive them off but take real damage.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -12,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Flee. Full burn.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "intuition",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You pour on speed and slip past before they can react. Clean exit.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "You get away, but they tag your hull on the way out.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -5,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They match your burn briefly and score a hit before you pull away.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -10,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Hail them. Talk it out.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "diplomat",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A tense exchange over comms. They accept your credentials and stand down. Professional courtesy.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They demand a toll — you pay it to avoid trouble.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They don't like your attitude. You manage to disengage before it escalates, but your crew is rattled.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -5,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "COMBAT_GEN_002",
+      "node_type": "combat",
+      "title": "Debris Field",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Debris Field",
+          "setup_text": "The navigation path cuts through a dense debris field. Twisted metal and shattered hulls drift in slow, silent orbits."
+        },
+        {
+          "title": "Wreckage Corridor",
+          "setup_text": "Ahead: a graveyard of ships, strung out along your plotted course. No way around — only through."
+        },
+        {
+          "title": "Scrap Cloud",
+          "setup_text": "Sensors light up with thousands of contacts — all debris. A battle happened here once. The evidence is still in orbit."
+        }
+      ],
+      "setup_text": "The navigation path cuts through a dense debris field. Twisted metal and shattered hulls drift in slow, silent orbits. Some of this wreckage is old. Some of it isn't.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Hull fragments ping off your shields as you navigate the field. The path through is narrow.",
+          "options": [
+            {
+              "label": "Push through quickly.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You thread the needle. A few scrapes, nothing serious.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -3,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Navigate carefully.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "pilot",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your pilot weaves through the worst of it. Clean passage.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Mostly clean, but a chunk of plating catches your port side.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -3,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "A tumbling section of hull comes out of nowhere. Solid hit.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -8,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "COMBAT_GEN_003",
+      "node_type": "combat",
+      "title": "Pirate Toll",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Pirate Toll",
+          "setup_text": "A rough-looking vessel hails you on an open channel. No pretense — they want payment for safe passage through 'their' space."
+        },
+        {
+          "title": "Lane Tax",
+          "setup_text": "Two small craft emerge from sensor shadow, running lights off until they're close. Their demand is simple: pay or fight."
+        },
+        {
+          "title": "Opportunist",
+          "setup_text": "A converted cargo hauler bristling with bolted-on weapons slides into your path. The pilot's grin is visible even over low-res comms."
+        }
+      ],
+      "setup_text": "A rough-looking vessel hails you on an open channel. No pretense — they want payment for safe passage through 'their' space.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "\"Nothing personal,\" the voice says over comms. \"But fuel and repairs cost money, and you've got more of it than we do. Twenty credits and you pass. No twenty, no pass.\"",
+          "options": [
+            {
+              "label": "Pay the toll.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Twenty credits lighter, you pass without incident. The pirate waves cheerfully as you go.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -20
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Bluff them. Claim military escort.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "command",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your confident bluff sends them scattering. They vanish behind an asteroid before you can blink.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They hesitate but don't buy it entirely. They settle for ten credits 'as a courtesy.'",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They call your bluff and open fire. You manage to disengage but take hits.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -3,
+                  "loyalty_delta": 0,
+                  "hull_delta": -8,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Engage. Pirates don't get tolls.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "command",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You disable their ship in short order. They're flying a rustbucket. A few scraps of salvage float free.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 25
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "A messy fight. You win, but they landed a few hits.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -8,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They're tougher than they look. You drive them off but pay for it in hull damage.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -15,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "COMBAT_GEN_004",
+      "node_type": "combat",
+      "title": "Stray Ordnance",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Stray Ordnance",
+          "setup_text": "Proximity alarms shriek. Unspent munitions from a past engagement drift through this sector."
+        },
+        {
+          "title": "Mine Drift",
+          "setup_text": "The sector is seeded with old mines — probably from a border skirmish nobody remembers. Your sensors are working overtime."
+        },
+        {
+          "title": "Dead Fire",
+          "setup_text": "Autonomous weapons platforms, long abandoned, still cycle through their targeting routines. Most have exhausted their payloads. Most."
+        }
+      ],
+      "setup_text": "Proximity alarms shriek. Unspent munitions from a past engagement drift through this sector — mines, maybe, or autonomous torpedoes with degraded friend-or-foe circuits.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Two contacts are closing. Old torpedoes, their guidance systems half-fried but still functional enough to track your heat signature.",
+          "options": [
+            {
+              "label": "Shoot them down.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "command",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Point defense handles them cleanly. Two flashes of light, then nothing.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "You get one. The other detonates close enough to rattle the hull.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -5,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "Too slow. Both detonate against your shields. The second one gets through.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -10,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Cut engines and drift past.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You go cold and coast. The torpedoes drift past, seeking heat that isn't there anymore. Tense minutes pass in silence.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -2
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TRADE_GEN_001",
+      "node_type": "trade_post",
+      "title": "Routine Resupply",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Routine Resupply",
+          "setup_text": "The station's supply dock has what you need — fuel, hull patches, provisions. The prices are fair."
+        },
+        {
+          "title": "Supply Run",
+          "setup_text": "A well-stocked outpost with reasonable prices. Your quartermaster already has a list ready."
+        },
+        {
+          "title": "Provisioning Stop",
+          "setup_text": "The station is nothing special — a fuel depot with a general store attached. But it has what you need, and that's enough."
+        }
+      ],
+      "setup_text": "The station's supply dock has what you need — fuel, hull patches, provisions. The prices are fair. Nothing special, nothing suspicious. Just commerce.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The dockmaster lists available stock. Standard rates, no haggling required. Your crew could use fresh supplies.",
+          "options": [
+            {
+              "label": "Buy fuel reserves.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Fuel tanks topped off. The crew appreciates the security of a full tank.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": 8
+                    },
+                    {
+                      "type": "credits",
+                      "value": -15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Purchase hull patches.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Patch kits loaded. Your engineer eyes the supplies with relief.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -20
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 10,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Browse for bargains.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "intuition",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You spot a mislabeled crate — quality supplies at scrap prices. Good eye.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": 5
+                    },
+                    {
+                      "type": "credits",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Nothing special jumps out, but you stock up at standard rates.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": 3
+                    },
+                    {
+                      "type": "credits",
+                      "value": -10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "You thought you found a deal. You didn't. Overcharged for basics.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": 3
+                    },
+                    {
+                      "type": "credits",
+                      "value": -20
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TRADE_GEN_002",
+      "node_type": "trade_post",
+      "title": "Passing Merchant",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Passing Merchant",
+          "setup_text": "A freelance trader pulls alongside at the docking bay, offering odds and ends from their cargo hold."
+        },
+        {
+          "title": "Dockside Hawker",
+          "setup_text": "A chatty trader flags you down between docking bays. They've got surplus to sell and stories to tell."
+        },
+        {
+          "title": "Trade Lane Encounter",
+          "setup_text": "Another ship at the dock — a small freighter with more cargo than sense. The captain's in a selling mood."
+        }
+      ],
+      "setup_text": "A freelance trader pulls alongside at the docking bay, offering odds and ends from their cargo hold. Nothing fancy — the kind of small commerce that keeps the lanes alive.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The merchant spreads their wares on a docking crate. Trinkets, spare parts, a few useful-looking components.",
+          "options": [
+            {
+              "label": "Buy something useful.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You pick up a decent set of spare parts. Nothing exciting, but it'll keep things running.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 5,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Just chat.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You trade stories instead of goods. The merchant mentions a station two jumps ahead with good prices. Useful intel.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TRADE_GEN_003",
+      "node_type": "trade_post",
+      "title": "Station Rumor",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Station Rumor",
+          "setup_text": "In the station's common area, a retired navigator offers information for sale."
+        },
+        {
+          "title": "Lane Gossip",
+          "setup_text": "A mechanic at the station bar has opinions about the sectors ahead. Loudly. Some of it might even be accurate."
+        },
+        {
+          "title": "Information Broker",
+          "setup_text": "A quiet figure in the corner of the station's cantina catches your eye. They're selling something, and it isn't cargo."
+        }
+      ],
+      "setup_text": "In the station's common area, a retired navigator offers information for sale. \"I know things about the lanes ahead,\" they say. \"Good information costs money. Bad decisions cost more.\"",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The old navigator waits patiently. They look like they've been doing this a long time — selling what they know to anyone heading deeper.",
+          "options": [
+            {
+              "label": "Pay for the intel.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Money well spent. The navigator's information is specific and current — hazard zones, patrol schedules, quiet lanes.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 5,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Decline. Save the credits.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You move on. The navigator shrugs — another customer will come along. They always do.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Try to get it for free.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "diplomat",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You strike up a conversation that turns into a genuine exchange. They share freely over drinks.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 5,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They give you a little — enough to know the rest is worth paying for. You buy the rest at half price.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -8
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They see right through you and shut down. \"Buy or don't.\" You don't.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TRADE_GEN_004",
+      "node_type": "trade_post",
+      "title": "Docking Dispute",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Docking Dispute",
+          "setup_text": "The station's docking authority has added a surcharge — 'environmental processing fee,' they call it."
+        },
+        {
+          "title": "Port Fee",
+          "setup_text": "New management at the dock means new fees. A flat surcharge for 'lane maintenance.' Your crew grumbles."
+        },
+        {
+          "title": "Bay Tax",
+          "setup_text": "The berth you reserved now costs extra. Something about 'priority docking allocation.' The fine print was always there, apparently."
+        }
+      ],
+      "setup_text": "The station's docking authority has added a surcharge — \"environmental processing fee,\" they call it. Your crew calls it something else.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The fee is fifteen credits. Not ruinous, but the principle grates. Other ships are paying it without complaint.",
+          "options": [
+            {
+              "label": "Pay it. Not worth the argument.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You pay. The dockmaster stamps your manifest without looking up. Just another transaction.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Negotiate.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "diplomat",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A few minutes of polite pushback gets the fee halved. The dockmaster respects someone who doesn't just roll over.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -8
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They knock off a token amount. \"Best I can do.\" It's not, but you'll take it.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -12
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "Your haggling annoys them. The fee stands, and they're less friendly about it.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Leave. Find another dock.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You undock and move on. The fuel cost of finding another berth stings, but at least it was your choice.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEREL_GEN_001",
+      "node_type": "derelict",
+      "title": "Standard Salvage",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Standard Salvage",
+          "setup_text": "A dead ship on passive sensors. No power signature, no life signs. Standard salvage opportunity."
+        },
+        {
+          "title": "Drifting Wreck",
+          "setup_text": "Another casualty of the lanes — a freighter with its drive section sheared off. Whatever happened, it happened fast."
+        },
+        {
+          "title": "Cold Hulk",
+          "setup_text": "The wreck has been here a while. Ice crystals coat the viewport glass. Whatever killed it, the void has had time to settle in."
+        }
+      ],
+      "setup_text": "A dead ship on passive sensors. No power signature, no life signs. Standard salvage — the kind your crew can do in their sleep. If they stay awake.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The wreck is cold and quiet. Initial scans show the cargo bay might have something worth taking, but the hull integrity is questionable.",
+          "options": [
+            {
+              "label": "Send a team in. Standard sweep.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "engineer",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your team strips the useful components efficiently. Good haul for minimal effort.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 20
+                    },
+                    {
+                      "type": "fuel",
+                      "value": 3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They find some salvage but a section collapses during extraction. Everyone's fine, but it cut the operation short.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The hull gives way during salvage. Your team gets out, but the cargo is crushed. Nothing worth recovering.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Quick grab — in and out.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You grab what's accessible near the airlock. Not much, but no risk either.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 8
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Skip it. Not worth the time.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You mark the coordinates and move on. Some wrecks aren't worth stopping for.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEREL_GEN_002",
+      "node_type": "derelict",
+      "title": "Empty Hull",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Empty Hull",
+          "setup_text": "The derelict is picked clean — someone got here first."
+        },
+        {
+          "title": "Stripped Wreck",
+          "setup_text": "Cutting torches and pry marks on every panel. This ship has been thoroughly salvaged already."
+        },
+        {
+          "title": "Hollow Shell",
+          "setup_text": "The ship is intact but empty. Not damaged — evacuated. Everything removable has been removed, methodically."
+        }
+      ],
+      "setup_text": "The derelict is picked clean — someone got here first. But the hull itself tells a story, if you're paying attention.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "No cargo, no components, no bodies. Just bare metal and the faint scent of recycled air that's been recycling nothing for months.",
+          "options": [
+            {
+              "label": "Search thoroughly anyway.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "intuition",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "In a hidden compartment behind the nav console, you find a data chip someone missed. It contains navigational data worth a few credits.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 8
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Nothing of value, but the hull design gives your engineer ideas about structural reinforcement.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "Nothing. The previous scavengers were thorough. You waste an hour confirming it.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Move on.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You log the wreck's position and continue. Not every stop pays off.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEREL_GEN_003",
+      "node_type": "derelict",
+      "title": "Unstable Wreck",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Unstable Wreck",
+          "setup_text": "The derelict's reactor is still cycling — barely, and badly. There's salvage here, but the wreck won't hold together much longer."
+        },
+        {
+          "title": "Hot Wreck",
+          "setup_text": "Radiation readings are climbing. The ship's containment is failing. It's a salvage race against physics."
+        },
+        {
+          "title": "Ticking Clock",
+          "setup_text": "The wreck's power core is in meltdown — slow enough to be useful, fast enough to be dangerous. Your crew exchanges looks."
+        }
+      ],
+      "setup_text": "The derelict's reactor is still cycling — barely, and badly. The hull creaks with thermal stress. There's salvage here, but the wreck won't hold together much longer.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Your engineer estimates ten minutes before the reactor goes critical. Maybe fifteen. The cargo hold is accessible but it's a sprint.",
+          "options": [
+            {
+              "label": "Quick extraction. Beat the clock.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "engineer",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your team moves fast. They strip the cargo hold and get out with two minutes to spare. The wreck blows behind you — close enough to feel the heat.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 25
+                    },
+                    {
+                      "type": "fuel",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They grab what they can and pull out early. Half a haul, but everyone's alive.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 12
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The reactor destabilizes faster than predicted. Your team evacuates with nothing. The blast wave rocks your ship.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -8,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Too risky. Back off.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You pull to safe distance and watch the wreck tear itself apart. Spectacular, if you ignore the lost salvage.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEREL_GEN_004",
+      "node_type": "derelict",
+      "title": "Distress Loop",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Distress Loop",
+          "setup_text": "An automated distress beacon cycles endlessly from a drifting hull. The message is old."
+        },
+        {
+          "title": "Ghost Signal",
+          "setup_text": "A distress call that's been repeating for longer than some of your crew have been alive. The ship behind it waits in darkness."
+        },
+        {
+          "title": "Old Beacon",
+          "setup_text": "The beacon's power cell is almost dead — the signal fades and returns, fades and returns. Like a heartbeat that doesn't know to stop."
+        }
+      ],
+      "setup_text": "An automated distress beacon cycles endlessly from a drifting hull. The message is old — years, maybe decades. The ship it came from is right there, dark and silent.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The beacon repeats: 'Drive failure. Requesting assistance. Crew of seven.' The ship shows no life signs. It hasn't for a long time.",
+          "options": [
+            {
+              "label": "Disable the beacon. Log the wreck.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You kill the signal and record the ship's registration. Someone's family might get closure. Small kindnesses in empty space.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Investigate the ship.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "intuition",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The crew died at their posts. You find personal effects and a small emergency fund. You take the credits and leave the rest.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 12
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Empty. The crew evacuated successfully — the beacon just never stopped. A good ending, as these things go.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The ship is structurally compromised. Your boarding team has to retreat when a section depressurizes. No casualties, but close.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -3,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FACTION_GEN_001",
+      "node_type": "faction_territory",
+      "title": "Routine Checkpoint",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Routine Checkpoint",
+          "setup_text": "A faction checkpoint station hails you on approach. Standard procedure."
+        },
+        {
+          "title": "Border Check",
+          "setup_text": "You're entering controlled space. A customs cutter matches your velocity and requests identification."
+        },
+        {
+          "title": "Lane Inspection",
+          "setup_text": "A patrol station at the sector boundary flags you for routine inspection. Your crew sighs collectively."
+        }
+      ],
+      "setup_text": "A faction checkpoint station hails you on approach. Standard procedure — identify yourself, state your business, submit to a scan. It should be routine.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The checkpoint officer runs your registration. Everything's in order, but they seem to be looking for a reason to delay you.",
+          "options": [
+            {
+              "label": "Comply fully. Nothing to hide.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A thorough but professional inspection. They wave you through with a stamp on your manifest. Bureaucracy served.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Offer a small courtesy payment.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The officer pockets the credits with practiced ease. Your inspection suddenly becomes a formality. You're through in minutes.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Bluff past the inspection.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "diplomat",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your confident demeanor and official-sounding jargon convince them you're not worth the paperwork. Through in record time.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They're suspicious but can't find anything. You pass, but they note your registry for future attention.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They don't buy it. Extended inspection — you lose time and your crew's patience.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -2
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -5,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FACTION_GEN_002",
+      "node_type": "faction_territory",
+      "title": "Border Patrol",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Border Patrol",
+          "setup_text": "A border patrol vessel runs a quick scan as you pass through. Routine."
+        },
+        {
+          "title": "Sweep Scan",
+          "setup_text": "A faction corvette paints your hull with active sensors. Brief, professional, impersonal. They're already scanning the next ship."
+        },
+        {
+          "title": "Patrol Pass",
+          "setup_text": "Faction patrol vessels hold position at the lane junction, scanning traffic. Your turn takes thirty seconds."
+        }
+      ],
+      "setup_text": "A border patrol vessel runs a quick scan as you pass through. Routine — they're looking for something, and it isn't you.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The scan takes thirty seconds. The patrol ship's running lights blink an acknowledgment and it moves on to the next ship in the lane.",
+          "options": [
+            {
+              "label": "Continue on your way.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The scan comes back clean. You're waved through without incident. Another checkpoint survived.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Hail them for local intel.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The patrol officer shares a brief update on local conditions — hazards, traffic, recent incidents. Useful context.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FACTION_GEN_003",
+      "node_type": "faction_territory",
+      "title": "Faction Trader",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Faction Trader",
+          "setup_text": "A faction-licensed merchant hails you from a trade buoy. They're selling faction goods at regulated prices."
+        },
+        {
+          "title": "Supply Tender",
+          "setup_text": "A faction supply ship offers to sell surplus inventory at standard rates. Government goods — reliable but pricey."
+        },
+        {
+          "title": "Licensed Vendor",
+          "setup_text": "A merchant flying faction colors and broadcasting a commerce license offers their catalog. Everything stamped and certified."
+        }
+      ],
+      "setup_text": "A faction-licensed merchant hails you from a trade buoy. They're selling faction goods at regulated prices — nothing black market, but some items are hard to find elsewhere.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The merchant displays their wares on a shared screen. Faction-standard equipment, well-maintained. The prices reflect quality — and the faction's cut.",
+          "options": [
+            {
+              "label": "Buy supplies at faction prices.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Quality goods at fair (if not cheap) prices. Your crew appreciates the reliability.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -20
+                    },
+                    {
+                      "type": "fuel",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 5,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Trade information instead.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "diplomat",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The merchant is happy to exchange knowledge for knowledge. You learn about conditions ahead.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "They're cagey about specifics but confirm some general lane conditions. Better than nothing.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "They're not interested in talk. \"Credits or nothing, friend.\"",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Pass. Too expensive.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You wave off the merchant and continue. They'll find another buyer soon enough.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FACTION_GEN_004",
+      "node_type": "faction_territory",
+      "title": "Territory Marker",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Territory Marker",
+          "setup_text": "You pass a faction territory marker — a beacon broadcasting sovereignty claims and navigation data."
+        },
+        {
+          "title": "Sovereignty Beacon",
+          "setup_text": "A faction beacon pulses steadily in the void, declaring who owns this particular patch of nothing."
+        },
+        {
+          "title": "Border Buoy",
+          "setup_text": "The navigation buoy marks the formal edge of faction space. Cross it and the rules change. Or so they claim."
+        }
+      ],
+      "setup_text": "You pass a faction territory marker — a beacon broadcasting sovereignty claims and navigation data. Standard border infrastructure.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The marker broadcasts on all frequencies: faction name, territorial extent, laws in effect. Your nav computer logs it automatically.",
+          "options": [
+            {
+              "label": "Log it and move on.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Another waypoint logged. The marker's data updates your local charts — marginally useful.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Scan the marker's data banks.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "technician",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The marker contains more than sovereignty claims — shipping schedules, patrol routes, maintenance records. Useful intelligence.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Standard data only. The interesting stuff is encrypted beyond your ability to crack.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "Your scan triggers an alert — the marker logs your registry as 'suspicious.' Not dangerous, but noted.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PLANET_GEN_001",
+      "node_type": "planet_exploration",
+      "title": "Surface Survey",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Surface Survey",
+          "setup_text": "The planet's surface offers nothing dramatic — just terrain, resources, and the quiet satisfaction of cataloging it."
+        },
+        {
+          "title": "Geological Scan",
+          "setup_text": "Mineral-rich crust, stable atmosphere, no hostiles. The kind of planet that pays for the fuel to reach it."
+        },
+        {
+          "title": "Landing Site",
+          "setup_text": "A flat expanse of alien geology stretches beneath you. Your crew prepares for a routine surface operation."
+        }
+      ],
+      "setup_text": "The planet's surface offers nothing dramatic — no cities, no ruins, no distress signals. Just terrain, resources, and the quiet satisfaction of being the first to catalog it.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Your scanners identify mineral deposits and a few biological samples worth collecting. A standard survey operation.",
+          "options": [
+            {
+              "label": "Full survey. Take your time.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "scientist",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A thorough survey yields good data and a decent mineral haul. Your science team is satisfied.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 15
+                    },
+                    {
+                      "type": "fuel",
+                      "value": 3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Decent results, but the terrain is harder than expected. You get about half of what you hoped for.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 8
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The mineral deposits turn out to be less pure than scans suggested. Disappointing, but not dangerous.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Quick sample and go.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You grab surface samples and boost back to orbit. Fast, efficient, minimal return.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PLANET_GEN_002",
+      "node_type": "planet_exploration",
+      "title": "Rough Entry",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Rough Entry",
+          "setup_text": "The planet's atmosphere is thicker than predicted. Turbulence shakes the hull as you descend."
+        },
+        {
+          "title": "Atmospheric Turbulence",
+          "setup_text": "Crosswinds and thermal columns buffet the ship during descent. Your pilot earns their pay today."
+        },
+        {
+          "title": "Hot Descent",
+          "setup_text": "The entry corridor is narrow and the atmosphere unforgiving. Heat shields glow as you punch through."
+        }
+      ],
+      "setup_text": "The planet's atmosphere is thicker than predicted. Turbulence shakes the hull as you descend, and your instruments go haywire for a few uncomfortable seconds.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The ship bucks and groans. Warning lights flicker. Then, as quickly as it started, you break through into clear sky. Everything stabilizes.",
+          "options": [
+            {
+              "label": "Ride it out. We're through.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A bumpy ride, nothing more. Your hull is tougher than some atmospheric friction.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": -2,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Adjust entry angle.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "pilot",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your pilot compensates beautifully. Smooth descent, minimal stress on the hull.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Better than brute-forcing it. Minor hull stress, but you're down safely.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": -2,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The adjustment overshoots. You come in at a bad angle and the hull takes the hit.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": -6,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SIGNAL_GEN_001",
+      "node_type": "anomalous_signal",
+      "title": "Old Beacon",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Old Beacon",
+          "setup_text": "A signal source that turns out to be an old navigational beacon, knocked off its mount and drifting."
+        },
+        {
+          "title": "Drift Beacon",
+          "setup_text": "The anomalous signal resolves to a mundane source — a navigation marker from a defunct shipping company."
+        },
+        {
+          "title": "Legacy Transmitter",
+          "setup_text": "The signal is ancient — a relay station from before the current factions carved up the sector. Still broadcasting to no one."
+        }
+      ],
+      "setup_text": "A signal source that turns out to be nothing exotic — an old navigational beacon, knocked off its mount and drifting. It's still transmitting, though. Some of that data might be useful.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The beacon's data banks contain old navigation charts, shipping manifests, and maintenance logs. Mundane, but information has value.",
+          "options": [
+            {
+              "label": "Download the data.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "technician",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The data downloads cleanly. Old charts, but some of the navigational shortcuts are still valid. Your pilot is pleased.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 10
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Partial download — the beacon's storage is degraded. You get some useful fragments.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The data is too corrupted to be useful. You waste time on static.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Ignore it. Just a beacon.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You log the beacon's position and move on. Not everything is a mystery worth solving.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SIGNAL_GEN_002",
+      "node_type": "anomalous_signal",
+      "title": "Static Burst",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Static Burst",
+          "setup_text": "Your sensors spike with a burst of structured noise — then it resolves into nothing. Just space being space."
+        },
+        {
+          "title": "Phantom Signal",
+          "setup_text": "For three seconds, your comms board lights up like a holiday. Then silence. Your crew exchanges looks."
+        },
+        {
+          "title": "Echo Pattern",
+          "setup_text": "A repeating signal fragment that your computer flags as 'potentially artificial.' Analysis says otherwise. Probably."
+        }
+      ],
+      "setup_text": "Your sensors spike with a burst of structured noise — for a moment it looks like a pattern, a signal, maybe even a message. Then it resolves into nothing. Just space being space.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The burst fades. Your communications officer shakes their head. \"Background radiation shaped by the local magnetic field. It happens.\"",
+          "options": [
+            {
+              "label": "Log it and move on.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Another false alarm cataloged. The void is full of noise that sounds like voices if you listen too hard.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Analyze the pattern anyway.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "scientist",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Your analysis confirms it's natural — but the magnetic field data itself is interesting. Worth a few credits to the right buyer.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": 5
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Nothing conclusive. The data is logged but your scientist doubts it'll lead anywhere.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "You spend too long staring at static. Your crew starts to wonder if you're hearing things.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEAD_GEN_001",
+      "node_type": "dead_zone",
+      "title": "Navigation Hazard",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Navigation Hazard",
+          "setup_text": "The Dead Zone lives up to its name. No landmarks, no signals, no reference points."
+        },
+        {
+          "title": "Void Drift",
+          "setup_text": "Without external reference, your instruments can't agree on which way is forward. The Dead Zone doesn't care about your heading."
+        },
+        {
+          "title": "Featureless Expanse",
+          "setup_text": "Nothing. In every direction, nothing. Even your experienced crew finds it unsettling."
+        }
+      ],
+      "setup_text": "The Dead Zone lives up to its name. No landmarks, no signals, no reference points. Your navigation systems struggle with the featureless void.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Your course is drifting. The nav computer can't lock onto enough reference stars. You'll need to correct manually or burn extra fuel to compensate.",
+          "options": [
+            {
+              "label": "Burn fuel to correct course.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Extra thrust brings you back on track. Fuel spent, but you're heading the right direction.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -4
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Navigate by instinct.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "intuition",
+              "difficulty": "medium",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You read the void like a chart. Subtle gradients in background radiation, the faintest gravitational tugs — you stay on course.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Close enough. You drift slightly off course but find your way back. Lost time, not fuel.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "You misjudge badly. By the time you realize, you've burned extra fuel correcting the correction.",
+                  "rewards": [
+                    {
+                      "type": "fuel",
+                      "value": -6
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEAD_GEN_002",
+      "node_type": "dead_zone",
+      "title": "Sensor Ghost",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Sensor Ghost",
+          "setup_text": "Something registers on your sensors — briefly, faintly. A contact that shouldn't be there."
+        },
+        {
+          "title": "Phantom Contact",
+          "setup_text": "Your tactical display shows a blip where nothing should be. It moves. It stops. It vanishes."
+        },
+        {
+          "title": "Dead Zone Echo",
+          "setup_text": "A sensor return that matches no known profile. Your instruments insist something is there. Your eyes insist otherwise."
+        }
+      ],
+      "setup_text": "Something registers on your sensors — briefly, faintly. A contact that shouldn't be there. Then it's gone. Then it's back. Then it's gone again.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Your crew watches the sensor display. The contact flickers — there, not there, there again. No one speaks. The Dead Zone plays tricks on instruments and minds alike.",
+          "options": [
+            {
+              "label": "Ignore it. Sensor noise.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You look away from the display and it stops. Probably. The Dead Zone is full of things that aren't there. Probably.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Track the ghost signal.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "scientist",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Analysis confirms it's a sensor artifact — your own emissions bouncing off a dust cloud. Mystery solved. Your crew relaxes.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "The signal defies easy explanation. Your scientist logs it as 'anomalous background.' Everyone pretends that's satisfying.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The more you study it, the less it makes sense. Your crew gets nervous. You drop the investigation.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -4,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NEXUS_GEN_001",
+      "node_type": "nexus_anomaly",
+      "title": "Resonance Echo",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Resonance Echo",
+          "setup_text": "The Nexus pulses — not painfully, but with a quiet insistence. Something in space here responds to it."
+        },
+        {
+          "title": "Nexus Tremor",
+          "setup_text": "A vibration that has no source. The Nexus is reacting to something — or something is reacting to the Nexus."
+        },
+        {
+          "title": "Harmonic Pulse",
+          "setup_text": "The ship hums at a frequency that isn't in any manual. The Nexus is singing, and something out here is singing back."
+        }
+      ],
+      "setup_text": "The Nexus pulses — not painfully, not urgently, but with a quiet insistence. Something in the fabric of space here responds to it. An echo. A memory. A test.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "The echo resonates through the ship's hull, through your bones. You feel the Nexus reaching — not toward you, but through you, toward whatever is resonating back.",
+          "options": [
+            {
+              "label": "Open yourself to it.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "stat",
+              "check_target": "resolve",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The resonance flows through you and fades. For a moment, you understood something — you can't remember what, but the Nexus remembers for you.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 2
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "A flash of something — not quite vision, not quite thought. The Nexus took something small and gave something smaller back.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The resonance is overwhelming. You shut it out, gasping. Your crew looks at you with concern.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -3,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                }
+              }
+            },
+            {
+              "label": "Resist. Keep your boundaries.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You push back against the resonance and it subsides. The Nexus doesn't insist. Not this time.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NEXUS_GEN_002",
+      "node_type": "nexus_anomaly",
+      "title": "Spatial Flicker",
+      "depth_zone": "any",
+      "faction_context": "none",
+      "min_resonance": 0,
+      "tags": [
+        "generic",
+        "repeatable"
+      ],
+      "complexity_tier": 1,
+      "repeatable": true,
+      "requires_flags": [],
+      "variants": [
+        {
+          "title": "Spatial Flicker",
+          "setup_text": "Space stutters. For a fraction of a second, you're somewhere else — or somewhere else is here."
+        },
+        {
+          "title": "Reality Hiccup",
+          "setup_text": "The universe blinks. When it opens its eyes again, everything is the same. Isn't it?"
+        },
+        {
+          "title": "Nexus Ripple",
+          "setup_text": "A wave passes through the ship — not physical, not quite. The lights dim and return. The Nexus hums, then falls silent."
+        }
+      ],
+      "setup_text": "Space stutters. For a fraction of a second, you're somewhere else — or somewhere else is here. Then normal reality reasserts itself, slightly embarrassed.",
+      "steps": [
+        {
+          "step_number": 1,
+          "condition": null,
+          "setup_text": "Your crew blinks. The stars outside the viewport are in slightly different positions than they were a moment ago. Or are they? The instruments say nothing happened. The Nexus says nothing at all.",
+          "options": [
+            {
+              "label": "Accept it. The Nexus does what it does.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "You file it under 'things that happen near the Nexus' and move on. The list is getting long.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                }
+              }
+            },
+            {
+              "label": "Check the ship's systems.",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "skill",
+              "check_target": "engineer",
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "Everything reads normal. Your engineer shrugs. 'If the Nexus broke something, it fixed it too.' Small comfort.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 1,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                },
+                "partial": {
+                  "level": "success",
+                  "narrative": "Systems check out, but your chronometer is off by two seconds. Or was it always off? Nobody can agree.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                },
+                "failure": {
+                  "level": "success",
+                  "narrative": "The more you check, the more things seem slightly wrong. You stop checking. Some things are better unexamined.",
+                  "rewards": [],
+                  "sets_flag": null,
+                  "clears_flag": null,
+                  "morale_delta": -2,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -176,7 +176,12 @@ const Registry = {
         if (evt.depth_zone !== depthZone) return false;
       }
       if ((evt.min_resonance || 0) > meta.resonance) return false;
-      if (run.seenEventIds && run.seenEventIds.includes(evt.id)) return false;
+      // Event-level flag gating — all required flags must be present
+      if (evt.requires_flags && evt.requires_flags.length > 0) {
+        if (!evt.requires_flags.every(f => run.runFlags.includes(f))) return false;
+      }
+      // Repeatable events skip the seenEventIds check
+      if (!evt.repeatable && run.seenEventIds && run.seenEventIds.includes(evt.id)) return false;
       return true;
     });
   },
