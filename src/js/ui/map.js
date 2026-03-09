@@ -32,6 +32,12 @@ const MapUI = {
     const currentDepth = GameState.run.depth;
     const maxVisible = currentDepth + 3;
 
+    // Ship sensor state (computed once, used per node)
+    const sensors = GameState.run.ship.baseSystems.sensors;
+    const sensorsWorking = sensors && !sensors.damaged;
+    const hasScanner = GameState.run.ship.equippedModules.some(m => m.id === 'mod_scanner_array');
+    const hasNexusCortex = GameState.run.ship.equippedModules.some(m => m.id === 'mod_nexus_cortex');
+
     for (let d = Math.max(0, currentDepth - 1); d <= Math.min(map.maxDepth, maxVisible); d++) {
       const layerNodes = map.nodes.filter(n => n.depth === d);
       if (layerNodes.length === 0) continue;
@@ -41,11 +47,21 @@ const MapUI = {
 
       for (const node of layerNodes) {
         const el = document.createElement('div');
-        const isRevealed = node.revealed || node.depth <= currentDepth + 1;
+        // Nexus Cortex reveals nexus_anomaly nodes within visible range
+        const nexusCortexReveal = hasNexusCortex && node.type === 'nexus_anomaly' &&
+          node.depth <= currentDepth + 3;
+        const isRevealed = node.revealed || node.depth <= currentDepth + 1 || nexusCortexReveal;
         const isCurrent = node.id === GameState.run.currentNodeId;
         const isVisited = node.visited;
         const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
                              map.edges.some(e => e.from === GameState.run.currentNodeId && e.to === node.id);
+
+        // Some nodes broadcast their presence (no sensors needed)
+        const broadcasts = node.type === 'trade_post' || node.type === 'dead_zone' ||
+          node.type === 'faction_territory';
+        // Sensor check: need sensors level 3+ or Scanner Array module to identify other nodes
+        const canIdentify = isVisited || (isRevealed && broadcasts) || nexusCortexReveal ||
+          (isRevealed && sensorsWorking && (sensors.level >= 3 || hasScanner));
 
         el.className = 'map-node' +
           (isCurrent ? ' current' : '') +
@@ -53,8 +69,27 @@ const MapUI = {
           (!isRevealed ? ' hidden-node' : '') +
           (isSelectable ? ' selectable' : '');
 
-        el.textContent = isRevealed ? this._nodeEmoji(node.type) : '?';
-        el.title = isRevealed ? node.type : 'Unknown';
+        el.textContent = canIdentify ? this._nodeEmoji(node.type) : (isRevealed ? '◌' : '?');
+        el.title = canIdentify ? node.type.replace(/_/g, ' ') : 'Unknown';
+
+        // Show faction influence (territory or nearby faction)
+        const factionId = node.faction || (isRevealed ? node.nearbyFaction : null);
+        if (factionId && isRevealed) {
+          const factionColor = this._factionColor(factionId);
+          if (node.faction) {
+            // Direct faction territory — solid colored border
+            el.style.borderColor = factionColor;
+            el.style.boxShadow = `0 0 4px ${factionColor}`;
+          } else if (node.nearbyFaction) {
+            // Approaching faction space — subtle hint
+            el.style.borderColor = factionColor;
+            el.style.opacity = el.style.opacity || '1';
+          }
+          // Add faction name to tooltip if sensors can identify
+          if (canIdentify) {
+            el.title += ` (${this._factionName(factionId)})`;
+          }
+        }
 
         if (isSelectable) {
           el.addEventListener('click', () => this._selectNode(node));
@@ -82,6 +117,26 @@ const MapUI = {
       dead_zone: '💀',
     };
     return icons[type] || '·';
+  },
+
+  _factionColor(factionId) {
+    const colors = {
+      concord_assembly: 'var(--faction-concord)',
+      vreth_dominion: 'var(--faction-vreth)',
+      drifter_compact: 'var(--faction-drifter)',
+      remnant_collective: 'var(--faction-remnant)',
+    };
+    return colors[factionId] || 'var(--text-muted)';
+  },
+
+  _factionName(factionId) {
+    const names = {
+      concord_assembly: 'Concord Assembly',
+      vreth_dominion: 'Vreth Dominion',
+      drifter_compact: 'Drifter Compact',
+      remnant_collective: 'Remnant Collective',
+    };
+    return names[factionId] || factionId;
   },
 
   _selectNode(node) {

@@ -1,6 +1,96 @@
 /* Void Meridian — Event Tab Renderer (events_master.json schema) */
 
 const EventUI = {
+
+  // ─── Narrative Colorizer ─────────────────────────────────────
+
+  _NARRATIVE_KEYWORDS: null,
+  _NARRATIVE_REGEX: null,
+
+  _buildColorizer() {
+    if (this._NARRATIVE_REGEX) return;
+
+    const keywords = {
+      // Threats (red)
+      'var(--color-danger)': [
+        'weapons drawn', 'fighter craft', 'hull breach', 'critical damage',
+        'fire upon', 'weapons fire', 'boarding party', 'self-destruct',
+        'weapons', 'hostile', 'attack', 'destroy', 'ambush', 'pirates',
+        'enemy', 'armed', 'boarding', 'missiles', 'torpedo', 'explode',
+        'raiders', 'intercept', 'killed', 'dead', 'death', 'lethal',
+        'predator', 'predators', 'threat', 'breach', 'detonation',
+        'overload', 'combat', 'wreckage', 'carnage', 'annihilate',
+      ],
+      // Caution (orange)
+      'var(--color-warning)': [
+        'warning', 'unstable', 'malfunction', 'failing', 'leak',
+        'drifting', 'sacrifice', 'risk', 'cost', 'price', 'damaged',
+        'stranded', 'distress', 'danger', 'trapped', 'quarantine',
+        'contaminated', 'radiation', 'corrosion', 'decay',
+      ],
+      // Gains (green)
+      'var(--color-success)': [
+        'repaired', 'salvage', 'recovered', 'credits', 'fuel cells',
+        'upgrade', 'ally', 'allies', 'safe', 'healed', 'restored',
+        'reward', 'rescued', 'gained', 'profit', 'trade', 'supplies',
+        'repair', 'reinforced', 'intact', 'fortune',
+      ],
+      // Nexus / mystery (purple)
+      'var(--color-nexus)': [
+        'nexus', 'resonance', 'the void', 'whisper', 'whispers',
+        'pattern', 'remember', 'the wound', 'pulse', 'meridian',
+        'reconstruction', 'anomaly', 'anomalous', 'transmission',
+        'tendrils', 'tendril', 'integration', 'cortex',
+      ],
+      // Factions
+      'var(--faction-concord)': ['concord assembly', 'concord'],
+      'var(--faction-vreth)': ['vreth dominion', 'vreth'],
+      'var(--faction-drifter)': ['drifter compact', 'drifter', 'drifters'],
+      'var(--faction-remnant)': ['remnant collective', 'remnant'],
+    };
+
+    // Build flat list sorted longest-first
+    const entries = [];
+    for (const [color, words] of Object.entries(keywords)) {
+      for (const word of words) {
+        entries.push({ word, color });
+      }
+    }
+    entries.sort((a, b) => b.word.length - a.word.length);
+
+    this._NARRATIVE_KEYWORDS = entries;
+
+    // Build single regex with alternation, word boundaries
+    const escaped = entries.map(e => e.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    this._NARRATIVE_REGEX = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'gi');
+  },
+
+  _colorizeNarrative(text) {
+    if (!text) return '';
+    this._buildColorizer();
+
+    // HTML-escape first
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Build a lookup map from lowercase word to color
+    const colorMap = {};
+    for (const entry of this._NARRATIVE_KEYWORDS) {
+      colorMap[entry.word.toLowerCase()] = entry.color;
+    }
+
+    // Replace matches with colored spans, preserving original case
+    html = html.replace(this._NARRATIVE_REGEX, (match) => {
+      const color = colorMap[match.toLowerCase()];
+      if (!color) return match;
+      return `<span style="color:${color}">${match}</span>`;
+    });
+
+    return html;
+  },
+
   render(container) {
     const screen = document.createElement('div');
     screen.className = 'screen';
@@ -9,6 +99,23 @@ const EventUI = {
 
     if (!evt) {
       this._renderShipStatus(screen);
+      container.appendChild(screen);
+      return;
+    }
+
+    // If outcome was resolved, show ONLY the outcome (clean page)
+    if (evt._resolved && evt._lastOutcome) {
+      this._renderOutcome(screen, evt);
+      container.appendChild(screen);
+      return;
+    }
+
+    // Current step
+    const stepIdx = GameState.run.activeEventStep;
+    const step = evt.steps ? evt.steps[stepIdx] : null;
+
+    if (!step) {
+      this._renderContinueButton(screen, evt);
       container.appendChild(screen);
       return;
     }
@@ -22,46 +129,30 @@ const EventUI = {
       screen.appendChild(nodeLabel);
     }
 
-    // Event setup text (shown once at event start)
-    const stepIdx = GameState.run.activeEventStep;
+    // For step 0, show the event setup_text as the intro
+    // For later steps, only show the step's own setup_text
     if (stepIdx === 0 && evt.setup_text) {
       const setupEl = document.createElement('div');
       setupEl.className = 'narrative';
-      setupEl.textContent = evt.setup_text;
+      setupEl.innerHTML = this._colorizeNarrative(evt.setup_text);
       screen.appendChild(setupEl);
     }
 
-    // Current step
-    const step = evt.steps ? evt.steps[stepIdx] : null;
-    if (!step) {
-      // No valid step — show continue button
-      this._renderContinueButton(screen, evt);
-      container.appendChild(screen);
-      return;
-    }
-
-    // Step setup text
+    // Step-specific setup text
     if (step.setup_text) {
       const stepSetup = document.createElement('div');
       stepSetup.className = 'narrative';
       if (stepIdx === 0 && evt.setup_text) {
         stepSetup.style.marginTop = 'var(--space-md)';
       }
-      stepSetup.textContent = step.setup_text;
+      stepSetup.innerHTML = this._colorizeNarrative(step.setup_text);
       screen.appendChild(stepSetup);
     }
 
-    // Divider before choices/outcome
+    // Divider before choices
     const divider = document.createElement('hr');
     divider.className = 'divider';
     screen.appendChild(divider);
-
-    // If outcome was resolved, show it
-    if (evt._resolved && evt._lastOutcome) {
-      this._renderOutcome(screen, evt);
-      container.appendChild(screen);
-      return;
-    }
 
     // Render options
     if (step.options) {
@@ -69,7 +160,6 @@ const EventUI = {
         const option = step.options[i];
         const { available, hint } = EventEngine.checkOptionAvailability(option);
 
-        // Hidden if locked and no locked_hint
         if (!available && !hint) continue;
 
         const btn = document.createElement('button');
@@ -82,7 +172,6 @@ const EventUI = {
         btn.textContent = label;
 
         if (!available) {
-          // Show locked hint
           const reason = document.createElement('span');
           reason.className = 'lock-reason';
           reason.textContent = hint;
@@ -102,6 +191,14 @@ const EventUI = {
   _renderOutcome(screen, evt) {
     const outcome = evt._lastOutcome;
 
+    // Show what the player chose
+    if (evt._lastChoiceLabel) {
+      const choiceEl = document.createElement('div');
+      choiceEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); margin-bottom:var(--space-sm); text-transform:uppercase;';
+      choiceEl.textContent = `▸ ${evt._lastChoiceLabel}`;
+      screen.appendChild(choiceEl);
+    }
+
     // Outcome level indicator
     const levelEl = document.createElement('div');
     levelEl.className = 'system-label';
@@ -115,7 +212,7 @@ const EventUI = {
     if (outcome.narrative) {
       const narrativeEl = document.createElement('div');
       narrativeEl.className = 'narrative';
-      narrativeEl.textContent = outcome.narrative;
+      narrativeEl.innerHTML = this._colorizeNarrative(outcome.narrative);
       screen.appendChild(narrativeEl);
     }
 
