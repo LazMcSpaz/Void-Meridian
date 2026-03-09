@@ -32,6 +32,12 @@ const MapUI = {
     const currentDepth = GameState.run.depth;
     const maxVisible = currentDepth + 3;
 
+    // Ship sensor state (computed once, used per node)
+    const sensors = GameState.run.ship.baseSystems.sensors;
+    const sensorsWorking = sensors && !sensors.damaged;
+    const hasScanner = GameState.run.ship.equippedModules.some(m => m.id === 'mod_scanner_array');
+    const hasNexusCortex = GameState.run.ship.equippedModules.some(m => m.id === 'mod_nexus_cortex');
+
     for (let d = Math.max(0, currentDepth - 1); d <= Math.min(map.maxDepth, maxVisible); d++) {
       const layerNodes = map.nodes.filter(n => n.depth === d);
       if (layerNodes.length === 0) continue;
@@ -41,16 +47,18 @@ const MapUI = {
 
       for (const node of layerNodes) {
         const el = document.createElement('div');
-        const isRevealed = node.revealed || node.depth <= currentDepth + 1;
+        // Nexus Cortex reveals nexus_anomaly nodes within visible range
+        const nexusCortexReveal = hasNexusCortex && node.type === 'nexus_anomaly' &&
+          node.depth <= currentDepth + 3;
+        const isRevealed = node.revealed || node.depth <= currentDepth + 1 || nexusCortexReveal;
         const isCurrent = node.id === GameState.run.currentNodeId;
         const isVisited = node.visited;
         const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
                              map.edges.some(e => e.from === GameState.run.currentNodeId && e.to === node.id);
 
-        // Sensor check: need functional sensors to identify node types
-        const sensors = GameState.run.ship.baseSystems.sensors;
-        const sensorsOnline = sensors && !sensors.damaged;
-        const canIdentify = isVisited || (isRevealed && sensorsOnline);
+        // Sensor check: need sensors level 3+ or Scanner Array module to identify node types
+        const canIdentify = isVisited || nexusCortexReveal ||
+          (isRevealed && sensorsWorking && (sensors.level >= 3 || hasScanner));
 
         el.className = 'map-node' +
           (isCurrent ? ' current' : '') +
@@ -74,8 +82,8 @@ const MapUI = {
             el.style.borderColor = factionColor;
             el.style.opacity = el.style.opacity || '1';
           }
-          // Add faction label below node if sensors online
-          if (canIdentify || node.faction) {
+          // Add faction name to tooltip if sensors can identify
+          if (canIdentify) {
             el.title += ` (${this._factionName(factionId)})`;
           }
         }
