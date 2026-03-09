@@ -9020,6 +9020,23 @@ const EventUI = {
       return;
     }
 
+    // If outcome was resolved, show ONLY the outcome (clean page)
+    if (evt._resolved && evt._lastOutcome) {
+      this._renderOutcome(screen, evt);
+      container.appendChild(screen);
+      return;
+    }
+
+    // Current step
+    const stepIdx = GameState.run.activeEventStep;
+    const step = evt.steps ? evt.steps[stepIdx] : null;
+
+    if (!step) {
+      this._renderContinueButton(screen, evt);
+      container.appendChild(screen);
+      return;
+    }
+
     // Node type indicator
     if (evt.node_type) {
       const nodeLabel = document.createElement('div');
@@ -9029,8 +9046,8 @@ const EventUI = {
       screen.appendChild(nodeLabel);
     }
 
-    // Event setup text (shown once at event start)
-    const stepIdx = GameState.run.activeEventStep;
+    // For step 0, show the event setup_text as the intro
+    // For later steps, only show the step's own setup_text
     if (stepIdx === 0 && evt.setup_text) {
       const setupEl = document.createElement('div');
       setupEl.className = 'narrative';
@@ -9038,16 +9055,7 @@ const EventUI = {
       screen.appendChild(setupEl);
     }
 
-    // Current step
-    const step = evt.steps ? evt.steps[stepIdx] : null;
-    if (!step) {
-      // No valid step — show continue button
-      this._renderContinueButton(screen, evt);
-      container.appendChild(screen);
-      return;
-    }
-
-    // Step setup text
+    // Step-specific setup text
     if (step.setup_text) {
       const stepSetup = document.createElement('div');
       stepSetup.className = 'narrative';
@@ -9058,17 +9066,10 @@ const EventUI = {
       screen.appendChild(stepSetup);
     }
 
-    // Divider before choices/outcome
+    // Divider before choices
     const divider = document.createElement('hr');
     divider.className = 'divider';
     screen.appendChild(divider);
-
-    // If outcome was resolved, show it
-    if (evt._resolved && evt._lastOutcome) {
-      this._renderOutcome(screen, evt);
-      container.appendChild(screen);
-      return;
-    }
 
     // Render options
     if (step.options) {
@@ -9076,7 +9077,6 @@ const EventUI = {
         const option = step.options[i];
         const { available, hint } = EventEngine.checkOptionAvailability(option);
 
-        // Hidden if locked and no locked_hint
         if (!available && !hint) continue;
 
         const btn = document.createElement('button');
@@ -9089,7 +9089,6 @@ const EventUI = {
         btn.textContent = label;
 
         if (!available) {
-          // Show locked hint
           const reason = document.createElement('span');
           reason.className = 'lock-reason';
           reason.textContent = hint;
@@ -9108,6 +9107,14 @@ const EventUI = {
 
   _renderOutcome(screen, evt) {
     const outcome = evt._lastOutcome;
+
+    // Show what the player chose
+    if (evt._lastChoiceLabel) {
+      const choiceEl = document.createElement('div');
+      choiceEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); margin-bottom:var(--space-sm); text-transform:uppercase;';
+      choiceEl.textContent = `▸ ${evt._lastChoiceLabel}`;
+      screen.appendChild(choiceEl);
+    }
 
     // Outcome level indicator
     const levelEl = document.createElement('div');
