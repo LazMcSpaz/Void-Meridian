@@ -48,7 +48,7 @@ const MapGenerator = {
 
     // Generate layers
     for (let d = 1; d <= totalDepth; d++) {
-      const nodesInLayer = 2 + Math.floor(Math.random() * 3); // 2-4 nodes per layer
+      const nodesInLayer = 1 + Math.floor(Math.random() * 4); // 1-4 nodes per layer
       const zone = d <= totalDepth * 0.3 ? 'early' : d <= totalDepth * 0.7 ? 'mid' : 'late';
 
       for (let i = 0; i < nodesInLayer; i++) {
@@ -81,7 +81,7 @@ const MapGenerator = {
           Math.abs(a.x - node.x) - Math.abs(b.x - node.x)
         );
 
-        const connectCount = 1 + Math.floor(Math.random() * 2);
+        const connectCount = 1 + Math.floor(Math.random() * 3); // 1-3 connections
         for (let i = 0; i < Math.min(connectCount, sorted.length); i++) {
           edges.push({ from: node.id, to: sorted[i].id });
         }
@@ -95,6 +95,28 @@ const MapGenerator = {
             Math.abs(n.x - next.x) < Math.abs(best.x - next.x) ? n : best
           , currentLayer[0]);
           edges.push({ from: nearest.id, to: next.id });
+        }
+      }
+    }
+
+    // Propagate faction influence: nodes leading into faction territory
+    // get a nearbyFaction hint so the player sees it 1-2 jumps ahead
+    for (const node of nodes) {
+      if (node.faction) continue; // already faction territory
+      // Check nodes reachable within 1-2 edges forward
+      const directTargets = edges.filter(e => e.from === node.id).map(e => e.to);
+      const twoHopTargets = [];
+      for (const tid of directTargets) {
+        for (const e2 of edges) {
+          if (e2.from === tid) twoHopTargets.push(e2.to);
+        }
+      }
+      const nearby = [...directTargets, ...twoHopTargets];
+      for (const targetId of nearby) {
+        const target = nodes.find(n => n.id === targetId);
+        if (target && target.faction) {
+          node.nearbyFaction = target.faction;
+          break;
         }
       }
     }

@@ -47,14 +47,38 @@ const MapUI = {
         const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
                              map.edges.some(e => e.from === GameState.run.currentNodeId && e.to === node.id);
 
+        // Sensor check: need functional sensors to identify node types
+        const sensors = GameState.run.ship.baseSystems.sensors;
+        const sensorsOnline = sensors && !sensors.damaged && sensors.level > 0;
+        const canIdentify = isVisited || (isRevealed && sensorsOnline);
+
         el.className = 'map-node' +
           (isCurrent ? ' current' : '') +
           (isVisited ? ' visited' : '') +
           (!isRevealed ? ' hidden-node' : '') +
           (isSelectable ? ' selectable' : '');
 
-        el.textContent = isRevealed ? this._nodeEmoji(node.type) : '?';
-        el.title = isRevealed ? node.type : 'Unknown';
+        el.textContent = canIdentify ? this._nodeEmoji(node.type) : (isRevealed ? '◌' : '?');
+        el.title = canIdentify ? node.type.replace(/_/g, ' ') : 'Unknown';
+
+        // Show faction influence (territory or nearby faction)
+        const factionId = node.faction || (isRevealed ? node.nearbyFaction : null);
+        if (factionId && isRevealed) {
+          const factionColor = this._factionColor(factionId);
+          if (node.faction) {
+            // Direct faction territory — solid colored border
+            el.style.borderColor = factionColor;
+            el.style.boxShadow = `0 0 4px ${factionColor}`;
+          } else if (node.nearbyFaction) {
+            // Approaching faction space — subtle hint
+            el.style.borderColor = factionColor;
+            el.style.opacity = el.style.opacity || '1';
+          }
+          // Add faction label below node if sensors online
+          if (canIdentify || node.faction) {
+            el.title += ` (${this._factionName(factionId)})`;
+          }
+        }
 
         if (isSelectable) {
           el.addEventListener('click', () => this._selectNode(node));
@@ -82,6 +106,26 @@ const MapUI = {
       dead_zone: '💀',
     };
     return icons[type] || '·';
+  },
+
+  _factionColor(factionId) {
+    const colors = {
+      concord_assembly: 'var(--faction-concord)',
+      vreth_dominion: 'var(--faction-vreth)',
+      drifter_compact: 'var(--faction-drifter)',
+      remnant_collective: 'var(--faction-remnant)',
+    };
+    return colors[factionId] || 'var(--text-muted)';
+  },
+
+  _factionName(factionId) {
+    const names = {
+      concord_assembly: 'Concord Assembly',
+      vreth_dominion: 'Vreth Dominion',
+      drifter_compact: 'Drifter Compact',
+      remnant_collective: 'Remnant Collective',
+    };
+    return names[factionId] || factionId;
   },
 
   _selectNode(node) {
