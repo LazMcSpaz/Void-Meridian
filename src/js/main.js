@@ -128,7 +128,12 @@ const Game = {
           MapUI.render(contentArea);
           break;
         case 'event':
-          EventUI.render(contentArea);
+          // Show depot menu when docked and no active event
+          if (GameState.run.atDepot && !GameState.run.activeEvent) {
+            DepotUI.render(contentArea);
+          } else {
+            EventUI.render(contentArea);
+          }
           break;
         case 'crew':
           CrewUI.render(contentArea);

@@ -76,6 +76,8 @@ function createRunState() {
     activeEventStep: 0,
     lastStepOutcomes: {},
     activeCombat: null,
+    atDepot: false,        // currently docked at a trade post
+    depotNodeId: null,     // node id of current depot
   };
 }
 

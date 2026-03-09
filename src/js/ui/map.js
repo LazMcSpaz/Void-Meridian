@@ -161,6 +161,12 @@ const MapUI = {
       }
     }
 
+    // Trade posts use the depot docking system
+    if (node.type === 'trade_post') {
+      DepotUI.enterDepot(node);
+      return;
+    }
+
     // Trigger node encounter
     EventEngine.triggerNodeEvent(node);
   },

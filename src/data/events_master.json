@@ -5164,7 +5164,8 @@
       "tags": [
         "concord",
         "economy",
-        "introductory"
+        "introductory",
+        "auto_trigger"
       ],
       "setup_text": "Waypoint Kessler is Concord Assembly infrastructure at its most mundane: a gray ring station staffed by gray-uniformed clerks processing gray manifests. A compliance officer intercepts you at the docking queue — young, ambitious, clipboard in hand. 'Cargo declaration, please. We're running a sector-wide audit this cycle.'",
       "steps": [

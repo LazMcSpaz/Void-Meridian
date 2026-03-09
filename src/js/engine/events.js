@@ -245,6 +245,11 @@ const EventEngine = {
       GameState.endRun('hull_destroyed');
       NexusEngine.accumulateRunResonance();
       GameState.screen = 'gameOver';
+    } else if (GameState.run.atDepot) {
+      // Return to depot docking menu after event
+      DepotUI.subScreen = 'menu';
+      GameState.screen = 'map';
+      Tabs.activeTab = 'event';
     } else {
       Tabs.switchTo('map');
     }
