@@ -1,6 +1,96 @@
 /* Void Meridian — Event Tab Renderer (events_master.json schema) */
 
 const EventUI = {
+
+  // ─── Narrative Colorizer ─────────────────────────────────────
+
+  _NARRATIVE_KEYWORDS: null,
+  _NARRATIVE_REGEX: null,
+
+  _buildColorizer() {
+    if (this._NARRATIVE_REGEX) return;
+
+    const keywords = {
+      // Threats (red)
+      'var(--color-danger)': [
+        'weapons drawn', 'fighter craft', 'hull breach', 'critical damage',
+        'fire upon', 'weapons fire', 'boarding party', 'self-destruct',
+        'weapons', 'hostile', 'attack', 'destroy', 'ambush', 'pirates',
+        'enemy', 'armed', 'boarding', 'missiles', 'torpedo', 'explode',
+        'raiders', 'intercept', 'killed', 'dead', 'death', 'lethal',
+        'predator', 'predators', 'threat', 'breach', 'detonation',
+        'overload', 'combat', 'wreckage', 'carnage', 'annihilate',
+      ],
+      // Caution (orange)
+      'var(--color-warning)': [
+        'warning', 'unstable', 'malfunction', 'failing', 'leak',
+        'drifting', 'sacrifice', 'risk', 'cost', 'price', 'damaged',
+        'stranded', 'distress', 'danger', 'trapped', 'quarantine',
+        'contaminated', 'radiation', 'corrosion', 'decay',
+      ],
+      // Gains (green)
+      'var(--color-success)': [
+        'repaired', 'salvage', 'recovered', 'credits', 'fuel cells',
+        'upgrade', 'ally', 'allies', 'safe', 'healed', 'restored',
+        'reward', 'rescued', 'gained', 'profit', 'trade', 'supplies',
+        'repair', 'reinforced', 'intact', 'fortune',
+      ],
+      // Nexus / mystery (purple)
+      'var(--color-nexus)': [
+        'nexus', 'resonance', 'the void', 'whisper', 'whispers',
+        'pattern', 'remember', 'the wound', 'pulse', 'meridian',
+        'reconstruction', 'anomaly', 'anomalous', 'transmission',
+        'tendrils', 'tendril', 'integration', 'cortex',
+      ],
+      // Factions
+      'var(--faction-concord)': ['concord assembly', 'concord'],
+      'var(--faction-vreth)': ['vreth dominion', 'vreth'],
+      'var(--faction-drifter)': ['drifter compact', 'drifter', 'drifters'],
+      'var(--faction-remnant)': ['remnant collective', 'remnant'],
+    };
+
+    // Build flat list sorted longest-first
+    const entries = [];
+    for (const [color, words] of Object.entries(keywords)) {
+      for (const word of words) {
+        entries.push({ word, color });
+      }
+    }
+    entries.sort((a, b) => b.word.length - a.word.length);
+
+    this._NARRATIVE_KEYWORDS = entries;
+
+    // Build single regex with alternation, word boundaries
+    const escaped = entries.map(e => e.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    this._NARRATIVE_REGEX = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'gi');
+  },
+
+  _colorizeNarrative(text) {
+    if (!text) return '';
+    this._buildColorizer();
+
+    // HTML-escape first
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Build a lookup map from lowercase word to color
+    const colorMap = {};
+    for (const entry of this._NARRATIVE_KEYWORDS) {
+      colorMap[entry.word.toLowerCase()] = entry.color;
+    }
+
+    // Replace matches with colored spans, preserving original case
+    html = html.replace(this._NARRATIVE_REGEX, (match) => {
+      const color = colorMap[match.toLowerCase()];
+      if (!color) return match;
+      return `<span style="color:${color}">${match}</span>`;
+    });
+
+    return html;
+  },
+
   render(container) {
     const screen = document.createElement('div');
     screen.className = 'screen';
@@ -44,7 +134,7 @@ const EventUI = {
     if (stepIdx === 0 && evt.setup_text) {
       const setupEl = document.createElement('div');
       setupEl.className = 'narrative';
-      setupEl.textContent = evt.setup_text;
+      setupEl.innerHTML = this._colorizeNarrative(evt.setup_text);
       screen.appendChild(setupEl);
     }
 
@@ -55,7 +145,7 @@ const EventUI = {
       if (stepIdx === 0 && evt.setup_text) {
         stepSetup.style.marginTop = 'var(--space-md)';
       }
-      stepSetup.textContent = step.setup_text;
+      stepSetup.innerHTML = this._colorizeNarrative(step.setup_text);
       screen.appendChild(stepSetup);
     }
 
@@ -122,7 +212,7 @@ const EventUI = {
     if (outcome.narrative) {
       const narrativeEl = document.createElement('div');
       narrativeEl.className = 'narrative';
-      narrativeEl.textContent = outcome.narrative;
+      narrativeEl.innerHTML = this._colorizeNarrative(outcome.narrative);
       screen.appendChild(narrativeEl);
     }
 
