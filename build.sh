@@ -86,4 +86,7 @@ cat >> "$OUT" << 'HTMLEND'
 </html>
 HTMLEND
 
+# Copy to repo root for GitHub Pages
+cp "$OUT" index.html
+
 echo "Build complete: $OUT ($(wc -c < "$OUT") bytes)"
