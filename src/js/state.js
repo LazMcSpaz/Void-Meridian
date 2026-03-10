@@ -78,6 +78,7 @@ function createRunState() {
     activeEventStep: 0,
     lastStepOutcomes: {},
     activeCombat: null,
+    lastCombatResult: null,
     activeInteraction: null,
     interactionResolved: false,
     seenInteractionIds: [],

@@ -1,1 +1,271 @@
-[]
+[
+  {
+    "id": "vreth_frigate",
+    "name": "Vreth Frigate",
+    "emoji": "⚔",
+    "hull": 55,
+    "shields": 10,
+    "attack": 10,
+    "defense": 4,
+    "moveSpeed": 1,
+    "faction": "vreth_dominion",
+    "yields": true,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Plasma Battery", "type": "energy", "damage": 8, "range": 2 },
+      { "name": "Kinetic Launcher", "type": "ballistic", "damage": 6, "range": 3 }
+    ],
+    "grid": { "obstacles": 4, "mines": 0, "debris": 2 }
+  },
+  {
+    "id": "ashfield_pirates",
+    "name": "Pirate Fighter",
+    "emoji": "💀",
+    "hull": 30,
+    "shields": 0,
+    "attack": 7,
+    "defense": 2,
+    "moveSpeed": 2,
+    "faction": null,
+    "yields": false,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 2,
+    "weapons": [
+      { "name": "Scrap Cannon", "type": "ballistic", "damage": 7, "range": 2 }
+    ],
+    "grid": { "obstacles": 6, "mines": 0, "debris": 3 }
+  },
+  {
+    "id": "vreth_captain",
+    "name": "Vreth Command Frigate",
+    "emoji": "⚔",
+    "hull": 70,
+    "shields": 15,
+    "attack": 12,
+    "defense": 5,
+    "moveSpeed": 1,
+    "faction": "vreth_dominion",
+    "yields": true,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Heavy Plasma Array", "type": "energy", "damage": 10, "range": 2 },
+      { "name": "Torpedo Launcher", "type": "missile", "damage": 8, "range": 4 }
+    ],
+    "grid": { "obstacles": 3, "mines": 0, "debris": 2 }
+  },
+  {
+    "id": "lane_pirates",
+    "name": "Lane Pirate",
+    "emoji": "💀",
+    "hull": 35,
+    "shields": 0,
+    "attack": 8,
+    "defense": 2,
+    "moveSpeed": 2,
+    "faction": null,
+    "yields": false,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 2,
+    "weapons": [
+      { "name": "Salvage Launcher", "type": "ballistic", "damage": 8, "range": 2 }
+    ],
+    "grid": { "obstacles": 3, "mines": 0, "debris": 2 }
+  },
+  {
+    "id": "scavenger_rigs",
+    "name": "Scavenger Rig",
+    "emoji": "🔩",
+    "hull": 15,
+    "shields": 0,
+    "attack": 5,
+    "defense": 1,
+    "moveSpeed": 2,
+    "faction": null,
+    "yields": false,
+    "ai": "cautious",
+    "weakness": null,
+    "count": 3,
+    "weapons": [
+      { "name": "Makeshift Blaster", "type": "energy", "damage": 5, "range": 2 }
+    ],
+    "grid": { "obstacles": 8, "mines": 0, "debris": 4 }
+  },
+  {
+    "id": "concord_cruiser",
+    "name": "Concord Patrol Cruiser",
+    "emoji": "🛡",
+    "hull": 120,
+    "shields": 30,
+    "attack": 18,
+    "defense": 8,
+    "moveSpeed": 1,
+    "faction": "concord_assembly",
+    "yields": true,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Compliance Beam", "type": "energy", "damage": 12, "range": 3 },
+      { "name": "Concussion Battery", "type": "ballistic", "damage": 10, "range": 3 },
+      { "name": "Tracking Missiles", "type": "missile", "damage": 8, "range": 5 }
+    ],
+    "grid": { "obstacles": 2, "mines": 0, "debris": 1 }
+  },
+  {
+    "id": "pirate_trap",
+    "name": "Pirate Ambusher",
+    "emoji": "💀",
+    "hull": 45,
+    "shields": 0,
+    "attack": 9,
+    "defense": 3,
+    "moveSpeed": 2,
+    "faction": null,
+    "yields": false,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Boarding Cannon", "type": "ballistic", "damage": 9, "range": 2 },
+      { "name": "Ion Net", "type": "emp", "damage": 4, "range": 3 }
+    ],
+    "grid": { "obstacles": 5, "mines": 2, "debris": 3 }
+  },
+  {
+    "id": "hollow_ship",
+    "name": "Ancient Derelict",
+    "emoji": "👁",
+    "hull": 80,
+    "shields": 20,
+    "attack": 14,
+    "defense": 6,
+    "moveSpeed": 0,
+    "faction": null,
+    "yields": false,
+    "ai": "stationary",
+    "weakness": "weapons",
+    "count": 1,
+    "weapons": [
+      { "name": "Resonance Pulse", "type": "nexus_energy", "damage": 10, "range": 3 },
+      { "name": "Gravity Lance", "type": "energy", "damage": 8, "range": 4 }
+    ],
+    "grid": { "obstacles": 6, "mines": 0, "debris": 5 }
+  },
+  {
+    "id": "drifter_salvager",
+    "name": "Drifter Salvage Vessel",
+    "emoji": "🔧",
+    "hull": 50,
+    "shields": 5,
+    "attack": 10,
+    "defense": 4,
+    "moveSpeed": 1,
+    "faction": "drifter_compact",
+    "yields": true,
+    "ai": "cautious",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Plasma Cutter", "type": "energy", "damage": 7, "range": 1 },
+      { "name": "Debris Launcher", "type": "ballistic", "damage": 8, "range": 3 }
+    ],
+    "grid": { "obstacles": 7, "mines": 0, "debris": 5 }
+  },
+  {
+    "id": "automated_sentry",
+    "name": "Automated Sentry",
+    "emoji": "🎯",
+    "hull": 40,
+    "shields": 0,
+    "attack": 11,
+    "defense": 5,
+    "moveSpeed": 0,
+    "faction": null,
+    "yields": false,
+    "ai": "stationary",
+    "weakness": "shields",
+    "count": 1,
+    "weapons": [
+      { "name": "Targeting Laser", "type": "energy", "damage": 11, "range": 4 }
+    ],
+    "grid": { "obstacles": 5, "mines": 3, "debris": 2 }
+  },
+  {
+    "id": "patrol_vessel",
+    "name": "Patrol Vessel",
+    "emoji": "🔍",
+    "hull": 35,
+    "shields": 5,
+    "attack": 8,
+    "defense": 3,
+    "moveSpeed": 1,
+    "faction": null,
+    "yields": true,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Standard Cannon", "type": "ballistic", "damage": 8, "range": 2 }
+    ],
+    "grid": { "obstacles": 3, "mines": 0, "debris": 1 }
+  },
+  {
+    "id": "debris_hazard",
+    "name": "Debris Cluster",
+    "emoji": "🪨",
+    "hull": 25,
+    "shields": 0,
+    "attack": 0,
+    "defense": 0,
+    "moveSpeed": 0,
+    "faction": null,
+    "yields": false,
+    "ai": "stationary",
+    "weakness": null,
+    "count": 3,
+    "weapons": [],
+    "grid": { "obstacles": 10, "mines": 0, "debris": 6 }
+  },
+  {
+    "id": "pirate_toll",
+    "name": "Pirate Enforcer",
+    "emoji": "💀",
+    "hull": 40,
+    "shields": 0,
+    "attack": 9,
+    "defense": 3,
+    "moveSpeed": 2,
+    "faction": null,
+    "yields": false,
+    "ai": "aggressive",
+    "weakness": null,
+    "count": 1,
+    "weapons": [
+      { "name": "Heavy Slugger", "type": "ballistic", "damage": 9, "range": 2 }
+    ],
+    "grid": { "obstacles": 3, "mines": 0, "debris": 2 }
+  },
+  {
+    "id": "stray_ordnance",
+    "name": "Drifting Mine",
+    "emoji": "💣",
+    "hull": 15,
+    "shields": 0,
+    "attack": 0,
+    "defense": 0,
+    "moveSpeed": 1,
+    "faction": null,
+    "yields": false,
+    "ai": "patrol",
+    "weakness": null,
+    "count": 4,
+    "weapons": [],
+    "grid": { "obstacles": 4, "mines": 6, "debris": 3 }
+  }
+]
