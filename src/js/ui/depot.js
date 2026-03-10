@@ -1,7 +1,7 @@
 /* Void Meridian — Trade Depot Docking UI */
 
 const DepotUI = {
-  // Sub-screen within the depot: 'menu' | 'trade' | 'recruit' | 'fuel' | 'repairs' | 'confirm_buy'
+  // Sub-screen within the depot: 'menu' | 'trade' | 'sell' | 'recruit' | 'fuel' | 'repairs' | 'confirm_buy'
   subScreen: 'menu',
 
   // Generated stock for this depot visit (lazily populated)
@@ -66,6 +66,7 @@ const DepotUI = {
   render(container) {
     switch (this.subScreen) {
       case 'trade':       this._renderTrade(container); break;
+      case 'sell':        this._renderSell(container); break;
       case 'confirm_buy': this._renderConfirmBuy(container); break;
       case 'recruit':     this._renderRecruit(container); break;
       case 'fuel':        this._renderFuel(container); break;
@@ -96,8 +97,10 @@ const DepotUI = {
     divider.className = 'divider';
     screen.appendChild(divider);
 
+    const sellableCount = this._getSellableItems().length;
     const services = [
-      { id: 'trade',   label: 'TRADE',     desc: 'Browse weapons, modules, and cargo' },
+      { id: 'trade',   label: 'BUY',       desc: 'Browse weapons and modules for sale' },
+      { id: 'sell',    label: 'SELL',       desc: sellableCount > 0 ? `${sellableCount} item${sellableCount !== 1 ? 's' : ''} to sell` : 'Nothing to sell' },
       { id: 'recruit', label: 'RECRUIT',    desc: 'Hire crew members' },
       { id: 'fuel',    label: 'BUY FUEL',   desc: `Current: ${GameState.run.fuel} cells` },
       { id: 'repairs', label: 'REPAIRS',    desc: `Hull: ${GameState.run.ship.hull}/${GameState.run.ship.maxHull}` },
@@ -446,6 +449,179 @@ const DepotUI = {
     screen.appendChild(cancelBtn);
 
     container.appendChild(screen);
+  },
+
+  // ─── Sell Service ───────────────────────────────────────────
+
+  _getSellPrice(item, type) {
+    const tier = item.tier || 1;
+    const base = tier * 20 + 10; // ~50% of buy price
+    const node = this._getDepotNode();
+    const faction = node && node.faction ? node.faction : null;
+    // Inverse price modifier — selling at hostile stations gives better prices
+    const priceMod = faction ? (2 - EconomyEngine.getPriceModifier(faction)) : 1;
+    if (type === 'cargo') return Math.round((tier * 15 + 5) * priceMod);
+    return Math.round(base * priceMod);
+  },
+
+  _getSellableItems() {
+    const ship = GameState.run.ship;
+    const items = [];
+
+    // Weapons — can sell if not irremovable AND player has more than 1 weapon
+    if (ship.equippedWeapons.length > 1) {
+      for (const wpn of ship.equippedWeapons) {
+        if (!wpn.irremovable) {
+          items.push({ item: wpn, type: 'weapon', price: this._getSellPrice(wpn, 'weapon') });
+        }
+      }
+    }
+
+    // Modules — can sell if not irremovable
+    for (const mod of ship.equippedModules) {
+      if (!mod.irremovable) {
+        items.push({ item: mod, type: 'module', price: this._getSellPrice(mod, 'module') });
+      }
+    }
+
+    // Cargo
+    for (let i = 0; i < ship.cargo.length; i++) {
+      const cargoId = ship.cargo[i];
+      items.push({
+        item: { id: cargoId, name: cargoId.replace(/_/g, ' '), tier: 1 },
+        type: 'cargo',
+        cargoIndex: i,
+        price: this._getSellPrice({ tier: 1 }, 'cargo'),
+      });
+    }
+
+    return items;
+  },
+
+  _renderSell(container) {
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = 'SELL';
+    screen.appendChild(header);
+
+    const credits = document.createElement('div');
+    credits.style.cssText = 'margin-bottom:var(--space-md); color:var(--color-credits);';
+    credits.textContent = `Credits: ${GameState.run.credits}`;
+    screen.appendChild(credits);
+
+    const sellable = this._getSellableItems();
+
+    if (sellable.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.color = 'var(--text-muted)';
+      empty.textContent = 'Nothing available to sell. Irremovable items and your last weapon cannot be sold.';
+      screen.appendChild(empty);
+    } else {
+      // Weapons
+      const weapons = sellable.filter(s => s.type === 'weapon');
+      if (weapons.length > 0) {
+        const wpnLabel = document.createElement('div');
+        wpnLabel.className = 'system-label';
+        wpnLabel.style.marginBottom = 'var(--space-sm)';
+        wpnLabel.textContent = 'WEAPONS';
+        screen.appendChild(wpnLabel);
+
+        for (const entry of weapons) {
+          screen.appendChild(this._createSellItem(entry));
+        }
+      }
+
+      // Modules
+      const modules = sellable.filter(s => s.type === 'module');
+      if (modules.length > 0) {
+        const modLabel = document.createElement('div');
+        modLabel.className = 'system-label';
+        modLabel.style.cssText = 'margin-top:var(--space-md); margin-bottom:var(--space-sm);';
+        modLabel.textContent = 'MODULES';
+        screen.appendChild(modLabel);
+
+        for (const entry of modules) {
+          screen.appendChild(this._createSellItem(entry));
+        }
+      }
+
+      // Cargo
+      const cargo = sellable.filter(s => s.type === 'cargo');
+      if (cargo.length > 0) {
+        const cargoLabel = document.createElement('div');
+        cargoLabel.className = 'system-label';
+        cargoLabel.style.cssText = 'margin-top:var(--space-md); margin-bottom:var(--space-sm);';
+        cargoLabel.textContent = 'CARGO';
+        screen.appendChild(cargoLabel);
+
+        for (const entry of cargo) {
+          screen.appendChild(this._createSellItem(entry));
+        }
+      }
+    }
+
+    this._addBackButton(screen);
+    container.appendChild(screen);
+  },
+
+  _createSellItem(entry) {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+
+    const name = document.createElement('span');
+    const emoji = entry.item.emoji || (entry.type === 'cargo' ? '📦' : '◻');
+    name.textContent = `${emoji} ${entry.item.name}`;
+    btn.appendChild(name);
+
+    // Show effect/stats
+    if (entry.item.effect) {
+      const eff = document.createElement('span');
+      eff.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--text-accent); margin-top:var(--space-xs);';
+      eff.textContent = entry.item.effect;
+      btn.appendChild(eff);
+    }
+
+    if (entry.type === 'weapon' && entry.item.stats) {
+      const s = entry.item.stats;
+      const statsEl = document.createElement('span');
+      statsEl.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--text-secondary); margin-top:var(--space-xs);';
+      let statsText = `DMG ${s.damage} | SPD ${s.speed_modifier >= 0 ? '+' : ''}${s.speed_modifier} | RNG ${s.range}`;
+      if (s.ammo != null) statsText += ` | AMMO ${s.ammo}`;
+      statsEl.textContent = statsText;
+      btn.appendChild(statsEl);
+    }
+
+    const price = document.createElement('span');
+    price.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--color-success); margin-top:var(--space-xs);';
+    price.textContent = `Sell for ${entry.price} credits`;
+    btn.appendChild(price);
+
+    btn.addEventListener('click', () => {
+      this._confirmSell(entry);
+    });
+
+    return btn;
+  },
+
+  _confirmSell(entry) {
+    // Sell immediately — the item list serves as the confirmation
+    EconomyEngine.earn(entry.price);
+
+    if (entry.type === 'weapon') {
+      const idx = GameState.run.ship.equippedWeapons.findIndex(w => w.id === entry.item.id);
+      if (idx !== -1) GameState.run.ship.equippedWeapons.splice(idx, 1);
+    } else if (entry.type === 'module') {
+      ShipEngine.removeModule(entry.item.id);
+    } else if (entry.type === 'cargo') {
+      GameState.run.ship.cargo.splice(entry.cargoIndex, 1);
+    }
+
+    GameState.addLog('event', `Sold ${entry.item.name} for ${entry.price} credits`);
+    GameState.save();
+    Game.render();
   },
 
   // ─── Recruit Service ─────────────────────────────────────────

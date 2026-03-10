@@ -70,6 +70,7 @@ function createRunState() {
     fuel: 10,
     depth: 0,
     runFlags: [],
+    loreFragments: [],
     seenEventIds: [],
     log: [],
     currentNodeId: null,

@@ -467,6 +467,13 @@ const EventEngine = {
         break;
 
       case 'lore_fragment':
+        if (!run.loreFragments.some(lf => lf.id === reward.value)) {
+          run.loreFragments.push({
+            id: reward.value,
+            description: reward.description || reward.value,
+            depth: run.depth,
+          });
+        }
         GameState.addLog('discovery', reward.description || `Lore fragment: ${reward.value}`);
         break;
 

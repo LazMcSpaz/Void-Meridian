@@ -419,6 +419,24 @@ const EventUI = {
         screen.appendChild(modEl);
       }
     }
+
+    // Lore fragments
+    const lore = run.loreFragments || [];
+    if (lore.length > 0) {
+      screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+      const loreHeader = document.createElement('div');
+      loreHeader.className = 'system-label';
+      loreHeader.style.marginBottom = 'var(--space-sm)';
+      loreHeader.textContent = `DISCOVERIES (${lore.length})`;
+      screen.appendChild(loreHeader);
+
+      for (const fragment of lore) {
+        const fragEl = document.createElement('div');
+        fragEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary); font-size:var(--font-size-sm);';
+        fragEl.textContent = `◆ ${fragment.description}`;
+        screen.appendChild(fragEl);
+      }
+    }
   },
 
   // ─── Module Detail Overlay ─────────────────────────────────────
