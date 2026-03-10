@@ -2,11 +2,11 @@
 
 const CombatUI = {
   render(container) {
-    const screen = document.createElement('div');
+    var screen = document.createElement('div');
     screen.className = 'screen';
     screen.style.cssText = 'padding:var(--space-sm); overflow-y:auto;';
 
-    const combat = GameState.run.activeCombat;
+    var combat = GameState.run.activeCombat;
     if (!combat) {
       screen.innerHTML = '<p style="color:var(--text-muted)">No active combat.</p>';
       container.appendChild(screen);
@@ -20,7 +20,7 @@ const CombatUI = {
       return;
     }
 
-    // Hull bars
+    // Hull bars (with sensor-enhanced info)
     this._renderHullBars(screen, combat);
 
     // Grid
@@ -38,13 +38,14 @@ const CombatUI = {
   // ─── Hull Bars ──────────────────────────────────────────────
 
   _renderHullBars(screen, combat) {
-    const player = combat.entities.find(function(e) { return e.id === 'player'; });
-    const enemies = combat.entities.filter(function(e) { return e.type === 'enemy' && e.hull > 0; });
+    var player = combat.entities.find(function(e) { return e.id === 'player'; });
+    var enemies = combat.entities.filter(function(e) { return e.type === 'enemy' && e.hull > 0; });
+    var sensorLvl = CombatEngine._getSensorLevel();
 
     // Player hull
-    const pHull = GameState.run.ship.hull;
-    const pMax = GameState.run.ship.maxHull;
-    screen.appendChild(this._hullBar('YOUR HULL', pHull, pMax, 'var(--color-hull)'));
+    var pHull = GameState.run.ship.hull;
+    var pMax = GameState.run.ship.maxHull;
+    screen.appendChild(this._hullBar('YOUR HULL', pHull, pMax, 'var(--color-hull)', null));
 
     // Enemy hulls
     for (var i = 0; i < enemies.length; i++) {
@@ -52,13 +53,64 @@ const CombatUI = {
       var color = enemy.yielded ? 'var(--color-warning)' : 'var(--color-danger)';
       var label = enemies.length > 1 ? enemy.name : 'ENEMY HULL';
       var suffix = enemy.scanned ? ' [' + enemy.weakness + ']' : '';
-      screen.appendChild(this._hullBar(label + suffix, enemy.hull, enemy.maxHull, color));
+
+      // Sensor-enhanced info
+      var intel = null;
+      if (sensorLvl >= 2) {
+        intel = this._getEnemyIntel(enemy, sensorLvl, combat);
+      }
+
+      screen.appendChild(this._hullBar(label + suffix, enemy.hull, enemy.maxHull, color, intel));
     }
 
     screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
   },
 
-  _hullBar(label, current, max, color) {
+  _getEnemyIntel(enemy, sensorLvl, combat) {
+    var parts = [];
+
+    // Level 2+: show weapon names and ranges
+    if (sensorLvl >= 2 && enemy.weapons && enemy.weapons.length > 0) {
+      var wpnStrs = [];
+      for (var i = 0; i < enemy.weapons.length; i++) {
+        var w = enemy.weapons[i];
+        wpnStrs.push(w.name + ' (r' + w.range + ')');
+      }
+      parts.push(wpnStrs.join(', '));
+    }
+
+    // Level 3+: show AI behavior and intention
+    if (sensorLvl >= 3) {
+      var intention = null;
+      for (var j = 0; j < (combat.enemyIntentions || []).length; j++) {
+        if (combat.enemyIntentions[j].entityId === enemy.id) {
+          intention = combat.enemyIntentions[j];
+          break;
+        }
+      }
+      if (intention) {
+        var intentLabels = {
+          attack: '\u2620 WILL ATTACK',
+          advance: '\u2192 ADVANCING',
+          retreat: '\u2190 RETREATING',
+          hold: '\u2022 HOLDING',
+          patrol: '\u21C4 PATROLLING',
+          idle: '\u2022 IDLE',
+        };
+        parts.push(intentLabels[intention.action] || intention.action);
+      }
+    }
+
+    // Level 4+: show defense stat
+    if (sensorLvl >= 4) {
+      parts.push('DEF ' + enemy.defense);
+      if (enemy.shields > 0) parts.push('SH ' + enemy.shields);
+    }
+
+    return parts.length > 0 ? parts.join(' \u2022 ') : null;
+  },
+
+  _hullBar(label, current, max, color, intel) {
     var pct = max > 0 ? Math.round((current / max) * 100) : 0;
     var filled = Math.round(pct / 10);
     var empty = 10 - filled;
@@ -68,6 +120,15 @@ const CombatUI = {
       '<span style="color:' + color + '">' + '\u2588'.repeat(filled) + '</span>' +
       '<span style="color:var(--text-muted)">' + '\u2591'.repeat(empty) + '</span> ' +
       '<span style="color:var(--text-secondary)">' + current + '/' + max + '</span>';
+
+    // Sensor intel line
+    if (intel) {
+      var intelDiv = document.createElement('div');
+      intelDiv.style.cssText = 'margin-left:100px; font-size:var(--font-size-sm); color:var(--color-nexus); opacity:0.8;';
+      intelDiv.textContent = intel;
+      el.appendChild(intelDiv);
+    }
+
     return el;
   },
 
@@ -82,23 +143,41 @@ const CombatUI = {
 
     var moveSet = new Set(combat.moveRange.map(function(c) { return c.x + ',' + c.y; }));
     var attackSet = new Set(combat.attackRange.map(function(c) { return c.x + ',' + c.y; }));
+    var threatSet = new Set((combat.threatCells || []).map(function(c) { return c.x + ',' + c.y; }));
+    var effectMap = {};
+    for (var ei = 0; ei < (combat.visualEffects || []).length; ei++) {
+      var eff = combat.visualEffects[ei];
+      effectMap[eff.x + ',' + eff.y] = eff.type;
+    }
+
+    // Build intention map for icons on enemy cells
+    var intentionMap = {};
+    for (var ii = 0; ii < (combat.enemyIntentions || []).length; ii++) {
+      intentionMap[combat.enemyIntentions[ii].entityId] = combat.enemyIntentions[ii];
+    }
 
     for (var y = 0; y < combat.gridHeight; y++) {
       for (var x = 0; x < combat.gridWidth; x++) {
         var cell = document.createElement('div');
         cell.style.cssText = 'width:' + cellSize + 'px; height:' + cellSize + 'px; display:flex; ' +
           'align-items:center; justify-content:center; font-size:' + Math.round(cellSize * 0.55) + 'px; ' +
-          'cursor:pointer; position:relative; transition:background 0.15s;';
+          'cursor:pointer; position:relative;';
 
         var terrain = combat.cells[y][x].terrain;
         var key = x + ',' + y;
-        var entity = combat.entities.find(function(e) { return e.x === x && e.y === y && e.hull > 0; }.bind(null));
+        var entity = combat.entities.find(function(e) { return e.x === x && e.y === y && e.hull > 0; });
 
         // Background
         var bg = 'var(--bg-secondary)';
         if (terrain === 'asteroid') bg = 'var(--bg-tertiary)';
         else if (terrain === 'debris') bg = '#0d1520';
         else if (terrain === 'mine') bg = 'var(--bg-secondary)';
+
+        // Threat highlighting (sensor level 2+, shown during player phases)
+        var isPlayerPhase = combat.phase === 'player_move' || combat.phase === 'player_action';
+        if (isPlayerPhase && threatSet.has(key) && !moveSet.has(key) && !attackSet.has(key)) {
+          cell.className = 'combat-threat-cell';
+        }
 
         // Highlight moveable cells
         if (combat.phase === 'player_move' && moveSet.has(key)) {
@@ -125,11 +204,18 @@ const CombatUI = {
           cell.style.boxShadow = 'inset 0 0 4px var(--color-warning)';
         }
 
+        // Visual effect overlay
+        if (effectMap[key]) {
+          var overlay = document.createElement('div');
+          overlay.className = 'combat-cell-effect ' + effectMap[key];
+          cell.appendChild(overlay);
+        }
+
         // Render entity with animation support
         if (entity) {
           var emoji = document.createElement('span');
           emoji.textContent = entity.emoji;
-          emoji.style.cssText = 'transition:transform 0.3s ease-out; display:inline-block;';
+          emoji.style.cssText = 'transition:transform 0.3s ease-out; display:inline-block; z-index:3; position:relative;';
 
           // Calculate slide offset if entity just moved
           if (entity._prevX !== null && entity._prevY !== null &&
@@ -137,7 +223,6 @@ const CombatUI = {
             var dx = (entity._prevX - entity.x) * (cellSize + 1);
             var dy = (entity._prevY - entity.y) * (cellSize + 1);
             emoji.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
-            // Force reflow then animate to final position
             (function(el) {
               requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
@@ -159,9 +244,22 @@ const CombatUI = {
             var hpDot = document.createElement('div');
             var hpPct = entity.hull / entity.maxHull;
             hpDot.style.cssText = 'position:absolute; bottom:1px; left:50%; transform:translateX(-50%); ' +
-              'width:' + Math.round(cellSize * 0.6) + 'px; height:2px; ' +
+              'width:' + Math.round(cellSize * 0.6) + 'px; height:2px; z-index:2; ' +
               'background:' + (hpPct > 0.5 ? 'var(--color-success)' : hpPct > 0.25 ? 'var(--color-warning)' : 'var(--color-danger)') + ';';
             cell.appendChild(hpDot);
+
+            // Intention icon (sensor level 3+)
+            var intent = intentionMap[entity.id];
+            if (intent && isPlayerPhase) {
+              var intentIcon = document.createElement('div');
+              intentIcon.className = 'combat-intention-icon';
+              intentIcon.textContent = intent.icon;
+              var intentColor = intent.action === 'attack' ? 'var(--color-danger)' :
+                               intent.action === 'advance' ? 'var(--color-warning)' :
+                               'var(--text-muted)';
+              intentIcon.style.color = intentColor;
+              cell.appendChild(intentIcon);
+            }
           }
         } else if (terrain === 'asteroid') {
           cell.textContent = '\u25C6';
@@ -220,7 +318,7 @@ const CombatUI = {
     phaseText.textContent = 'TURN ' + combat.turn + ' \u2014 ' + (phaseLabel[combat.phase] || combat.phase);
     turnDiv.appendChild(phaseText);
 
-    // AP counter during action phase
+    // AP counter during player phases
     if (combat.phase === 'player_action' || combat.phase === 'player_move') {
       var apDiv = document.createElement('span');
       apDiv.style.cssText = 'color:var(--color-accent); font-size:var(--font-size-sm);';
@@ -240,6 +338,19 @@ const CombatUI = {
         'margin-bottom:var(--space-sm); min-height:2em;';
       actionLog.textContent = combat.lastAction;
       screen.appendChild(actionLog);
+    }
+
+    // Sensor hint for new players
+    var sensorLvl = CombatEngine._getSensorLevel();
+    if (sensorLvl >= 2 && combat.turn === 1 && combat.phase === 'player_move') {
+      var sensorHint = document.createElement('div');
+      sensorHint.style.cssText = 'color:var(--color-nexus); font-size:var(--font-size-sm); opacity:0.7; margin-bottom:var(--space-xs);';
+      if (sensorLvl >= 3) {
+        sensorHint.textContent = '\u25C8 Sensors active \u2014 threat zones and enemy intentions displayed';
+      } else {
+        sensorHint.textContent = '\u25C8 Sensors active \u2014 enemy weapon data detected';
+      }
+      screen.appendChild(sensorHint);
     }
 
     screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));

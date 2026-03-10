@@ -153,11 +153,16 @@ const CombatEngine = {
       maxActions: playerAP,
       hasMoved: false,
       defeatStats: null,
+      visualEffects: [],     // [{x, y, type}] transient per-render
+      threatCells: [],       // [{x, y}] cells enemies can attack
+      enemyIntentions: [],   // [{entityId, action, icon}] per-enemy intent
     };
 
     GameState.screen = 'combat';
     GameState.addLog('combat', `Engaged ${template.name || 'hostile vessel'}`);
     this._calculateMoveRange();
+    this._calculateThreats();
+    this._applySensorBonuses();
     Game.render();
   },
 
@@ -516,6 +521,8 @@ const CombatEngine = {
         }
         combat.actionsRemaining--;
         combat.lastAction = `${weapon.name} hits ${target.name} (${shieldDmg} to shields). ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+        this._addEffect(player.x, player.y, 'attack');
+        this._addEffect(target.x, target.y, 'shield');
         this._afterPlayerAction(combat);
         return;
       } else if (shieldMode === 'partial') {
@@ -533,6 +540,10 @@ const CombatEngine = {
 
     combat.actionsRemaining--;
     combat.lastAction = `${weapon.name} hits ${target.name} for ${actualDamage}!`;
+
+    // Visual effects
+    this._addEffect(player.x, player.y, 'attack');
+    this._addEffect(target.x, target.y, target.hull <= 0 ? 'explode' : 'damage');
 
     // Check yield
     if (target.yields && !target.yielded && target.hull > 0 &&
@@ -564,6 +575,7 @@ const CombatEngine = {
     combat.actionsRemaining--;
     const shieldLevel = GameState.run.ship.baseSystems.shields_armor.level;
     combat.lastAction = `Shields raised. Damage reduced by ${shieldLevel * 2 + 3}. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+    this._addEffect(player.x, player.y, 'shield');
     this._afterPlayerAction(combat);
   },
 
@@ -579,6 +591,7 @@ const CombatEngine = {
     player.hull = GameState.run.ship.hull;
     combat.actionsRemaining--;
     combat.lastAction = `Emergency repairs: +${repair} hull. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+    this._addEffect(player.x, player.y, 'heal');
     this._afterPlayerAction(combat);
   },
 
@@ -601,6 +614,13 @@ const CombatEngine = {
     const successChance = (scientist || techie) ? 80 : 50;
 
     combat.actionsRemaining--;
+
+    // Sensor level boosts scan success
+    var sensorLvl = this._getSensorLevel();
+    if (sensorLvl >= 3) successChance = Math.min(95, successChance + 15);
+    else if (sensorLvl >= 2) successChance = Math.min(90, successChance + 10);
+
+    this._addEffect(target.x, target.y, 'scan');
 
     if (Math.random() * 100 < successChance) {
       target.scanned = true;
@@ -651,6 +671,7 @@ const CombatEngine = {
     // Transition to enemy phase
     combat.phase = 'enemy';
     this._clearAnimState();
+    this._clearEffects();
     Game.render();
 
     setTimeout(() => this._runEnemyTurns(), 600);
@@ -764,10 +785,14 @@ const CombatEngine = {
     const player2 = combat.entities.find(e => e.id === 'player');
     if (player2) player2.defending = false;
     this._calculateMoveRange();
+    this._calculateThreats();
     Game.render();
 
     // Clear animation state after render so next frame won't re-animate
-    setTimeout(() => this._clearAnimState(), 350);
+    setTimeout(() => {
+      this._clearAnimState();
+      this._clearEffects();
+    }, 500);
   },
 
   _enemyAI(entity, combat) {
@@ -884,6 +909,8 @@ const CombatEngine = {
 
       const actualDmg = Math.max(1, damage);
       ShipEngine.takeDamage(actualDmg);
+      this._addEffect(entity.x, entity.y, 'attack');
+      this._addEffect(player.x, player.y, player.defending ? 'shield' : 'damage');
       return `${entity.name} fires for ${actualDmg}.`;
     }
 
@@ -1002,6 +1029,158 @@ const CombatEngine = {
     GameState.screen = 'gameOver';
     GameState.save();
     Game.render();
+  },
+
+  // ─── Visual Effects ─────────────────────────────────────────
+
+  _addEffect(x, y, type) {
+    const combat = GameState.run.activeCombat;
+    if (combat) combat.visualEffects.push({ x: x, y: y, type: type });
+  },
+
+  _clearEffects() {
+    const combat = GameState.run.activeCombat;
+    if (combat) combat.visualEffects = [];
+  },
+
+  // ─── Sensor-Based Intelligence ────────────────────────────
+
+  _getSensorLevel() {
+    const sensors = GameState.run.ship.baseSystems.sensors;
+    if (!sensors || sensors.damaged) return 0;
+    return sensors.level || 1;
+  },
+
+  _applySensorBonuses() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+    const sensorLvl = this._getSensorLevel();
+
+    // Level 4+: auto-scan the first unscanned enemy at combat start
+    if (sensorLvl >= 4) {
+      var enemies = combat.entities.filter(function(e) { return e.type === 'enemy' && e.hull > 0 && !e.scanned; });
+      for (var i = 0; i < enemies.length; i++) {
+        enemies[i].scanned = true;
+        if (!enemies[i].weakness) {
+          var weaknesses = ['weapons', 'shields', 'engines'];
+          enemies[i].weakness = weaknesses[Math.floor(Math.random() * weaknesses.length)];
+        }
+      }
+      if (enemies.length > 0) {
+        combat.lastAction += ' Advanced sensors reveal enemy weaknesses.';
+      }
+    }
+  },
+
+  // ─── Threat / Intention Calculation ───────────────────────
+
+  _calculateThreats() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+
+    const sensorLvl = this._getSensorLevel();
+    combat.threatCells = [];
+    combat.enemyIntentions = [];
+
+    // Need sensor level 2+ for threat display
+    if (sensorLvl < 2) return;
+
+    const player = combat.entities.find(function(e) { return e.id === 'player'; });
+    if (!player) return;
+
+    const enemies = combat.entities.filter(function(e) {
+      return e.type === 'enemy' && e.hull > 0 && !e.yielded;
+    });
+
+    var threatSet = new Set();
+
+    for (var i = 0; i < enemies.length; i++) {
+      var enemy = enemies[i];
+
+      // Predict where enemy would move
+      var predictedX = enemy.x;
+      var predictedY = enemy.y;
+
+      if (enemy.ai === 'aggressive' && enemy.moveSpeed > 0) {
+        var moveable = this._getMoveableCells(enemy);
+        var best = null;
+        var bestDist = Infinity;
+        for (var m = 0; m < moveable.length; m++) {
+          var d = this._getDistance(moveable[m], player);
+          if (d < bestDist) { bestDist = d; best = moveable[m]; }
+        }
+        if (best && bestDist < this._getDistance(enemy, player)) {
+          predictedX = best.x;
+          predictedY = best.y;
+        }
+      } else if (enemy.ai === 'cautious' && enemy.moveSpeed > 0) {
+        var dist = this._getDistance(enemy, player);
+        if (dist < 2) {
+          var moveAway = this._getMoveableCells(enemy);
+          var bestA = null;
+          var bestDistA = 0;
+          for (var ma = 0; ma < moveAway.length; ma++) {
+            var da = this._getDistance(moveAway[ma], player);
+            if (da > bestDistA) { bestDistA = da; bestA = moveAway[ma]; }
+          }
+          if (bestA) { predictedX = bestA.x; predictedY = bestA.y; }
+        }
+      }
+
+      // Calculate attack range from predicted position
+      var intent = { entityId: enemy.id, action: 'idle', icon: '\u2022' };
+
+      for (var w = 0; w < (enemy.weapons || []).length; w++) {
+        var wpn = enemy.weapons[w];
+        var range = wpn.range || this.WEAPON_RANGE[wpn.type] || 2;
+
+        // Mark all cells in weapon range as threatened
+        for (var ty = 0; ty < this.GRID_H; ty++) {
+          for (var tx = 0; tx < this.GRID_W; tx++) {
+            var tdist = Math.abs(predictedX - tx) + Math.abs(predictedY - ty);
+            if (tdist > 0 && tdist <= range) {
+              threatSet.add(tx + ',' + ty);
+            }
+          }
+        }
+      }
+
+      // Determine intention display
+      var distToPlayer = this._getDistance({ x: predictedX, y: predictedY }, player);
+      var hasWeaponInRange = false;
+      for (var w2 = 0; w2 < (enemy.weapons || []).length; w2++) {
+        var r = enemy.weapons[w2].range || this.WEAPON_RANGE[enemy.weapons[w2].type] || 2;
+        if (distToPlayer <= r) { hasWeaponInRange = true; break; }
+      }
+
+      if (enemy.ai === 'stationary') {
+        intent.action = hasWeaponInRange ? 'attack' : 'idle';
+        intent.icon = hasWeaponInRange ? '\u2620' : '\u2022'; // skull or dot
+      } else if (hasWeaponInRange) {
+        intent.action = 'attack';
+        intent.icon = '\u2620'; // skull - will attack
+      } else if (enemy.ai === 'aggressive') {
+        intent.action = 'advance';
+        intent.icon = '\u2192'; // arrow - advancing
+      } else if (enemy.ai === 'cautious') {
+        intent.action = distToPlayer < 2 ? 'retreat' : 'hold';
+        intent.icon = distToPlayer < 2 ? '\u2190' : '\u2022'; // retreat arrow or dot
+      } else if (enemy.ai === 'patrol') {
+        intent.action = 'patrol';
+        intent.icon = '\u21C4'; // left-right arrow
+      }
+
+      // Sensor level 3+: show specific intentions
+      if (sensorLvl >= 3) {
+        combat.enemyIntentions.push(intent);
+      }
+    }
+
+    // Convert threat set to array
+    threatSet.forEach(function(key) {
+      var parts = key.split(',');
+      combat.threatCells.push({ x: parseInt(parts[0]), y: parseInt(parts[1]) });
+    });
   },
 
   _genericEnemy() {
