@@ -42,6 +42,15 @@ const CombatEngine = {
     return 1.4;
   },
 
+  // ─── Action Point Calculation ──────────────────────────────
+
+  _getPlayerAP() {
+    let ap = 2; // base actions per turn
+    const captain = GameState.run.captain;
+    if (captain && captain.stats && captain.stats.command >= 2) ap++;
+    return ap;
+  },
+
   // ─── Start Combat ──────────────────────────────────────────
 
   startCombat(enemyId, fromEvent) {
@@ -60,6 +69,7 @@ const CombatEngine = {
       type: 'player',
       x: 1,
       y: Math.floor(this.GRID_H / 2),
+      _prevX: null, _prevY: null,
       hull: ship.hull,
       maxHull: ship.maxHull,
       shields: ship.baseSystems.shields_armor.level * 5,
@@ -87,7 +97,6 @@ const CombatEngine = {
 
     for (let i = 0; i < count; i++) {
       const pos = enemyPositions[i];
-      // Clear spawn cell
       cells[pos.y][pos.x] = { terrain: 'empty', blocked: false };
 
       const eHull = Math.round((template.hull || 40) * scale);
@@ -97,6 +106,7 @@ const CombatEngine = {
         type: 'enemy',
         x: pos.x,
         y: pos.y,
+        _prevX: null, _prevY: null,
         hull: eHull,
         maxHull: eHull,
         shields: template.shields || 0,
@@ -119,9 +129,11 @@ const CombatEngine = {
         scanned: false,
         weakness: template.weakness || null,
         ai: template.ai || 'aggressive',
-        patrolDir: 1,  // for patrol AI
+        patrolDir: 1,
       });
     }
+
+    const playerAP = this._getPlayerAP();
 
     GameState.run.activeCombat = {
       gridWidth: this.GRID_W,
@@ -137,6 +149,10 @@ const CombatEngine = {
       fromEvent: !!fromEvent,
       combatResult: null,
       enemyDef: template,
+      actionsRemaining: playerAP,
+      maxActions: playerAP,
+      hasMoved: false,
+      defeatStats: null,
     };
 
     GameState.screen = 'combat';
@@ -152,7 +168,6 @@ const CombatEngine = {
     const weapons = ship.equippedWeapons;
 
     if (!weapons || weapons.length === 0) {
-      // Fallback: base system weapon
       const weaponLevel = ship.baseSystems.weapons.level;
       return [{
         name: 'Ship Guns',
@@ -170,7 +185,7 @@ const CombatEngine = {
       damage: wpn.stats.damage || 2,
       range: wpn.stats.range || this.WEAPON_RANGE[wpn.type] || 2,
       _ammo: typeof wpn._currentAmmo === 'number' ? wpn._currentAmmo : null,
-      _ref: wpn,  // reference to actual weapon for ammo tracking
+      _ref: wpn,
     }));
   },
 
@@ -189,7 +204,6 @@ const CombatEngine = {
     const mineCount = gridDef.mines || 0;
     const debrisCount = gridDef.debris || 0;
 
-    // Place obstacles (avoid spawn zones: x<3 for player, x>5 for enemies)
     let placed = 0;
     let attempts = 0;
     while (placed < obstacleCount && attempts < 200) {
@@ -202,8 +216,7 @@ const CombatEngine = {
       attempts++;
     }
 
-    placed = 0;
-    attempts = 0;
+    placed = 0; attempts = 0;
     while (placed < debrisCount && attempts < 200) {
       const x = Math.floor(Math.random() * this.GRID_W);
       const y = Math.floor(Math.random() * this.GRID_H);
@@ -214,8 +227,7 @@ const CombatEngine = {
       attempts++;
     }
 
-    placed = 0;
-    attempts = 0;
+    placed = 0; attempts = 0;
     while (placed < mineCount && attempts < 200) {
       const x = Math.floor(Math.random() * this.GRID_W);
       const y = Math.floor(Math.random() * this.GRID_H);
@@ -243,7 +255,6 @@ const CombatEngine = {
       attempts++;
     }
 
-    // Fallback: place remaining at far right
     while (positions.length < count) {
       positions.push({ x: 7, y: positions.length % this.GRID_H });
     }
@@ -268,7 +279,6 @@ const CombatEngine = {
     const cells = [];
     const speed = entity.moveSpeed;
 
-    // BFS from entity position
     const visited = new Set();
     const queue = [{ x: entity.x, y: entity.y, dist: 0 }];
     visited.add(`${entity.x},${entity.y}`);
@@ -298,7 +308,6 @@ const CombatEngine = {
   },
 
   _hasLineOfSight(from, to, cells) {
-    // Bresenham-like check through grid cells
     const dx = to.x - from.x;
     const dy = to.y - from.y;
     const steps = Math.max(Math.abs(dx), Math.abs(dy));
@@ -326,7 +335,7 @@ const CombatEngine = {
 
     for (const other of combat.entities) {
       if (other.id === entity.id || other.hull <= 0) continue;
-      if (other.type === entity.type) continue; // don't target allies
+      if (other.type === entity.type) continue;
       if (other.yielded) continue;
 
       const dist = this._getDistance(entity, other);
@@ -371,6 +380,24 @@ const CombatEngine = {
     combat.moveRange = this._getMoveableCells(player);
   },
 
+  // ─── Entity Movement (with animation tracking) ─────────────
+
+  _moveEntity(entity, newX, newY) {
+    entity._prevX = entity.x;
+    entity._prevY = entity.y;
+    entity.x = newX;
+    entity.y = newY;
+  },
+
+  _clearAnimState() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+    for (const e of combat.entities) {
+      e._prevX = null;
+      e._prevY = null;
+    }
+  },
+
   // ─── Player Move Phase ──────────────────────────────────────
 
   movePlayer(x, y) {
@@ -379,11 +406,12 @@ const CombatEngine = {
 
     const player = combat.entities.find(e => e.id === 'player');
 
-    // Allow clicking own position to stay
+    // Stay in place
     if (x === player.x && y === player.y) {
       combat.phase = 'player_action';
       combat.moveRange = [];
-      combat.lastAction = 'Holding position. Choose an action.';
+      combat.hasMoved = true;
+      combat.lastAction = `Holding position. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} remaining.`;
       Game.render();
       return;
     }
@@ -392,8 +420,7 @@ const CombatEngine = {
     const valid = combat.moveRange.some(c => c.x === x && c.y === y);
     if (!valid) return;
 
-    player.x = x;
-    player.y = y;
+    this._moveEntity(player, x, y);
 
     // Check mine collision
     if (combat.cells[y][x].terrain === 'mine') {
@@ -408,11 +435,12 @@ const CombatEngine = {
         return;
       }
     } else {
-      combat.lastAction = 'Repositioned. Choose an action.';
+      combat.lastAction = `Repositioned. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} remaining.`;
     }
 
     combat.phase = 'player_action';
     combat.moveRange = [];
+    combat.hasMoved = true;
     player.defending = false;
     Game.render();
   },
@@ -426,7 +454,6 @@ const CombatEngine = {
     const player = combat.entities.find(e => e.id === 'player');
 
     if (combat.selectedWeaponIdx === weaponIdx) {
-      // Deselect
       combat.selectedWeaponIdx = null;
       combat.attackRange = [];
       Game.render();
@@ -442,6 +469,7 @@ const CombatEngine = {
     const combat = GameState.run.activeCombat;
     if (!combat || combat.phase !== 'player_action') return;
     if (combat.selectedWeaponIdx === null) return;
+    if (combat.actionsRemaining <= 0) return;
 
     const player = combat.entities.find(e => e.id === 'player');
     const target = combat.entities.find(e => e.id === targetId);
@@ -451,7 +479,7 @@ const CombatEngine = {
     const weapon = player.weapons[weaponIdx];
     if (!weapon) return;
 
-    // Verify target is in range
+    // Verify target in range
     const targets = this._getWeaponTargets(player, weaponIdx);
     if (!targets.some(t => t.id === targetId)) return;
 
@@ -467,33 +495,28 @@ const CombatEngine = {
     // Calculate damage
     let damage = weapon.damage || 2;
 
-    // Crew bonus from soldier
     const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
     if (gunner) damage += 1;
 
-    // Scanned weakness bonus
     if (target.scanned && target.weakness === 'weapons') {
       damage = Math.round(damage * 1.3);
     }
 
-    // Roll variance
     damage = Math.round(damage * (0.7 + Math.random() * 0.6));
 
     // Shield interaction
     const shieldMode = this.SHIELD_INTERACTION[weapon.type] || 'partial';
-    let shieldMsg = '';
     if (target.shields > 0) {
       if (shieldMode === 'blocked') {
         const shieldDmg = Math.min(damage, target.shields);
         target.shields = Math.max(0, target.shields - shieldDmg);
-        shieldMsg = ` (${shieldDmg} to shields)`;
-        // Consume ammo
         if (weapon._ammo !== null) {
           weapon._ammo--;
           if (weapon._ref) weapon._ref._currentAmmo = weapon._ammo;
         }
-        combat.lastAction = `${weapon.name} hits ${target.name}${shieldMsg}`;
-        this._finishPlayerAction(combat);
+        combat.actionsRemaining--;
+        combat.lastAction = `${weapon.name} hits ${target.name} (${shieldDmg} to shields). ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+        this._afterPlayerAction(combat);
         return;
       } else if (shieldMode === 'partial') {
         damage = Math.max(1, damage - 1);
@@ -503,12 +526,12 @@ const CombatEngine = {
     const actualDamage = Math.max(1, damage - target.defense);
     target.hull = Math.max(0, target.hull - actualDamage);
 
-    // Consume ammo
     if (weapon._ammo !== null) {
       weapon._ammo--;
       if (weapon._ref) weapon._ref._currentAmmo = weapon._ammo;
     }
 
+    combat.actionsRemaining--;
     combat.lastAction = `${weapon.name} hits ${target.name} for ${actualDamage}!`;
 
     // Check yield
@@ -524,41 +547,45 @@ const CombatEngine = {
       return;
     }
 
-    // Check if target destroyed
     if (target.hull <= 0) {
       combat.lastAction += ` ${target.name} destroyed!`;
     }
 
-    this._finishPlayerAction(combat);
+    this._afterPlayerAction(combat);
   },
 
   playerDefend() {
     const combat = GameState.run.activeCombat;
     if (!combat || combat.phase !== 'player_action') return;
+    if (combat.actionsRemaining <= 0) return;
 
     const player = combat.entities.find(e => e.id === 'player');
     player.defending = true;
+    combat.actionsRemaining--;
     const shieldLevel = GameState.run.ship.baseSystems.shields_armor.level;
-    combat.lastAction = `Shields raised. Damage reduced by ${shieldLevel * 2 + 3}.`;
-    this._finishPlayerAction(combat);
+    combat.lastAction = `Shields raised. Damage reduced by ${shieldLevel * 2 + 3}. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+    this._afterPlayerAction(combat);
   },
 
   playerRepair() {
     const combat = GameState.run.activeCombat;
     if (!combat || combat.phase !== 'player_action') return;
+    if (combat.actionsRemaining <= 0) return;
 
     const player = combat.entities.find(e => e.id === 'player');
     const engineer = GameState.run.crew.find(c => !c.dead && c.role === 'engineer');
     const repair = engineer ? 12 : 6;
     ShipEngine.repair(repair);
     player.hull = GameState.run.ship.hull;
-    combat.lastAction = `Emergency repairs: +${repair} hull.`;
-    this._finishPlayerAction(combat);
+    combat.actionsRemaining--;
+    combat.lastAction = `Emergency repairs: +${repair} hull. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+    this._afterPlayerAction(combat);
   },
 
   playerScan(targetId) {
     const combat = GameState.run.activeCombat;
     if (!combat || combat.phase !== 'player_action') return;
+    if (combat.actionsRemaining <= 0) return;
 
     const target = combat.entities.find(e => e.id === targetId);
     if (!target) return;
@@ -573,28 +600,48 @@ const CombatEngine = {
     const techie = GameState.run.crew.find(c => !c.dead && c.role === 'technician');
     const successChance = (scientist || techie) ? 80 : 50;
 
+    combat.actionsRemaining--;
+
     if (Math.random() * 100 < successChance) {
       target.scanned = true;
       if (!target.weakness) {
         const weaknesses = ['weapons', 'shields', 'engines'];
         target.weakness = weaknesses[Math.floor(Math.random() * weaknesses.length)];
       }
-      combat.lastAction = `Scan: ${target.name} weakness is ${target.weakness}.`;
+      combat.lastAction = `Scan: ${target.name} weakness is ${target.weakness}. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
     } else {
-      combat.lastAction = 'Scan inconclusive.';
+      combat.lastAction = `Scan inconclusive. ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
     }
 
-    this._finishPlayerAction(combat);
+    this._afterPlayerAction(combat);
   },
 
-  skipAction() {
+  endTurn() {
     const combat = GameState.run.activeCombat;
-    if (!combat || combat.phase !== 'player_action') return;
-    combat.lastAction = 'Action skipped.';
-    this._finishPlayerAction(combat);
+    if (!combat || (combat.phase !== 'player_action' && combat.phase !== 'player_move')) return;
+    combat.actionsRemaining = 0;
+    combat.lastAction = 'Turn ended.';
+    this._finishPlayerTurn(combat);
   },
 
-  _finishPlayerAction(combat) {
+  _afterPlayerAction(combat) {
+    combat.selectedWeaponIdx = null;
+    combat.attackRange = [];
+
+    // Check victory
+    if (this._checkVictory(combat)) return;
+
+    // If actions remain, stay in action phase
+    if (combat.actionsRemaining > 0) {
+      Game.render();
+      return;
+    }
+
+    // Out of actions — end turn
+    this._finishPlayerTurn(combat);
+  },
+
+  _finishPlayerTurn(combat) {
     combat.selectedWeaponIdx = null;
     combat.attackRange = [];
 
@@ -603,9 +650,9 @@ const CombatEngine = {
 
     // Transition to enemy phase
     combat.phase = 'enemy';
+    this._clearAnimState();
     Game.render();
 
-    // Run enemy turns with delay
     setTimeout(() => this._runEnemyTurns(), 600);
   },
 
@@ -617,18 +664,16 @@ const CombatEngine = {
 
     const target = combat.entities.find(e => e.id === combat._yieldingEntity);
     if (target) {
-      target.hull = 0; // Remove from combat
+      target.hull = 0;
       combat.lastAction = `${target.name} disabled and surrendered.`;
     }
 
-    // Check if all enemies dealt with
     const remaining = combat.entities.filter(e => e.type === 'enemy' && e.hull > 0 && !e.yielded);
     if (remaining.length === 0) {
       this._victory('victory_disabled');
       return;
     }
 
-    // Continue combat against remaining enemies
     combat.phase = 'enemy';
     Game.render();
     setTimeout(() => this._runEnemyTurns(), 600);
@@ -640,9 +685,8 @@ const CombatEngine = {
 
     const target = combat.entities.find(e => e.id === combat._yieldingEntity);
     if (target) {
-      // Enemy fights desperately: +25% attack
       target.attack = Math.round(target.attack * 1.25);
-      target.yielded = false; // reset so they fight on
+      target.yielded = false;
       combat.lastAction = `Yield rejected. ${target.name} fights with desperation.`;
     }
 
@@ -697,7 +741,7 @@ const CombatEngine = {
 
     combat.lastAction = actions.join(' ') || 'Enemies hold position.';
 
-    // Check player death
+    // Sync player hull
     const player = combat.entities.find(e => e.id === 'player');
     player.hull = GameState.run.ship.hull;
 
@@ -706,18 +750,24 @@ const CombatEngine = {
       return;
     }
 
-    // Check mine proximity damage to player
     this._checkMineProximity(combat);
     if (GameState.run.ship.hull <= 0) {
       this._playerDestroyed();
       return;
     }
 
-    // Advance turn
+    // Advance turn — reset player AP
     combat.turn++;
     combat.phase = 'player_move';
+    combat.actionsRemaining = this._getPlayerAP();
+    combat.hasMoved = false;
+    const player2 = combat.entities.find(e => e.id === 'player');
+    if (player2) player2.defending = false;
     this._calculateMoveRange();
     Game.render();
+
+    // Clear animation state after render so next frame won't re-animate
+    setTimeout(() => this._clearAnimState(), 350);
   },
 
   _enemyAI(entity, combat) {
@@ -739,43 +789,34 @@ const CombatEngine = {
   },
 
   _aiAggressive(entity, player, combat) {
-    // Move toward player
     this._aiMoveToward(entity, player, combat);
-    // Attack if in range
     return this._aiAttack(entity, player, combat);
   },
 
   _aiCautious(entity, player, combat) {
     const dist = this._getDistance(entity, player);
-    const preferredRange = 3;
 
     if (dist < 2) {
-      // Too close, move away
       this._aiMoveAway(entity, player, combat);
-    } else if (dist > preferredRange + 1) {
-      // Too far, close in
+    } else if (dist > 4) {
       this._aiMoveToward(entity, player, combat);
     }
-    // else stay at range
 
     return this._aiAttack(entity, player, combat);
   },
 
   _aiStationary(entity, player, combat) {
-    // Never move, just attack
     return this._aiAttack(entity, player, combat);
   },
 
   _aiPatrol(entity, player, combat) {
-    // Move back and forth along current row
     const nx = entity.x + entity.patrolDir;
     if (nx >= 0 && nx < this.GRID_W && !combat.cells[entity.y][nx].blocked &&
         !this._getEntityAt(nx, entity.y)) {
-      entity.x = nx;
+      this._moveEntity(entity, nx, entity.y);
     } else {
       entity.patrolDir *= -1;
     }
-    // Patrol entities (mines) don't attack conventionally
     return null;
   },
 
@@ -785,7 +826,6 @@ const CombatEngine = {
     const moveable = this._getMoveableCells(entity);
     if (moveable.length === 0) return;
 
-    // Pick cell closest to player
     let best = null;
     let bestDist = Infinity;
     for (const cell of moveable) {
@@ -797,8 +837,7 @@ const CombatEngine = {
     }
 
     if (best && bestDist < this._getDistance(entity, player)) {
-      entity.x = best.x;
-      entity.y = best.y;
+      this._moveEntity(entity, best.x, best.y);
     }
   },
 
@@ -819,8 +858,7 @@ const CombatEngine = {
     }
 
     if (best) {
-      entity.x = best.x;
-      entity.y = best.y;
+      this._moveEntity(entity, best.x, best.y);
     }
   },
 
@@ -828,7 +866,6 @@ const CombatEngine = {
     if (!entity.weapons || entity.weapons.length === 0) return null;
     if (entity.attack <= 0) return null;
 
-    // Pick best weapon that can reach player
     for (const weapon of entity.weapons) {
       const range = weapon.range || this.WEAPON_RANGE[weapon.type] || 2;
       const dist = this._getDistance(entity, player);
@@ -837,17 +874,14 @@ const CombatEngine = {
       const blocked = this.WEAPON_BLOCKED_BY_OBSTACLES[weapon.type] !== false;
       if (blocked && !this._hasLineOfSight(entity, player, combat.cells)) continue;
 
-      // Calculate damage
       let damage = weapon.damage || entity.attack;
       damage = Math.round(damage * (0.6 + Math.random() * 0.8));
 
-      // Player defending
       if (player.defending) {
         const shieldLevel = GameState.run.ship.baseSystems.shields_armor.level;
         damage = Math.max(1, damage - shieldLevel * 2 - 3);
       }
 
-      // Apply to ship
       const actualDmg = Math.max(1, damage);
       ShipEngine.takeDamage(actualDmg);
       return `${entity.name} fires for ${actualDmg}.`;
@@ -857,7 +891,6 @@ const CombatEngine = {
   },
 
   _checkMineProximity(combat) {
-    // Check if any patrol mines are adjacent to player
     const player = combat.entities.find(e => e.id === 'player');
     const mines = combat.entities.filter(e => e.type === 'enemy' && e.hull > 0 && e.ai === 'patrol');
 
@@ -878,7 +911,6 @@ const CombatEngine = {
     const enemies = combat.entities.filter(e => e.type === 'enemy' && e.hull > 0 && !e.yielded);
     if (enemies.length > 0) return false;
 
-    // Determine result type
     const anyYielded = combat.entities.some(e => e.type === 'enemy' && e.yielded);
     const result = anyYielded ? 'victory_disabled' : 'victory_destroyed';
     this._victory(result);
@@ -889,12 +921,10 @@ const CombatEngine = {
     const combat = GameState.run.activeCombat;
     if (!combat) return;
 
-    // Loot — disabled ships give more
     const baseLoot = 10 + Math.floor(Math.random() * 30);
     const loot = result === 'victory_disabled' ? Math.round(baseLoot * 1.5) : baseLoot;
     GameState.run.credits += loot;
 
-    // Faction reputation hit for attacking faction ships
     const factionEntity = combat.entities.find(e => e.type === 'enemy' && e.faction);
     if (factionEntity && result === 'victory_destroyed') {
       EconomyEngine.adjustReputation(factionEntity.faction, -1);
@@ -911,7 +941,6 @@ const CombatEngine = {
   },
 
   endCombatAndReturn() {
-    // Called from UI "Continue" button after victory
     const combat = GameState.run.activeCombat;
     if (!combat) return;
     this._endCombat(combat.combatResult);
@@ -921,17 +950,10 @@ const CombatEngine = {
     const combat = GameState.run.activeCombat;
     const fromEvent = combat ? combat.fromEvent : false;
 
-    // Sync player hull back to ship state
-    const player = combat ? combat.entities.find(e => e.id === 'player') : null;
-    if (player) {
-      // Hull is already synced via ShipEngine.takeDamage/repair
-    }
-
     GameState.run.activeCombat = null;
     GameState.run.lastCombatResult = result;
 
     if (fromEvent && GameState.run.activeEvent) {
-      // Return to event — advance to next step
       GameState.screen = 'map';
       Tabs.activeTab = 'event';
       EventEngine.advanceEvent();
@@ -946,10 +968,40 @@ const CombatEngine = {
   },
 
   _playerDestroyed() {
+    const combat = GameState.run.activeCombat;
+
+    // Collect defeat stats for the defeat screen
+    const stats = {
+      enemyName: combat ? combat.enemyDef.name : 'Unknown',
+      turnsLasted: combat ? combat.turn : 0,
+      enemiesDestroyed: combat
+        ? combat.entities.filter(e => e.type === 'enemy' && e.hull <= 0).length : 0,
+      totalEnemies: combat
+        ? combat.entities.filter(e => e.type === 'enemy').length : 0,
+    };
+
+    if (combat) {
+      combat.phase = 'defeat';
+      combat.defeatStats = stats;
+      combat.lastAction = 'Your ship has been destroyed.';
+      Game.render();
+    } else {
+      // Fallback: go straight to game over
+      GameState.run.activeCombat = null;
+      GameState.endRun('ship_destroyed');
+      GameState.screen = 'gameOver';
+      GameState.save();
+      Game.render();
+    }
+  },
+
+  confirmDefeat() {
+    // Called from UI after viewing defeat screen
     GameState.run.activeCombat = null;
     GameState.endRun('ship_destroyed');
-    GameState.screen = 'reconstruction';
-    ReconstructionUI.start();
+    GameState.screen = 'gameOver';
+    GameState.save();
+    Game.render();
   },
 
   _genericEnemy() {
