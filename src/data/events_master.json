@@ -15772,14 +15772,14 @@
               "outcomes": {
                 "success": {
                   "level": "success",
-                  "narrative": "Money well spent. The navigator's information is specific and current \u2014 hazard zones, patrol schedules, quiet lanes.",
+                  "narrative": "Money well spent. The navigator's information is specific and current \u2014 hazard zones, patrol schedules, quiet lanes. More importantly, they know who's buying and selling right now.",
                   "rewards": [
                     {
                       "type": "credits",
                       "value": -15
                     }
                   ],
-                  "sets_flag": null,
+                  "sets_flag": "has_trade_intel",
                   "clears_flag": null,
                   "morale_delta": 5,
                   "loyalty_delta": 0,
@@ -15827,9 +15827,9 @@
               "outcomes": {
                 "success": {
                   "level": "success",
-                  "narrative": "You strike up a conversation that turns into a genuine exchange. They share freely over drinks.",
+                  "narrative": "You strike up a conversation that turns into a genuine exchange. They share freely over drinks \u2014 including a few leads on local trade.",
                   "rewards": [],
-                  "sets_flag": null,
+                  "sets_flag": "has_trade_intel",
                   "clears_flag": null,
                   "morale_delta": 5,
                   "loyalty_delta": 0,
@@ -15838,14 +15838,14 @@
                 },
                 "partial": {
                   "level": "success",
-                  "narrative": "They give you a little \u2014 enough to know the rest is worth paying for. You buy the rest at half price.",
+                  "narrative": "They give you a little \u2014 enough to know the rest is worth paying for. You buy the rest at half price. It's not the full picture, but there's enough to work with.",
                   "rewards": [
                     {
                       "type": "credits",
                       "value": -8
                     }
                   ],
-                  "sets_flag": null,
+                  "sets_flag": "has_trade_intel",
                   "clears_flag": null,
                   "morale_delta": 3,
                   "loyalty_delta": 0,
@@ -15861,6 +15861,113 @@
                   "morale_delta": -2,
                   "loyalty_delta": 0,
                   "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "condition": {
+            "requires_flag": "has_trade_intel"
+          },
+          "setup_text": "The navigator pulls out a worn datapad and taps through a few screens. \"Here's what's moving through this station right now. You've got options.\"",
+          "options": [
+            {
+              "label": "Buy trade goods at insider prices. (20 credits)",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The navigator makes a call and within the hour you've got crates in the hold \u2014 fabrication-grade materials at well below market rate. These will sell for a profit at any depot deeper in.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -20
+                    },
+                    {
+                      "type": "cargo",
+                      "value": "fabrication_materials"
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": "has_trade_intel",
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Stock up on fuel through their contact. (12 credits)",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "A dockhand arrives with three fuel cells \u2014 no questions, no markup. The navigator wasn't lying about knowing the right people.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -12
+                    },
+                    {
+                      "type": "fuel",
+                      "value": 3
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": "has_trade_intel",
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 0,
+                  "resonance_delta": 0
+                }
+              }
+            },
+            {
+              "label": "Get a repair contact. (15 credits)",
+              "requires_crew_role": null,
+              "requires_module": null,
+              "requires_rep": null,
+              "requires_flag": null,
+              "requires_ability": null,
+              "locked_hint": "",
+              "check_type": "none",
+              "check_target": null,
+              "difficulty": "easy",
+              "outcomes": {
+                "success": {
+                  "level": "success",
+                  "narrative": "The navigator's contact is a shipwright who works off the books. Fast, clean, no questions. Your hull's in better shape by the time you're done.",
+                  "rewards": [
+                    {
+                      "type": "credits",
+                      "value": -15
+                    }
+                  ],
+                  "sets_flag": null,
+                  "clears_flag": "has_trade_intel",
+                  "morale_delta": 0,
+                  "loyalty_delta": 0,
+                  "hull_delta": 15,
                   "resonance_delta": 0
                 }
               }
