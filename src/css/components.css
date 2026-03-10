@@ -234,6 +234,78 @@
   to { opacity: 1; }
 }
 
+/* === Combat Visual Effects === */
+@keyframes combat-damage {
+  0%   { background: rgba(255, 107, 107, 0.5); }
+  100% { background: transparent; }
+}
+
+@keyframes combat-heal {
+  0%   { background: rgba(135, 214, 141, 0.4); }
+  100% { background: transparent; }
+}
+
+@keyframes combat-shield {
+  0%   { background: rgba(92, 207, 230, 0.4); box-shadow: inset 0 0 8px rgba(92, 207, 230, 0.6); }
+  100% { background: transparent; box-shadow: none; }
+}
+
+@keyframes combat-scan {
+  0%   { background: rgba(212, 191, 255, 0.4); }
+  50%  { background: rgba(212, 191, 255, 0.15); }
+  100% { background: transparent; }
+}
+
+@keyframes combat-attack-out {
+  0%   { background: rgba(255, 213, 128, 0.5); }
+  100% { background: transparent; }
+}
+
+@keyframes combat-miss {
+  0%, 25%, 50% { opacity: 0.3; }
+  12%, 37%     { opacity: 1; }
+  100%         { opacity: 1; }
+}
+
+@keyframes combat-explode {
+  0%   { background: rgba(255, 107, 107, 0.7); transform: scale(1.1); }
+  50%  { background: rgba(255, 213, 128, 0.4); }
+  100% { background: transparent; transform: scale(1); }
+}
+
+@keyframes threat-pulse {
+  0%, 100% { border-color: rgba(255, 107, 107, 0.15); }
+  50%      { border-color: rgba(255, 107, 107, 0.4); }
+}
+
+.combat-cell-effect {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.combat-cell-effect.damage   { animation: combat-damage 0.5s ease-out forwards; }
+.combat-cell-effect.heal     { animation: combat-heal 0.6s ease-out forwards; }
+.combat-cell-effect.shield   { animation: combat-shield 0.6s ease-out forwards; }
+.combat-cell-effect.scan     { animation: combat-scan 0.8s ease-out forwards; }
+.combat-cell-effect.attack   { animation: combat-attack-out 0.4s ease-out forwards; }
+.combat-cell-effect.explode  { animation: combat-explode 0.6s ease-out forwards; }
+
+.combat-threat-cell {
+  border: 1px dashed rgba(255, 107, 107, 0.3);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+
+.combat-intention-icon {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  font-size: 0.5em;
+  opacity: 0.7;
+  z-index: 2;
+}
+
 .recon-screen .nexus-line {
   color: var(--color-nexus);
   font-style: italic;
