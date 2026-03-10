@@ -292,6 +292,31 @@ const EventEngine = {
       }
     }
 
+    // Check for crew interaction trigger before clearing event state
+    if (typeof InteractionEngine !== 'undefined') {
+      const interaction = InteractionEngine.checkForInteraction(
+        event, event._lastOutcomeLevel || 'success'
+      );
+
+      if (interaction) {
+        GameState.run.activeInteraction = interaction;
+        GameState.run.interactionResolved = false;
+        GameState.run.lastInteractionDepth = GameState.run.depth;
+        if (!interaction.repeatable) {
+          GameState.run.seenInteractionIds.push(interaction.id);
+        }
+        // Clear event state but don't transition screens
+        GameState.run.activeEvent = null;
+        GameState.run.activeEventStep = 0;
+        GameState.run.lastStepOutcomes = {};
+        CrewEngine.tickAfterEvent();
+        ShipEngine.updateVisualStage();
+        GameState.save();
+        Game.render();
+        return; // InteractionUI takes over
+      }
+    }
+
     GameState.run.activeEvent = null;
     GameState.run.activeEventStep = 0;
     GameState.run.lastStepOutcomes = {};

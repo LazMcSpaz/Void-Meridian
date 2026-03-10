@@ -9,6 +9,7 @@ const ReconstructionUI = {
   systems: null,      // { weapons: 0, propulsion: 0, sensors: 0, shields_armor: 0, cargo_hold: 0, crew_quarters: 0 }
   captainStats: null,  // { command: 0, intuition: 0, resolve: 0 }
   captainAbility: null,
+  captainName: '',
   crewChoices: null,   // [{ role, quality }]  — up to 3 starter crew picks
   supplies: null,      // { credits: 0, fuel: 0 }
   selectedWeaponId: null,
@@ -86,6 +87,7 @@ const ReconstructionUI = {
     this.systems = { weapons: 0, propulsion: 0, sensors: 0, shields_armor: 0, cargo_hold: 0, crew_quarters: 0 };
     this.captainStats = { command: 0, intuition: 0, resolve: 0 };
     this.captainAbility = null;
+    this.captainName = '';
     this.crewChoices = [];
     this.supplies = { credits: 0, fuel: 0 };
     this.selectedWeaponId = null;
@@ -301,11 +303,36 @@ const ReconstructionUI = {
 
   _renderCaptain(screen) {
     this._renderPhaseHeader(screen, 'CAPTAIN',
-      'Your captain\'s stats affect skill checks throughout the game. Stats also cost salvage points. You must choose one starting ability before proceeding.');
+      'Name your captain, allocate stats, and choose a starting ability.');
 
     const area = document.createElement('div');
     area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1;';
+
+    // Captain name input
+    const nameHeader = document.createElement('div');
+    nameHeader.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:var(--space-sm);';
+    nameHeader.textContent = 'CAPTAIN NAME';
+    area.appendChild(nameHeader);
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.maxLength = 20;
+    nameInput.placeholder = 'ENTER NAME';
+    nameInput.value = this.captainName;
+    nameInput.style.cssText = 'width:100%; padding:var(--space-sm) var(--space-md); background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); font-family:inherit; font-size:var(--font-size-base); letter-spacing:0.05em; margin-bottom:var(--space-md); box-sizing:border-box;';
+    nameInput.addEventListener('input', (e) => {
+      this.captainName = e.target.value;
+      // Update button state without full rerender to preserve focus
+      const nextBtn = document.querySelector('[data-captain-next]');
+      if (nextBtn) {
+        const canProceed = this.captainAbility && this.captainName.trim().length > 0;
+        nextBtn.style.opacity = canProceed ? '1' : '0.3';
+        nextBtn.style.pointerEvents = canProceed ? 'auto' : 'none';
+        nextBtn.textContent = !this.captainName.trim() ? 'ENTER NAME' : !this.captainAbility ? 'SELECT ABILITY' : 'NEXT →';
+      }
+    });
+    area.appendChild(nameInput);
 
     // Stats
     const statsHeader = document.createElement('div');
@@ -400,7 +427,7 @@ const ReconstructionUI = {
 
     screen.appendChild(area);
 
-    // Custom nav — disable NEXT if no ability selected
+    // Custom nav — disable NEXT if no ability selected or no name entered
     const nav = document.createElement('div');
     nav.style.cssText = 'display:flex; gap:var(--space-sm); width:100%; max-width:400px; margin-top:var(--space-lg);';
 
@@ -411,13 +438,15 @@ const ReconstructionUI = {
     back.addEventListener('click', () => { this.phase = 'systems'; Game.render(); });
     nav.appendChild(back);
 
+    const canProceed = this.captainAbility && this.captainName.trim().length > 0;
     const next = document.createElement('button');
     next.className = 'btn-confirm';
     next.style.cssText = 'flex:2;';
-    if (!this.captainAbility) {
+    next.setAttribute('data-captain-next', '');
+    if (!canProceed) {
       next.style.opacity = '0.3';
       next.style.pointerEvents = 'none';
-      next.textContent = 'SELECT ABILITY';
+      next.textContent = !this.captainName.trim() ? 'ENTER NAME' : 'SELECT ABILITY';
     } else {
       next.textContent = 'CREW →';
       next.addEventListener('click', () => { this.phase = 'crew_pick'; Game.render(); });
@@ -666,7 +695,8 @@ const ReconstructionUI = {
     area.innerHTML += `<div style="margin-bottom:var(--space-md);"><div style="color:var(--text-muted); text-transform:uppercase; margin-bottom:var(--space-xs);">Ship Systems</div>${systemLines}</div>`;
 
     // Captain summary
-    let capLines = '';
+    const capName = this.captainName.trim() || 'Captain';
+    let capLines = `<div style="display:flex; justify-content:space-between; padding:2px 0; margin-bottom:var(--space-xs);"><span>Name</span><span style="color:var(--text-accent);">${capName}</span></div>`;
     for (const [key, info] of Object.entries(this.CAPTAIN_STAT_INFO)) {
       capLines += `<div style="display:flex; justify-content:space-between; padding:2px 0;"><span>${info.emoji} ${info.label}</span><span style="color:var(--text-accent);">${1 + this.captainStats[key]}</span></div>`;
     }
@@ -737,8 +767,9 @@ const ReconstructionUI = {
       ShipEngine.equipWeapon(this.selectedWeaponId);
     }
 
-    // Apply captain stats
+    // Apply captain name and stats
     const cap = GameState.run.captain;
+    cap.name = this.captainName.trim() || 'Captain';
     cap.stats.command = 1 + this.captainStats.command;
     cap.stats.intuition = 1 + this.captainStats.intuition;
     cap.stats.resolve = 1 + this.captainStats.resolve;
