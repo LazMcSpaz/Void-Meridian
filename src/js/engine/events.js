@@ -215,26 +215,29 @@ const EventEngine = {
     const outcomeLevel = this.resolveCheck(option);
     const outcome = option.outcomes[outcomeLevel];
 
-    if (!outcome) {
-      // Fallback to success if outcome level missing
-      const fallback = option.outcomes.success;
-      if (fallback) {
-        this._applyOutcome(fallback, event);
-      }
-    } else {
-      this._applyOutcome(outcome, event);
+    const effectiveOutcome = outcome || option.outcomes.success;
+    let combatInitiated = false;
+    if (effectiveOutcome) {
+      combatInitiated = this._applyOutcome(effectiveOutcome, event);
     }
 
     // Store step outcome for conditional branching
     GameState.run.lastStepOutcomes[step.step_number] = outcomeLevel;
 
     // Store for UI display
-    event._lastOutcome = outcome || option.outcomes.success;
+    event._lastOutcome = effectiveOutcome;
     event._lastOutcomeLevel = outcomeLevel;
     event._lastChoiceLabel = option.label;
-    event._resolved = true;
 
     GameState.addLog('event', `Chose: "${option.label}" → ${outcomeLevel}`);
+
+    // If combat was initiated, don't mark resolved — combat screen takes over
+    if (combatInitiated) {
+      GameState.save();
+      return;
+    }
+
+    event._resolved = true;
     GameState.save();
     Game.render();
   },
@@ -244,6 +247,29 @@ const EventEngine = {
   advanceEvent() {
     const event = GameState.run.activeEvent;
     if (!event) return;
+
+    // If returning from combat, set result flags for step conditions
+    if (GameState.run.lastCombatResult) {
+      const result = GameState.run.lastCombatResult;
+      const flags = GameState.run.runFlags;
+      // Clear any prior combat flags
+      const combatFlags = ['combat_destroyed', 'combat_disabled', 'combat_fled', 'combat_surrendered'];
+      for (const f of combatFlags) {
+        const idx = flags.indexOf(f);
+        if (idx !== -1) flags.splice(idx, 1);
+      }
+      // Set the current result flag
+      if (result === 'victory_destroyed' && !flags.includes('combat_destroyed')) {
+        flags.push('combat_destroyed');
+      } else if (result === 'victory_disabled' && !flags.includes('combat_disabled')) {
+        flags.push('combat_disabled');
+      } else if (result === 'fled' && !flags.includes('combat_fled')) {
+        flags.push('combat_fled');
+      } else if (result === 'surrendered' && !flags.includes('combat_surrendered')) {
+        flags.push('combat_surrendered');
+      }
+      GameState.run.lastCombatResult = null;
+    }
 
     event._resolved = false;
     event._lastOutcome = null;
@@ -270,6 +296,21 @@ const EventEngine = {
     // Flag-based condition: step only appears if a run flag is set
     if (step.condition.requires_flag) {
       if (!GameState.run.runFlags.includes(step.condition.requires_flag)) return false;
+    }
+    // Multiple flags: all must be set
+    if (step.condition.requires_flags) {
+      for (const flag of step.condition.requires_flags) {
+        if (!GameState.run.runFlags.includes(flag)) return false;
+      }
+    }
+    // Exclude flag(s): step is skipped if any exclude flag is set
+    if (step.condition.excludes_flag) {
+      if (GameState.run.runFlags.includes(step.condition.excludes_flag)) return false;
+    }
+    if (step.condition.excludes_flags) {
+      for (const flag of step.condition.excludes_flags) {
+        if (GameState.run.runFlags.includes(flag)) return false;
+      }
     }
     // Prior step outcome condition
     if (step.condition.prior_step != null && step.condition.outcome) {
@@ -401,6 +442,14 @@ const EventEngine = {
       const idx = GameState.run.runFlags.indexOf(outcome.clears_flag);
       if (idx !== -1) GameState.run.runFlags.splice(idx, 1);
     }
+
+    // 9. Initiate combat if specified
+    if (outcome.initiates_combat) {
+      CombatEngine.startCombat(outcome.initiates_combat, true);
+      return true; // signal that combat was initiated
+    }
+
+    return false;
   },
 
   _processReward(reward) {
