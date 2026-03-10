@@ -32,7 +32,14 @@ const Registry = {
     if (this.modules.size === 0) this._loadFallbackModules();
 
     this._loadEventLibrary();
-    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crewArchetypes.size} archetypes, ${this.crewNamed.size} named crew, ${this.eventLibrary.length} events, ${this.enemies.size} enemies`);
+
+    // Initialize crew interaction system
+    if (typeof InteractionEngine !== 'undefined' && typeof DATA_CREW_INTERACTIONS !== 'undefined') {
+      InteractionEngine.init(DATA_CREW_INTERACTIONS);
+    }
+
+    const intCount = typeof InteractionEngine !== 'undefined' ? InteractionEngine._interactionLibrary.length : 0;
+    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crewArchetypes.size} archetypes, ${this.crewNamed.size} named crew, ${this.eventLibrary.length} events, ${intCount} interactions, ${this.enemies.size} enemies`);
   },
 
   _mergeArrays(primary, secondary) {

@@ -588,6 +588,1010 @@ body {
   <script>
 const DATA_CREW = 
 [];
+const DATA_CREW_INTERACTIONS = 
+{
+  "personality_profiles": {
+    "reckless": {
+      "affinity_traits": ["curious", "vocal"],
+      "conflict_traits": ["stoic", "pragmatic"],
+      "values": ["action", "risk", "freedom"],
+      "reaction_bias": { "risky_success": 3, "cautious_success": 0, "loss": 1, "danger": 2 }
+    },
+    "stoic": {
+      "affinity_traits": ["pragmatic", "haunted"],
+      "conflict_traits": ["reckless", "vocal"],
+      "values": ["duty", "control", "endurance"],
+      "reaction_bias": { "risky_success": 0, "cautious_success": 2, "loss": 2, "danger": 1 }
+    },
+    "vocal": {
+      "affinity_traits": ["reckless", "idealistic"],
+      "conflict_traits": ["stoic", "haunted"],
+      "values": ["truth", "debate", "transparency"],
+      "reaction_bias": { "risky_success": 2, "cautious_success": 1, "loss": 3, "danger": 1 }
+    },
+    "curious": {
+      "affinity_traits": ["idealistic", "reckless"],
+      "conflict_traits": ["pragmatic"],
+      "values": ["knowledge", "discovery", "patterns"],
+      "reaction_bias": { "risky_success": 2, "cautious_success": 2, "loss": 1, "danger": 2 }
+    },
+    "haunted": {
+      "affinity_traits": ["stoic", "pragmatic"],
+      "conflict_traits": ["vocal", "idealistic"],
+      "values": ["survival", "penance", "silence"],
+      "reaction_bias": { "risky_success": 0, "cautious_success": 1, "loss": 3, "danger": 2 }
+    },
+    "pragmatic": {
+      "affinity_traits": ["stoic", "haunted"],
+      "conflict_traits": ["reckless", "idealistic"],
+      "values": ["efficiency", "results", "reliability"],
+      "reaction_bias": { "risky_success": 0, "cautious_success": 3, "loss": 2, "danger": 1 }
+    },
+    "idealistic": {
+      "affinity_traits": ["curious", "vocal"],
+      "conflict_traits": ["pragmatic", "haunted"],
+      "values": ["justice", "hope", "principle"],
+      "reaction_bias": { "risky_success": 1, "cautious_success": 2, "loss": 2, "danger": 1 }
+    }
+  },
+
+  "interactions": [
+
+    {
+      "id": "INT_REACT_OSS_DRI_001",
+      "type": "event_reaction",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_oss_roots_acknowledged", "int_oss_roots_dismissed"],
+      "requires_crew": ["oss_navigator_pilot"],
+      "requires_any_trait": [],
+      "requires_event_tags": ["drifter_compact"],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "oss_navigator_pilot", "text": "That was Drifter space. Those were my people's routes." },
+        { "speaker": "oss_navigator_pilot", "text": "You handled it well, {captain}. Most wouldn't bother." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Acknowledge] 'I know what that territory means to you.'",
+          "outcome": {
+            "narrative": "Oss looks at you for a long moment. Something shifts behind her eyes — not warmth, exactly, but the absence of a wall that was there before.",
+            "loyalty_delta": { "oss_navigator_pilot": 5 },
+            "morale_delta": { "oss_navigator_pilot": 3 },
+            "sets_flag": "int_oss_roots_acknowledged"
+          }
+        },
+        {
+          "label": "[Dismiss] 'We had a job to do. That's all.'",
+          "outcome": {
+            "narrative": "Oss's jaw tightens. She nods once and turns back to her console without another word.",
+            "loyalty_delta": { "oss_navigator_pilot": -3 },
+            "morale_delta": {},
+            "sets_flag": "int_oss_roots_dismissed"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_REACT_KESS_CON_001",
+      "type": "event_reaction",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_kess_concord_reflected", "int_kess_concord_buried"],
+      "requires_crew": ["kess_diplomat"],
+      "requires_any_trait": [],
+      "requires_event_tags": ["concord_assembly"],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "kess_diplomat", "text": "I used to draft the protocols for encounters like that. Every word calibrated." },
+        { "speaker": "kess_diplomat", "text": "Funny how different it looks from this side of the negotiating table." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Probe] 'Sounds like you have a history with the Assembly.'",
+          "outcome": {
+            "narrative": "Kess gives you a look that says she's deciding how much to trust you. 'History is one word for it,' she says. The conversation is over, but the door isn't closed.",
+            "loyalty_delta": { "kess_diplomat": 3 },
+            "morale_delta": {},
+            "sets_flag": "int_kess_concord_reflected"
+          }
+        },
+        {
+          "label": "[Professional] 'We got through it. That's what matters.'",
+          "outcome": {
+            "narrative": "Kess nods crisply. The bureaucrat mask slides back into place.",
+            "loyalty_delta": {},
+            "morale_delta": {},
+            "sets_flag": "int_kess_concord_buried"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_REACT_VEL_NEXUS_001",
+      "type": "event_reaction",
+      "priority": 7,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_vel_nexus_noticed", "int_vel_nexus_ignored"],
+      "requires_crew": ["vel_remnant_scientist"],
+      "requires_any_trait": [],
+      "requires_event_tags": ["nexus_anomaly"],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "vel_remnant_scientist", "text": "Interesting. The anomaly responded to your presence differently than I expected." },
+        { "speaker": "vel_remnant_scientist", "text": "Most organic minds cause static. Yours caused... recognition." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Curious] 'What do you mean, recognition?'",
+          "outcome": {
+            "narrative": "Vel tilts their head, studying you like a specimen. 'The Nexus remembers things, {captain}. I think it's starting to remember you.' The words should be unsettling. Coming from Vel, they sound almost like a compliment.",
+            "loyalty_delta": { "vel_remnant_scientist": 4 },
+            "morale_delta": {},
+            "sets_flag": "int_vel_nexus_noticed"
+          }
+        },
+        {
+          "label": "[Wary] 'I'd rather it didn't.'",
+          "outcome": {
+            "narrative": "Vel's expression doesn't change. 'That is not how the Nexus works,' they say quietly. 'But I understand the instinct.'",
+            "loyalty_delta": { "vel_remnant_scientist": -1 },
+            "morale_delta": {},
+            "sets_flag": "int_vel_nexus_ignored"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_REACT_TAM_REMNANT_001",
+      "type": "event_reaction",
+      "priority": 5,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_tam_tech_fascinated", "int_tam_tech_cautious"],
+      "requires_crew": ["tam_technician"],
+      "requires_any_trait": [],
+      "requires_event_tags": ["remnant_collective", "derelict"],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "tam_technician", "text": "Did you feel that? When the systems came online?" },
+        { "speaker": "tam_technician", "text": "My implants were... resonating. Like they recognized the architecture." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_REACT_SERA_DORIN_VRETH_001",
+      "type": "event_reaction",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_sera_dorin_vreth_tension"],
+      "requires_crew": ["sera_soldier", "dorin_engineer"],
+      "requires_any_trait": [],
+      "requires_event_tags": ["vreth_dominion"],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "sera_soldier", "text": "Vreth patrol markings. Those were Brennar garrison insignia." },
+        { "speaker": "dorin_engineer", "text": "Sera—" },
+        { "speaker": "sera_soldier", "text": "I'm fine. Just... noting it." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_REACT_ROOK_INJURY_001",
+      "type": "event_reaction",
+      "priority": 5,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_rook_triage_reflected"],
+      "requires_crew": ["rook_medic"],
+      "requires_any_trait": [],
+      "requires_event_tags": ["combat"],
+      "requires_outcome_level": "partial",
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "rook_medic", "text": "Could've been worse. Could always be worse." },
+        { "speaker": "rook_medic", "text": "I've treated injuries like these before. On people who didn't make it." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_REACT_GENERIC_IDEALISTIC_001",
+      "type": "event_reaction",
+      "priority": 3,
+      "repeatable": true,
+      "requires_flags": [],
+      "excludes_flags": [],
+      "requires_crew": [],
+      "requires_any_trait": ["idealistic"],
+      "requires_event_tags": [],
+      "requires_outcome_level": "failure",
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "any_idealistic", "text": "That didn't have to go the way it did. We could have found another path." },
+        { "speaker": "any_idealistic", "text": "I know you did what you thought was right, {captain}. I just hope it was worth the cost." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_REACT_GENERIC_PRAGMATIC_001",
+      "type": "event_reaction",
+      "priority": 3,
+      "repeatable": true,
+      "requires_flags": [],
+      "excludes_flags": [],
+      "requires_crew": [],
+      "requires_any_trait": ["pragmatic"],
+      "requires_event_tags": [],
+      "requires_outcome_level": "failure",
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "any_pragmatic", "text": "That cost us. Real resources, real damage." },
+        { "speaker": "any_pragmatic", "text": "Next time, let's count the odds before we jump." }
+      ],
+      "captain_options": null
+    },
+
+
+    {
+      "id": "INT_C2C_OSS_SERA_001",
+      "type": "crew_to_crew",
+      "priority": 5,
+      "repeatable": false,
+      "requires_flags": ["int_oss_roots_acknowledged"],
+      "excludes_flags": ["int_oss_sera_bonded", "int_oss_sera_tension"],
+      "requires_crew": ["oss_navigator_pilot", "sera_soldier"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "oss_navigator_pilot", "text": "You watch exits. I watch escape routes. We should stop pretending we don't notice each other doing it." },
+        { "speaker": "sera_soldier", "text": "I watch exits because I was trained to. You watch them because you're afraid." },
+        { "speaker": "oss_navigator_pilot", "text": "Afraid? I'm a Drifter pilot. Fear is what keeps the hull between me and vacuum." },
+        { "speaker": "sera_soldier", "text": "Exactly my point. You fly like someone expecting the worst. That makes you either paranoid or smart." },
+        { "speaker": "oss_navigator_pilot", "text": "Can't it be both?" }
+      ],
+      "captain_options": [
+        {
+          "label": "[Mediate] 'You're both right. That's why this works.'",
+          "outcome": {
+            "narrative": "Oss and Sera exchange a glance. It's not friendship — not yet — but it's the beginning of respect.",
+            "loyalty_delta": { "oss_navigator_pilot": 3, "sera_soldier": 3 },
+            "morale_delta": { "oss_navigator_pilot": 2, "sera_soldier": 2 },
+            "sets_flag": "int_oss_sera_bonded"
+          }
+        },
+        {
+          "label": "[Challenge] 'This isn't productive. Focus on the mission.'",
+          "outcome": {
+            "narrative": "They both fall silent. The tension doesn't resolve — it just goes underground.",
+            "loyalty_delta": { "oss_navigator_pilot": -2, "sera_soldier": -1 },
+            "morale_delta": {},
+            "sets_flag": "int_oss_sera_tension"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_C2C_DORIN_SERA_001",
+      "type": "crew_to_crew",
+      "priority": 5,
+      "repeatable": false,
+      "requires_flags": ["int_sera_dorin_vreth_tension"],
+      "excludes_flags": ["int_dorin_sera_understanding", "int_dorin_sera_distance"],
+      "requires_crew": ["dorin_engineer", "sera_soldier"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "mid",
+      "dialogue": [
+        { "speaker": "dorin_engineer", "text": "You've been checking the bulkheads again. Third time this shift." },
+        { "speaker": "sera_soldier", "text": "The weld joints on frame seven are degrading. Standard maintenance." },
+        { "speaker": "dorin_engineer", "text": "Sera. That's not what I mean." },
+        { "speaker": "sera_soldier", "text": "I know what you mean, Dorin. The Vreth encounter rattled us both. I'm handling it." },
+        { "speaker": "dorin_engineer", "text": "You're handling it by not sleeping and checking bulkheads. That's not handling it." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Stay out] 'I'll let you two work this out.'",
+          "outcome": {
+            "narrative": "You step away. Through the closed hatch, you hear their voices — low, careful, honest. When they emerge later, something has settled between them.",
+            "loyalty_delta": { "dorin_engineer": 2, "sera_soldier": 2 },
+            "morale_delta": { "sera_soldier": 3 },
+            "sets_flag": "int_dorin_sera_understanding"
+          }
+        },
+        {
+          "label": "[Direct] 'Both of you need to stay sharp. We can't afford this.'",
+          "outcome": {
+            "narrative": "Dorin nods stiffly. Sera salutes — crisp, military, cold. They'll do their jobs. But the wall between them just got higher.",
+            "loyalty_delta": { "dorin_engineer": -1, "sera_soldier": 1 },
+            "morale_delta": {},
+            "sets_flag": "int_dorin_sera_distance"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_C2C_KESS_ROOK_001",
+      "type": "crew_to_crew",
+      "priority": 5,
+      "repeatable": false,
+      "requires_flags": ["int_kess_concord_reflected"],
+      "excludes_flags": ["int_kess_rook_solidarity", "int_kess_rook_awkward"],
+      "requires_crew": ["kess_diplomat", "rook_medic"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "kess_diplomat", "text": "You were Concord medical corps before the Compact, weren't you?" },
+        { "speaker": "rook_medic", "text": "...Yes. A long time ago." },
+        { "speaker": "kess_diplomat", "text": "I read your file once. Back when I had access to those files." },
+        { "speaker": "rook_medic", "text": "Then you know why I left." },
+        { "speaker": "kess_diplomat", "text": "I know why the file says you left. I'm asking why you actually left." },
+        { "speaker": "rook_medic", "text": "Because I couldn't look at my hands and see a doctor anymore." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_C2C_VEL_TAM_001",
+      "type": "crew_to_crew",
+      "priority": 5,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_vel_tam_connected", "int_vel_tam_distant"],
+      "requires_crew": ["vel_remnant_scientist", "tam_technician"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "tam_technician", "text": "Vel? My implants are doing that thing again. The harmonic." },
+        { "speaker": "vel_remnant_scientist", "text": "I know. I can feel it from across the ship." },
+        { "speaker": "tam_technician", "text": "You can feel my implants?" },
+        { "speaker": "vel_remnant_scientist", "text": "I can feel what your implants are connected to. There is a difference." },
+        { "speaker": "tam_technician", "text": "That's... both amazing and deeply unsettling." },
+        { "speaker": "vel_remnant_scientist", "text": "Most truths about the Nexus are." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_C2C_OSHA_ROOK_001",
+      "type": "crew_to_crew",
+      "priority": 4,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_osha_rook_respect", "int_osha_rook_friction"],
+      "requires_crew": ["dr_yema_osha", "rook_medic"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "dr_yema_osha", "text": "Your field sutures are excellent. Military training?" },
+        { "speaker": "rook_medic", "text": "Something like that. Your pathogen containment protocols are... thorough." },
+        { "speaker": "dr_yema_osha", "text": "I learned the hard way. My crew—" },
+        { "speaker": "rook_medic", "text": "You don't have to explain. I know what it's like to carry that." },
+        { "speaker": "dr_yema_osha", "text": "Do you? Or do you just know what it's like to carry something different and call it the same?" }
+      ],
+      "captain_options": [
+        {
+          "label": "[Encourage] 'You both have experience. Use it together.'",
+          "outcome": {
+            "narrative": "Osha extends her hand. Rook takes it — carefully, like he's not sure he deserves to. Two medics who know too much about what happens when healing fails.",
+            "loyalty_delta": { "dr_yema_osha": 2, "rook_medic": 3 },
+            "morale_delta": { "rook_medic": 2 },
+            "sets_flag": "int_osha_rook_respect"
+          }
+        },
+        {
+          "label": "[Redirect] 'We need medics, not therapists. Keep it professional.'",
+          "outcome": {
+            "narrative": "Both fall silent. They'll work together — they're professionals. But the moment of connection is gone.",
+            "loyalty_delta": {},
+            "morale_delta": { "dr_yema_osha": -1 },
+            "sets_flag": "int_osha_rook_friction"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_C2C_KESS_OSS_001",
+      "type": "crew_to_crew",
+      "priority": 4,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_kess_oss_understanding", "int_kess_oss_clash"],
+      "requires_crew": ["kess_diplomat", "oss_navigator_pilot"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "kess_diplomat", "text": "Your course deviation added six hours to our transit. Protocol says—" },
+        { "speaker": "oss_navigator_pilot", "text": "Protocol says a lot of things. The asteroid field I dodged says I'm alive." },
+        { "speaker": "kess_diplomat", "text": "You could have flagged it. I could have calculated—" },
+        { "speaker": "oss_navigator_pilot", "text": "Calculated what? The optimal speed at which to fly into a rock? I don't do things by committee." },
+        { "speaker": "kess_diplomat", "text": "That's exactly the problem." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Side with Oss] 'In the pilot's chair, instinct saves lives.'",
+          "outcome": {
+            "narrative": "Oss grins. Kess's lips thin, but she nods. 'Fine. But next time, a heads-up.' It's not agreement — it's a ceasefire.",
+            "loyalty_delta": { "oss_navigator_pilot": 3, "kess_diplomat": -1 },
+            "morale_delta": {},
+            "sets_flag": "int_kess_oss_understanding"
+          }
+        },
+        {
+          "label": "[Side with Kess] 'Communication keeps the crew safe. Both of you.'",
+          "outcome": {
+            "narrative": "Kess straightens. Oss rolls her eyes but doesn't argue. The diplomat won this round.",
+            "loyalty_delta": { "kess_diplomat": 3, "oss_navigator_pilot": -1 },
+            "morale_delta": {},
+            "sets_flag": "int_kess_oss_clash"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_C2C_GENERIC_RECKLESS_PRAGMATIC_001",
+      "type": "crew_to_crew",
+      "priority": 2,
+      "repeatable": true,
+      "requires_flags": [],
+      "excludes_flags": [],
+      "requires_crew": [],
+      "requires_any_trait": ["reckless", "pragmatic"],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "any_reckless", "text": "If we'd hit the boost sooner, we would've cleared that debris field clean." },
+        { "speaker": "any_pragmatic", "text": "If we'd hit the boost sooner, we would've lost the port stabilizer." },
+        { "speaker": "any_reckless", "text": "Maybe. But we'd have a better story." },
+        { "speaker": "any_pragmatic", "text": "I prefer stories where the ship is intact at the end." }
+      ],
+      "captain_options": null
+    },
+
+    {
+      "id": "INT_C2C_GENERIC_VOCAL_HAUNTED_001",
+      "type": "crew_to_crew",
+      "priority": 2,
+      "repeatable": true,
+      "requires_flags": [],
+      "excludes_flags": [],
+      "requires_crew": [],
+      "requires_any_trait": ["vocal", "haunted"],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "any_vocal", "text": "You never talk about what happened before. Don't you think the crew deserves to know?" },
+        { "speaker": "any_haunted", "text": "No." },
+        { "speaker": "any_vocal", "text": "That's it? Just 'no'?" },
+        { "speaker": "any_haunted", "text": "Some things don't get better when you talk about them. Some things just get louder." }
+      ],
+      "captain_options": null
+    },
+
+
+    {
+      "id": "INT_121_OSS_001",
+      "type": "captain_one_on_one",
+      "priority": 7,
+      "repeatable": false,
+      "requires_flags": ["int_oss_roots_acknowledged"],
+      "excludes_flags": ["int_oss_confided_blackop"],
+      "requires_crew": ["oss_navigator_pilot"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 45,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "oss_navigator_pilot", "text": "{captain}. Got a minute?" },
+        { "speaker": "oss_navigator_pilot", "text": "You asked about the Drifter routes. The truth is, I know those routes because I grew up on the freeports they connect." },
+        { "speaker": "oss_navigator_pilot", "text": "One of those freeports doesn't exist anymore. The Concord Assembly destroyed it. I was the only one who made it out." },
+        { "speaker": "oss_navigator_pilot", "text": "I'm the only proof it ever happened. That's why certain people want me quiet." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Support] 'You're safe on this ship. That's a promise.'",
+          "outcome": {
+            "narrative": "Oss searches your face for the lie. She doesn't find one. 'I'm going to hold you to that, {captain}.' For the first time, her voice doesn't sound like she's already planning her escape.",
+            "loyalty_delta": { "oss_navigator_pilot": 8 },
+            "morale_delta": { "oss_navigator_pilot": 5 },
+            "sets_flag": "int_oss_confided_blackop"
+          }
+        },
+        {
+          "label": "[Honest] 'I can't promise safety. But I won't hand you over.'",
+          "outcome": {
+            "narrative": "Oss nods slowly. 'That's actually more reassuring than a promise. Promises break. Intentions don't — not from people like you.'",
+            "loyalty_delta": { "oss_navigator_pilot": 6 },
+            "morale_delta": { "oss_navigator_pilot": 3 },
+            "sets_flag": "int_oss_confided_blackop"
+          }
+        },
+        {
+          "label": "[Practical] 'That's useful intel. The Concord won't expect us to know.'",
+          "outcome": {
+            "narrative": "Something shutters behind Oss's eyes. 'Right. Intel.' She stands and leaves. You've gained information. You may have lost something else.",
+            "loyalty_delta": { "oss_navigator_pilot": -4 },
+            "morale_delta": { "oss_navigator_pilot": -3 },
+            "sets_flag": "int_oss_confided_blackop"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_SERA_001",
+      "type": "captain_one_on_one",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": ["int_sera_dorin_vreth_tension"],
+      "excludes_flags": ["int_sera_opened_up"],
+      "requires_crew": ["sera_soldier"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 50,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "sera_soldier", "text": "I need to tell you something about Brennar VI, {captain}." },
+        { "speaker": "sera_soldier", "text": "Those garrison insignia we saw — I recognized them because they were mine. I was the commanding officer." },
+        { "speaker": "sera_soldier", "text": "I was ordered to annex the settlement. I chose not to. The soldiers I commanded... I stopped them myself." },
+        { "speaker": "sera_soldier", "text": "Dorin doesn't know. He thinks the garrison just withdrew." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Accept] 'You made the right call. That's what matters now.'",
+          "outcome": {
+            "narrative": "Sera's posture breaks for just a moment — shoulders dropping, breath releasing. She straightens again, but something is different. Lighter. 'Thank you, {captain}. I needed to hear that from someone who isn't me.'",
+            "loyalty_delta": { "sera_soldier": 8 },
+            "morale_delta": { "sera_soldier": 5 },
+            "sets_flag": "int_sera_opened_up"
+          }
+        },
+        {
+          "label": "[Question] 'Dorin deserves to know eventually.'",
+          "outcome": {
+            "narrative": "'I know,' Sera says. 'I've known since Brennar. I just... I don't know how to be the person who saved him and the person who killed her own squad. Not to the same person.' She looks away. 'But you're right.'",
+            "loyalty_delta": { "sera_soldier": 4 },
+            "morale_delta": { "sera_soldier": -2 },
+            "sets_flag": "int_sera_opened_up"
+          }
+        },
+        {
+          "label": "[Cold] 'Your past is your problem. Just do your job.'",
+          "outcome": {
+            "narrative": "Sera snaps back to attention. 'Yes, Captain.' The walls go up — thick, military-grade. You won't be hearing from her again.",
+            "loyalty_delta": { "sera_soldier": -6 },
+            "morale_delta": { "sera_soldier": -4 },
+            "sets_flag": "int_sera_opened_up"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_DORIN_001",
+      "type": "captain_one_on_one",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_dorin_drive_admission"],
+      "requires_crew": ["dorin_engineer"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 50,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "mid",
+      "dialogue": [
+        { "speaker": "dorin_engineer", "text": "You've seen how I work, {captain}. I fix things. That's what I do." },
+        { "speaker": "dorin_engineer", "text": "But I wasn't always a repair tech. Before the settlement, I was a Vreth military engineer." },
+        { "speaker": "dorin_engineer", "text": "I built drive systems. Good ones. The kind that let capital ships jump into civilian sectors before anyone can send a warning." },
+        { "speaker": "dorin_engineer", "text": "One of those drives was used to jump into Brennar VI. My home." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Compassion] 'You didn't pull the trigger. The Vreth did.'",
+          "outcome": {
+            "narrative": "Dorin's hands stop moving — the first time you've seen them still. 'I built the gun,' he says quietly. Then: 'But thank you for saying that.' He goes back to work. The silence between you feels different now. Warmer.",
+            "loyalty_delta": { "dorin_engineer": 7 },
+            "morale_delta": { "dorin_engineer": 3 },
+            "sets_flag": "int_dorin_drive_admission"
+          }
+        },
+        {
+          "label": "[Direct] 'That knowledge is valuable here. Make it count.'",
+          "outcome": {
+            "narrative": "Dorin nods. Pragmatic to pragmatic. 'I plan to.' It's not absolution, but it's purpose. Sometimes that's enough.",
+            "loyalty_delta": { "dorin_engineer": 4 },
+            "morale_delta": { "dorin_engineer": 2 },
+            "sets_flag": "int_dorin_drive_admission"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_KESS_001",
+      "type": "captain_one_on_one",
+      "priority": 7,
+      "repeatable": false,
+      "requires_flags": ["int_kess_concord_reflected"],
+      "excludes_flags": ["int_kess_reclamation_reveal"],
+      "requires_crew": ["kess_diplomat"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 55,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "kess_diplomat", "text": "{captain}, you asked about my history with the Assembly. I think it's time you knew." },
+        { "speaker": "kess_diplomat", "text": "I didn't just work for the Concord. I designed the Reclamation Division's operational protocols." },
+        { "speaker": "kess_diplomat", "text": "Every hidden facility, every suppressed record, every officer who signed off on making evidence disappear — I wrote the playbook." },
+        { "speaker": "kess_diplomat", "text": "I left because they started using those protocols on people instead of documents." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Trust] 'That took courage. Both the leaving and the telling.'",
+          "outcome": {
+            "narrative": "Kess blinks — you've surprised her. Bureaucrats don't expect to be understood. 'I've been running from what I built for three years. Maybe it's time to start dismantling it instead.' Her eyes are sharp with purpose.",
+            "loyalty_delta": { "kess_diplomat": 8 },
+            "morale_delta": { "kess_diplomat": 4 },
+            "sets_flag": "int_kess_reclamation_reveal"
+          }
+        },
+        {
+          "label": "[Strategic] 'Those protocols could be useful to us.'",
+          "outcome": {
+            "narrative": "Kess stiffens. 'I didn't tell you this so you could weaponize it.' A pause. 'But... yes. Knowing how they operate gives us an edge.' The diplomat in her recognizes the logic even as the person in her recoils.",
+            "loyalty_delta": { "kess_diplomat": 2 },
+            "morale_delta": { "kess_diplomat": -2 },
+            "sets_flag": "int_kess_reclamation_reveal"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_VEL_001",
+      "type": "captain_one_on_one",
+      "priority": 7,
+      "repeatable": false,
+      "requires_flags": ["int_vel_nexus_noticed"],
+      "excludes_flags": ["int_vel_builder_hint"],
+      "requires_crew": ["vel_remnant_scientist"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 50,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "vel_remnant_scientist", "text": "{captain}. I want to show you something." },
+        { "speaker": "vel_remnant_scientist", "text": "When I speak about the Nexus builders, I use present tense. You've noticed." },
+        { "speaker": "vel_remnant_scientist", "text": "Most assume it's an affectation. An academic quirk." },
+        { "speaker": "vel_remnant_scientist", "text": "It is not a quirk." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Gentle] 'Take your time. I'm listening.'",
+          "outcome": {
+            "narrative": "Vel's expression shifts — a crack in that unsettling patience. 'You are the first person in a very long time who has said that and meant it.' They don't explain further. Not yet. But the silence between you feels like a promise.",
+            "loyalty_delta": { "vel_remnant_scientist": 7 },
+            "morale_delta": { "vel_remnant_scientist": 3 },
+            "sets_flag": "int_vel_builder_hint",
+            "resonance_delta": 2
+          }
+        },
+        {
+          "label": "[Press] 'Are you saying you're one of them?'",
+          "outcome": {
+            "narrative": "Vel tilts their head. 'I am saying that the distinction between studying the builders and being one is less clear than you might assume.' A non-answer that answers everything. The Nexus hums faintly, as if in agreement.",
+            "loyalty_delta": { "vel_remnant_scientist": 4 },
+            "morale_delta": {},
+            "sets_flag": "int_vel_builder_hint",
+            "resonance_delta": 3
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_TAM_001",
+      "type": "captain_one_on_one",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_tam_implant_questioned"],
+      "requires_crew": ["tam_technician"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 45,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "tam_technician", "text": "Hey, {captain}? Can I ask you something weird?" },
+        { "speaker": "tam_technician", "text": "My implants. I don't remember getting them. I woke up on that derelict and they were just... part of me." },
+        { "speaker": "tam_technician", "text": "They talk to machines. Not metaphorically — I can feel data like texture. Code like sound." },
+        { "speaker": "tam_technician", "text": "Do you think something was done to me? Or do you think I was always like this?" }
+      ],
+      "captain_options": [
+        {
+          "label": "[Reassure] 'Whatever you were before, you're crew now. That's what matters.'",
+          "outcome": {
+            "narrative": "Tam smiles — quick, bright, genuine. 'Yeah. Okay. That's a good answer.' She hops off the console and heads back to work, lighter. The question isn't answered, but it doesn't weigh as much anymore.",
+            "loyalty_delta": { "tam_technician": 6 },
+            "morale_delta": { "tam_technician": 5 },
+            "sets_flag": "int_tam_implant_questioned"
+          }
+        },
+        {
+          "label": "[Curious] 'Have you tried interfacing with the ship's Nexus systems?'",
+          "outcome": {
+            "narrative": "Tam's eyes widen. 'I... no. I was afraid to.' A pause. 'But you're right. If I'm going to understand what I am, that might be where I start.' The curiosity in her voice wins over the fear. Barely.",
+            "loyalty_delta": { "tam_technician": 4 },
+            "morale_delta": { "tam_technician": 2 },
+            "sets_flag": "int_tam_implant_questioned",
+            "resonance_delta": 1
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_ROOK_001",
+      "type": "captain_one_on_one",
+      "priority": 6,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_rook_experiments_revealed"],
+      "requires_crew": ["rook_medic"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 50,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "rook_medic", "text": "{captain}. I owe you honesty." },
+        { "speaker": "rook_medic", "text": "Before the Compact, I was Concord medical corps. Surgical division. The kind that doesn't appear in public records." },
+        { "speaker": "rook_medic", "text": "I performed experimental procedures on Drifter prisoners. They told me it was research. I told myself it was necessary." },
+        { "speaker": "rook_medic", "text": "Those prisoners are still alive. Some of them are looking for me." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Compassion] 'People change. What you're doing now — that matters.'",
+          "outcome": {
+            "narrative": "Rook stares at the floor for a long time. When he looks up, his eyes are wet. 'Fifteen years of penance and you're the first person who's said that.' He takes a breath. 'I won't waste it, {captain}.'",
+            "loyalty_delta": { "rook_medic": 8 },
+            "morale_delta": { "rook_medic": 5 },
+            "sets_flag": "int_rook_experiments_revealed"
+          }
+        },
+        {
+          "label": "[Honest] 'That's a heavy burden. I can't absolve you, but I won't judge you.'",
+          "outcome": {
+            "narrative": "'I'm not asking for absolution,' Rook says. 'I'm asking if you still want me on your ship.' The question hangs. You nod. He nods back. It's enough.",
+            "loyalty_delta": { "rook_medic": 6 },
+            "morale_delta": { "rook_medic": 3 },
+            "sets_flag": "int_rook_experiments_revealed"
+          }
+        },
+        {
+          "label": "[Hard] 'If your past endangers this crew, I need to know immediately.'",
+          "outcome": {
+            "narrative": "Rook flinches. 'Understood, Captain.' The military formality is back — a shield he knows how to wear. He'll keep you informed. He won't keep you close.",
+            "loyalty_delta": { "rook_medic": -2 },
+            "morale_delta": { "rook_medic": -3 },
+            "sets_flag": "int_rook_experiments_revealed"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_OSHA_001",
+      "type": "captain_one_on_one",
+      "priority": 7,
+      "repeatable": false,
+      "requires_flags": [],
+      "excludes_flags": ["int_osha_pathogen_truth"],
+      "requires_crew": ["dr_yema_osha"],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": 55,
+      "max_loyalty": null,
+      "min_morale": null,
+      "max_morale": null,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "dr_yema_osha", "text": "{captain}, I need to correct something. About the pathogen that killed my research crew." },
+        { "speaker": "dr_yema_osha", "text": "I told you it was an accident. A containment failure. That was true — technically." },
+        { "speaker": "dr_yema_osha", "text": "What I didn't tell you is that my team engineered the pathogen. From Remnant biosamples. I led the research." },
+        { "speaker": "dr_yema_osha", "text": "I was the only one immune because I built the immunity into myself first. My crew didn't know the risks because I didn't tell them the risks." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Forgive] 'You've carried this long enough. Let it go.'",
+          "outcome": {
+            "narrative": "Osha's composure finally breaks. The idealist, the scientist, the woman who treats every patient like a penance — she cries. Quietly. Completely. When it passes, something has healed. Not everything. But enough. 'Thank you, {captain}. I'll spend the rest of my career making sure no one else makes my mistakes.'",
+            "loyalty_delta": { "dr_yema_osha": 10 },
+            "morale_delta": { "dr_yema_osha": 5 },
+            "sets_flag": "int_osha_pathogen_truth"
+          }
+        },
+        {
+          "label": "[Firm] 'That's a serious breach of trust. We'll discuss this further.'",
+          "outcome": {
+            "narrative": "Osha nods. She expected this. Maybe she needed it. 'I understand. I'll submit a full report on the pathogen and my immunity. Use it however you need.' Her voice is steady. The confession was the hard part.",
+            "loyalty_delta": { "dr_yema_osha": 2 },
+            "morale_delta": { "dr_yema_osha": -3 },
+            "sets_flag": "int_osha_pathogen_truth"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "INT_121_GENERIC_MORALE_001",
+      "type": "captain_one_on_one",
+      "priority": 3,
+      "repeatable": true,
+      "requires_flags": [],
+      "excludes_flags": [],
+      "requires_crew": [],
+      "requires_any_trait": [],
+      "requires_event_tags": [],
+      "requires_outcome_level": null,
+      "min_loyalty": null,
+      "max_loyalty": null,
+      "min_morale": 0,
+      "max_morale": 35,
+      "depth_zone": "any",
+      "dialogue": [
+        { "speaker": "any_haunted", "text": "{captain}. Can I be honest?" },
+        { "speaker": "any_haunted", "text": "I'm not sure how much longer I can keep this up. The jumps, the fights, the constant uncertainty." },
+        { "speaker": "any_haunted", "text": "I signed on because I believed in what we're doing. I still do. But believing and enduring are different things." }
+      ],
+      "captain_options": [
+        {
+          "label": "[Rally] 'We're in this together. I won't let this crew fall apart.'",
+          "outcome": {
+            "narrative": "A nod. Not conviction — not yet — but something close to it. 'Okay, {captain}. Okay.' They head back to their station. The weight is still there, but it's shared now.",
+            "loyalty_delta": { "all": 2 },
+            "morale_delta": { "all": 5 },
+            "sets_flag": null
+          }
+        },
+        {
+          "label": "[Honest] 'I can't promise it gets easier. But I need you here.'",
+          "outcome": {
+            "narrative": "'That's the most honest thing anyone's said to me in a while.' They almost smile. Almost. 'I'll stay. Just... don't forget we're people back here, not just stat sheets.'",
+            "loyalty_delta": { "all": 3 },
+            "morale_delta": { "all": 3 },
+            "sets_flag": null
+          }
+        }
+      ]
+    }
+  ]
+}
+;
 const DATA_ENEMIES = 
 [];
 const DATA_EVENTS = 
@@ -19769,6 +20773,7 @@ function createShipState() {
 
 function createCaptainState() {
   return {
+    name: '',
     abilities: [],
     stats: {
       command: 1,
@@ -19806,6 +20811,10 @@ function createRunState() {
     activeEventStep: 0,
     lastStepOutcomes: {},
     activeCombat: null,
+    activeInteraction: null,
+    interactionResolved: false,
+    seenInteractionIds: [],
+    lastInteractionDepth: -1,
     atDepot: false,        // currently docked at a trade post
     depotNodeId: null,     // node id of current depot
   };
@@ -19953,7 +20962,14 @@ const Registry = {
     if (this.modules.size === 0) this._loadFallbackModules();
 
     this._loadEventLibrary();
-    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crewArchetypes.size} archetypes, ${this.crewNamed.size} named crew, ${this.eventLibrary.length} events, ${this.enemies.size} enemies`);
+
+    // Initialize crew interaction system
+    if (typeof InteractionEngine !== 'undefined' && typeof DATA_CREW_INTERACTIONS !== 'undefined') {
+      InteractionEngine.init(DATA_CREW_INTERACTIONS);
+    }
+
+    const intCount = typeof InteractionEngine !== 'undefined' ? InteractionEngine._interactionLibrary.length : 0;
+    console.log(`Registry loaded: ${this.weapons.size} weapons, ${this.modules.size} modules, ${this.crewArchetypes.size} archetypes, ${this.crewNamed.size} named crew, ${this.eventLibrary.length} events, ${intCount} interactions, ${this.enemies.size} enemies`);
   },
 
   _mergeArrays(primary, secondary) {
@@ -20617,6 +21633,31 @@ const EventEngine = {
     if (event.id && event.id !== 'PLACEHOLDER' && !event.repeatable) {
       if (!GameState.run.seenEventIds.includes(event.id)) {
         GameState.run.seenEventIds.push(event.id);
+      }
+    }
+
+    // Check for crew interaction trigger before clearing event state
+    if (typeof InteractionEngine !== 'undefined') {
+      const interaction = InteractionEngine.checkForInteraction(
+        event, event._lastOutcomeLevel || 'success'
+      );
+
+      if (interaction) {
+        GameState.run.activeInteraction = interaction;
+        GameState.run.interactionResolved = false;
+        GameState.run.lastInteractionDepth = GameState.run.depth;
+        if (!interaction.repeatable) {
+          GameState.run.seenInteractionIds.push(interaction.id);
+        }
+        // Clear event state but don't transition screens
+        GameState.run.activeEvent = null;
+        GameState.run.activeEventStep = 0;
+        GameState.run.lastStepOutcomes = {};
+        CrewEngine.tickAfterEvent();
+        ShipEngine.updateVisualStage();
+        GameState.save();
+        Game.render();
+        return; // InteractionUI takes over
       }
     }
 
@@ -21557,6 +22598,309 @@ const CrewEngine = {
                   'Holt', 'Reis', 'Voss', 'Kade', 'Cross', 'Lorn', 'Shade', 'Peak', 'Drift', 'Stone'];
     return first[Math.floor(Math.random() * first.length)] + ' ' +
            last[Math.floor(Math.random() * last.length)];
+  },
+};
+
+/* Void Meridian — Crew Interaction Engine */
+
+const InteractionEngine = {
+  _interactionLibrary: [],
+  _profileLibrary: {},
+
+  // ─── Initialization ──────────────────────────────────────────
+
+  init(data) {
+    if (!data) return;
+    this._interactionLibrary = data.interactions || [];
+    this._profileLibrary = data.personality_profiles || {};
+  },
+
+  // ─── Check for interaction after event ───────────────────────
+
+  checkForInteraction(completedEvent, outcomeLevel) {
+    const eligible = this._getEligibleInteractions(completedEvent, outcomeLevel);
+    if (eligible.length === 0) return null;
+
+    const run = GameState.run;
+
+    // Cooldown: skip if last interaction was < 2 nodes ago
+    // unless best candidate has priority >= 8 (critical story)
+    const bestPriority = Math.max(...eligible.map(i => i.priority || 5));
+    if (run.lastInteractionDepth >= 0 &&
+        run.depth - run.lastInteractionDepth < 2 &&
+        bestPriority < 8) {
+      return null;
+    }
+
+    // Probability gate: base 40% + 5% per intuition stat
+    const intuition = run.captain.stats.intuition || 1;
+    const chance = 0.40 + (intuition - 1) * 0.05;
+    if (bestPriority < 8 && Math.random() > chance) return null;
+
+    return this._weightedSelect(eligible, completedEvent);
+  },
+
+  // ─── Filter eligible interactions ────────────────────────────
+
+  _getEligibleInteractions(completedEvent, outcomeLevel) {
+    const run = GameState.run;
+    const maxDepth = run.map ? run.map.maxDepth : 30;
+    const depthZone = Registry._getDepthZone(run.depth, maxDepth);
+    const livingCrew = run.crew.filter(c => !c.dead);
+
+    return this._interactionLibrary.filter(int => {
+      // Already seen (non-repeatable)
+      if (!int.repeatable && run.seenInteractionIds.includes(int.id)) return false;
+
+      // Flag gating
+      if (int.requires_flags && int.requires_flags.length > 0) {
+        if (!int.requires_flags.every(f => run.runFlags.includes(f))) return false;
+      }
+      if (int.excludes_flags && int.excludes_flags.length > 0) {
+        if (int.excludes_flags.some(f => run.runFlags.includes(f))) return false;
+      }
+
+      // Depth zone
+      if (int.depth_zone && int.depth_zone !== 'any') {
+        if (int.depth_zone !== depthZone) return false;
+      }
+
+      // Required specific crew (must all be alive)
+      if (int.requires_crew && int.requires_crew.length > 0) {
+        for (const crewId of int.requires_crew) {
+          if (!livingCrew.some(c => c.id === crewId)) return false;
+        }
+      }
+
+      // Required traits — for crew_to_crew, ALL listed traits must be represented
+      // by at least one unique crew member each. For other types, any match suffices.
+      if (int.requires_any_trait && int.requires_any_trait.length > 0) {
+        if (int.type === 'crew_to_crew') {
+          // Each trait needs a distinct crew member
+          const availableCrew = [...livingCrew];
+          for (const trait of int.requires_any_trait) {
+            const idx = availableCrew.findIndex(c => c.personality === trait);
+            if (idx === -1) return false;
+            availableCrew.splice(idx, 1); // remove so same crew can't satisfy two traits
+          }
+        } else {
+          if (!livingCrew.some(c => int.requires_any_trait.includes(c.personality))) return false;
+        }
+      }
+
+      // Event tag match (for event_reaction type)
+      if (int.requires_event_tags && int.requires_event_tags.length > 0) {
+        const eventTags = completedEvent.tags || [];
+        const eventFaction = completedEvent.faction_context || 'none';
+        const eventType = completedEvent.node_type || '';
+        // Check if any required tag is in event tags, faction, or node type
+        const hasMatch = int.requires_event_tags.some(tag =>
+          eventTags.includes(tag) ||
+          eventFaction === tag ||
+          eventType === tag ||
+          eventType.includes(tag)
+        );
+        if (!hasMatch) return false;
+      }
+
+      // Outcome level match
+      if (int.requires_outcome_level && int.requires_outcome_level !== outcomeLevel) return false;
+
+      // Loyalty/morale thresholds — check against first required crew, or any crew if generic
+      const thresholdTarget = (int.requires_crew && int.requires_crew.length > 0)
+        ? livingCrew.find(c => c.id === int.requires_crew[0])
+        : null;
+
+      if (int.min_loyalty != null) {
+        if (thresholdTarget) {
+          if (thresholdTarget.loyalty < int.min_loyalty) return false;
+        } else {
+          if (!livingCrew.some(c => c.loyalty >= int.min_loyalty)) return false;
+        }
+      }
+      if (int.max_loyalty != null) {
+        if (thresholdTarget) {
+          if (thresholdTarget.loyalty > int.max_loyalty) return false;
+        } else {
+          if (!livingCrew.some(c => c.loyalty <= int.max_loyalty)) return false;
+        }
+      }
+      if (int.min_morale != null) {
+        if (thresholdTarget) {
+          if (thresholdTarget.morale < int.min_morale) return false;
+        } else {
+          if (!livingCrew.some(c => c.morale >= int.min_morale)) return false;
+        }
+      }
+      if (int.max_morale != null) {
+        if (thresholdTarget) {
+          if (thresholdTarget.morale > int.max_morale) return false;
+        } else {
+          if (!livingCrew.some(c => c.morale <= int.max_morale)) return false;
+        }
+      }
+
+      return true;
+    });
+  },
+
+  // ─── Weighted selection ──────────────────────────────────────
+
+  _weightedSelect(eligible, completedEvent) {
+    const livingCrew = GameState.run.crew.filter(c => !c.dead);
+    const eventFaction = completedEvent.faction_context || 'none';
+
+    const weighted = eligible.map(int => {
+      let weight = int.priority || 5;
+
+      // 2x bonus for Type A when event faction matches crew faction affiliation
+      if (int.type === 'event_reaction' && eventFaction !== 'none') {
+        if (int.requires_crew && int.requires_crew.length > 0) {
+          const member = livingCrew.find(c => c.id === int.requires_crew[0]);
+          if (member && member.factionAffiliation === eventFaction) {
+            weight *= 2;
+          }
+        }
+      }
+
+      return { interaction: int, weight };
+    });
+
+    const totalWeight = weighted.reduce((s, w) => s + w.weight, 0);
+    let roll = Math.random() * totalWeight;
+    for (const w of weighted) {
+      roll -= w.weight;
+      if (roll <= 0) return JSON.parse(JSON.stringify(w.interaction));
+    }
+    return JSON.parse(JSON.stringify(weighted[weighted.length - 1].interaction));
+  },
+
+  // ─── Player selects a captain option ─────────────────────────
+
+  selectOption(optionIndex) {
+    const interaction = GameState.run.activeInteraction;
+    if (!interaction || !interaction.captain_options) return;
+    if (optionIndex >= interaction.captain_options.length) return;
+
+    const option = interaction.captain_options[optionIndex];
+    interaction._selectedOption = option;
+    interaction._selectedIndex = optionIndex;
+    GameState.run.interactionResolved = true;
+
+    this._applyOutcome(option.outcome);
+    GameState.save();
+    Game.render();
+  },
+
+  // ─── Apply interaction outcome ───────────────────────────────
+
+  _applyOutcome(outcome) {
+    if (!outcome) return;
+    const run = GameState.run;
+
+    // Targeted loyalty deltas
+    if (outcome.loyalty_delta) {
+      for (const [crewId, delta] of Object.entries(outcome.loyalty_delta)) {
+        if (crewId === 'all') {
+          for (const member of run.crew) {
+            if (!member.dead) CrewEngine.adjustLoyalty(member, delta);
+          }
+        } else {
+          const member = run.crew.find(c => c.id === crewId);
+          if (member && !member.dead) CrewEngine.adjustLoyalty(member, delta);
+        }
+      }
+    }
+
+    // Targeted morale deltas
+    if (outcome.morale_delta) {
+      for (const [crewId, delta] of Object.entries(outcome.morale_delta)) {
+        if (crewId === 'all') {
+          CrewEngine.adjustMoraleAll(delta);
+        } else {
+          const member = run.crew.find(c => c.id === crewId);
+          if (member && !member.dead) {
+            member.morale = Math.max(0, Math.min(100, member.morale + delta));
+          }
+        }
+      }
+    }
+
+    // Set flag
+    if (outcome.sets_flag) {
+      if (!run.runFlags.includes(outcome.sets_flag)) {
+        run.runFlags.push(outcome.sets_flag);
+      }
+    }
+
+    // Resonance delta
+    if (outcome.resonance_delta) {
+      GameState.meta.resonance += outcome.resonance_delta;
+    }
+  },
+
+  // ─── Finish interaction and transition ───────────────────────
+
+  finishInteraction() {
+    GameState.run.activeInteraction = null;
+    GameState.run.interactionResolved = false;
+
+    // Check for hull death
+    if (GameState.run.ship.hull <= 0) {
+      GameState.endRun('hull_destroyed');
+      NexusEngine.accumulateRunResonance();
+      GameState.screen = 'gameOver';
+    } else if (GameState.run.atDepot) {
+      DepotUI.subScreen = 'menu';
+      GameState.screen = 'map';
+      Tabs.activeTab = 'event';
+    } else {
+      Tabs.switchTo('map');
+    }
+
+    GameState.save();
+    Game.render();
+  },
+
+  // ─── Token replacement ───────────────────────────────────────
+
+  _resolveTokens(text) {
+    if (!text) return '';
+    const captainName = GameState.run.captain.name || 'Captain';
+    return text.replace(/\{captain\}/g, captainName);
+  },
+
+  // ─── Resolve speaker ID to crew member ───────────────────────
+
+  _resolveSpeaker(speakerId) {
+    if (speakerId === 'captain') {
+      return {
+        name: GameState.run.captain.name || 'Captain',
+        emoji: '⚑',
+        personality: null,
+        role: 'captain',
+        _isCaptain: true,
+      };
+    }
+
+    // Generic trait-based speaker: "any_reckless", "any_stoic", etc.
+    if (speakerId.startsWith('any_')) {
+      const trait = speakerId.substring(4);
+      const living = GameState.run.crew.filter(c => !c.dead && c.personality === trait);
+      if (living.length > 0) {
+        return living[Math.floor(Math.random() * living.length)];
+      }
+      // Fallback: any living crew
+      const allLiving = GameState.run.crew.filter(c => !c.dead);
+      if (allLiving.length > 0) return allLiving[0];
+      return { name: 'Crew', emoji: '◻', personality: trait, role: 'unknown' };
+    }
+
+    // Specific crew ID
+    const member = GameState.run.crew.find(c => c.id === speakerId && !c.dead);
+    if (member) return member;
+
+    return { name: speakerId, emoji: '◻', personality: null, role: 'unknown' };
   },
 };
 
@@ -22989,6 +24333,12 @@ const EventUI = {
   },
 
   render(container) {
+    // Delegate to interaction UI if a crew interaction is active
+    if (GameState.run.activeInteraction) {
+      InteractionUI.render(container);
+      return;
+    }
+
     const screen = document.createElement('div');
     screen.className = 'screen';
 
@@ -23398,6 +24748,254 @@ const EventUI = {
   },
 };
 
+/* Void Meridian — Crew Interaction UI */
+
+const InteractionUI = {
+
+  // Trait colors for speaker names
+  TRAIT_COLORS: {
+    reckless:   '#e8634a',
+    stoic:      '#7a8b99',
+    vocal:      '#d4a843',
+    curious:    '#5cc4e6',
+    haunted:    '#8b6bb5',
+    pragmatic:  '#6b9b6b',
+    idealistic: '#c4829b',
+  },
+
+  TYPE_LABELS: {
+    event_reaction:    'CREW REACTION',
+    crew_to_crew:      'CREW TALK',
+    captain_one_on_one: 'PRIVATE CONVERSATION',
+  },
+
+  TYPE_COLORS: {
+    event_reaction:    'var(--text-secondary)',
+    crew_to_crew:      'var(--text-muted)',
+    captain_one_on_one: 'var(--text-accent)',
+  },
+
+  // ─── Main render ─────────────────────────────────────────────
+
+  render(container) {
+    const interaction = GameState.run.activeInteraction;
+    if (!interaction) return;
+
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    // If resolved (player chose option), show outcome
+    if (GameState.run.interactionResolved && interaction._selectedOption) {
+      this._renderResolved(screen, interaction);
+    } else if (!interaction.captain_options || interaction.captain_options.length === 0) {
+      // Passive interaction — show dialogue + continue
+      this._renderPassive(screen, interaction);
+    } else {
+      // Active interaction — show dialogue + captain options
+      this._renderActive(screen, interaction);
+    }
+
+    container.appendChild(screen);
+  },
+
+  // ─── Passive (no player choice needed) ───────────────────────
+
+  _renderPassive(screen, interaction) {
+    this._renderHeader(screen, interaction);
+    this._renderPersonalitySubheader(screen, interaction);
+    this._renderDialogue(screen, interaction);
+
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'btn-confirm';
+    continueBtn.style.marginTop = 'var(--space-md)';
+    continueBtn.textContent = 'CONTINUE';
+    continueBtn.addEventListener('click', () => InteractionEngine.finishInteraction());
+    screen.appendChild(continueBtn);
+  },
+
+  // ─── Active (captain must choose) ────────────────────────────
+
+  _renderActive(screen, interaction) {
+    this._renderHeader(screen, interaction);
+    this._renderPersonalitySubheader(screen, interaction);
+    this._renderDialogue(screen, interaction);
+
+    // Captain divider for crew_to_crew mediation
+    if (interaction.type === 'crew_to_crew') {
+      const divider = document.createElement('div');
+      divider.style.cssText = 'text-align:center; color:var(--text-muted); font-size:var(--font-size-sm); text-transform:uppercase; letter-spacing:0.1em; margin:var(--space-md) 0 var(--space-sm); border-top:1px solid var(--border); padding-top:var(--space-sm);';
+      divider.textContent = '⚑ CAPTAIN';
+      screen.appendChild(divider);
+    } else {
+      const divider = document.createElement('hr');
+      divider.className = 'divider';
+      screen.appendChild(divider);
+    }
+
+    // Captain options
+    for (let i = 0; i < interaction.captain_options.length; i++) {
+      const option = interaction.captain_options[i];
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = option.label;
+      const idx = i;
+      btn.addEventListener('click', () => InteractionEngine.selectOption(idx));
+      screen.appendChild(btn);
+    }
+  },
+
+  // ─── Resolved (outcome shown) ────────────────────────────────
+
+  _renderResolved(screen, interaction) {
+    this._renderHeader(screen, interaction);
+
+    // Show the choice made
+    const selectedOption = interaction._selectedOption;
+    if (selectedOption && selectedOption.label) {
+      const choiceEl = document.createElement('div');
+      choiceEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); margin-bottom:var(--space-sm); text-transform:uppercase;';
+      choiceEl.textContent = `▸ ${selectedOption.label}`;
+      screen.appendChild(choiceEl);
+    }
+
+    // Outcome narrative
+    if (selectedOption && selectedOption.outcome && selectedOption.outcome.narrative) {
+      const narrativeEl = document.createElement('div');
+      narrativeEl.className = 'narrative';
+      narrativeEl.innerHTML = EventUI._colorizeNarrative(
+        InteractionEngine._resolveTokens(selectedOption.outcome.narrative)
+      );
+      screen.appendChild(narrativeEl);
+    }
+
+    // Effects summary
+    const effects = this._summarizeOutcome(selectedOption ? selectedOption.outcome : null, interaction);
+    if (effects.length > 0) {
+      const effectsEl = document.createElement('div');
+      effectsEl.style.cssText = 'margin-top:var(--space-sm); color:var(--text-muted); font-size:var(--font-size-sm);';
+      effectsEl.innerHTML = effects.join('<br>');
+      screen.appendChild(effectsEl);
+    }
+
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'btn-confirm';
+    continueBtn.style.marginTop = 'var(--space-md)';
+    continueBtn.textContent = 'CONTINUE';
+    continueBtn.addEventListener('click', () => InteractionEngine.finishInteraction());
+    screen.appendChild(continueBtn);
+  },
+
+  // ─── Header ──────────────────────────────────────────────────
+
+  _renderHeader(screen, interaction) {
+    const header = document.createElement('div');
+    header.className = 'system-label';
+    header.style.cssText = `margin-bottom:var(--space-sm); color:${this.TYPE_COLORS[interaction.type] || 'var(--text-secondary)'};`;
+    header.textContent = this.TYPE_LABELS[interaction.type] || 'CREW INTERACTION';
+    screen.appendChild(header);
+  },
+
+  // ─── Personality subheader (Type C only) ─────────────────────
+
+  _renderPersonalitySubheader(screen, interaction) {
+    if (interaction.type !== 'captain_one_on_one') return;
+    if (!interaction.requires_crew || interaction.requires_crew.length === 0) return;
+
+    const member = GameState.run.crew.find(c => c.id === interaction.requires_crew[0] && !c.dead);
+    if (!member || !member.personalityDescription) return;
+
+    const desc = document.createElement('div');
+    desc.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); font-style:italic; margin-bottom:var(--space-md); line-height:1.4;';
+    desc.textContent = member.personalityDescription;
+    screen.appendChild(desc);
+  },
+
+  // ─── Dialogue lines ─────────────────────────────────────────
+
+  _renderDialogue(screen, interaction) {
+    if (!interaction.dialogue || interaction.dialogue.length === 0) return;
+
+    const dialogueArea = document.createElement('div');
+    dialogueArea.style.cssText = 'margin-bottom:var(--space-sm);';
+
+    let prevSpeakerId = null;
+    for (let i = 0; i < interaction.dialogue.length; i++) {
+      const line = interaction.dialogue[i];
+      const speaker = InteractionEngine._resolveSpeaker(line.speaker);
+      const isNewSpeaker = line.speaker !== prevSpeakerId;
+      prevSpeakerId = line.speaker;
+
+      const lineEl = document.createElement('div');
+
+      // Alternating indent for crew-to-crew
+      if (interaction.type === 'crew_to_crew' && i > 0) {
+        const isSecondSpeaker = line.speaker !== interaction.dialogue[0].speaker;
+        if (isSecondSpeaker) {
+          lineEl.style.marginLeft = '2em';
+        }
+      }
+
+      lineEl.style.cssText += 'margin-bottom:var(--space-sm); line-height:1.5;';
+
+      // Speaker name (only show when speaker changes)
+      if (isNewSpeaker) {
+        const nameEl = document.createElement('div');
+        const traitColor = this.TRAIT_COLORS[speaker.personality] || 'var(--text-accent)';
+        nameEl.style.cssText = `color:${traitColor}; font-size:var(--font-size-sm); font-weight:bold; margin-bottom:2px;`;
+        nameEl.textContent = `${speaker.emoji || '◻'} ${speaker.name}`;
+        lineEl.appendChild(nameEl);
+      }
+
+      // Dialogue text
+      const textEl = document.createElement('div');
+      textEl.style.cssText = 'color:var(--text-primary); padding-left:var(--space-sm);';
+      // Type A gets left border accent
+      if (interaction.type === 'event_reaction') {
+        textEl.style.cssText += 'border-left:2px solid var(--border); padding-left:var(--space-md);';
+      }
+      textEl.innerHTML = EventUI._colorizeNarrative(
+        InteractionEngine._resolveTokens(line.text)
+      );
+      lineEl.appendChild(textEl);
+
+      dialogueArea.appendChild(lineEl);
+    }
+
+    screen.appendChild(dialogueArea);
+  },
+
+  // ─── Effects summary ─────────────────────────────────────────
+
+  _summarizeOutcome(outcome, interaction) {
+    const effects = [];
+    if (!outcome) return effects;
+
+    if (outcome.loyalty_delta) {
+      for (const [crewId, delta] of Object.entries(outcome.loyalty_delta)) {
+        const name = crewId === 'all' ? 'All crew' :
+          (GameState.run.crew.find(c => c.id === crewId)?.name || crewId);
+        if (delta > 0) effects.push(`${name}: Loyalty +${delta}`);
+        if (delta < 0) effects.push(`${name}: Loyalty ${delta}`);
+      }
+    }
+
+    if (outcome.morale_delta) {
+      for (const [crewId, delta] of Object.entries(outcome.morale_delta)) {
+        const name = crewId === 'all' ? 'All crew' :
+          (GameState.run.crew.find(c => c.id === crewId)?.name || crewId);
+        if (delta > 0) effects.push(`${name}: Morale +${delta}`);
+        if (delta < 0) effects.push(`${name}: Morale ${delta}`);
+      }
+    }
+
+    if (outcome.resonance_delta) {
+      effects.push(`Resonance ${outcome.resonance_delta > 0 ? '+' : ''}${outcome.resonance_delta}`);
+    }
+
+    return effects;
+  },
+};
+
 /* Void Meridian — Crew Tab Renderer */
 
 const CrewUI = {
@@ -23658,6 +25256,7 @@ const ReconstructionUI = {
   systems: null,      // { weapons: 0, propulsion: 0, sensors: 0, shields_armor: 0, cargo_hold: 0, crew_quarters: 0 }
   captainStats: null,  // { command: 0, intuition: 0, resolve: 0 }
   captainAbility: null,
+  captainName: '',
   crewChoices: null,   // [{ role, quality }]  — up to 3 starter crew picks
   supplies: null,      // { credits: 0, fuel: 0 }
   selectedWeaponId: null,
@@ -23735,6 +25334,7 @@ const ReconstructionUI = {
     this.systems = { weapons: 0, propulsion: 0, sensors: 0, shields_armor: 0, cargo_hold: 0, crew_quarters: 0 };
     this.captainStats = { command: 0, intuition: 0, resolve: 0 };
     this.captainAbility = null;
+    this.captainName = '';
     this.crewChoices = [];
     this.supplies = { credits: 0, fuel: 0 };
     this.selectedWeaponId = null;
@@ -23950,11 +25550,36 @@ const ReconstructionUI = {
 
   _renderCaptain(screen) {
     this._renderPhaseHeader(screen, 'CAPTAIN',
-      'Your captain\'s stats affect skill checks throughout the game. Stats also cost salvage points. You must choose one starting ability before proceeding.');
+      'Name your captain, allocate stats, and choose a starting ability.');
 
     const area = document.createElement('div');
     area.setAttribute('data-recon-scroll', '');
     area.style.cssText = 'width:100%; max-width:400px; overflow-y:auto; flex-shrink:1;';
+
+    // Captain name input
+    const nameHeader = document.createElement('div');
+    nameHeader.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:var(--space-sm);';
+    nameHeader.textContent = 'CAPTAIN NAME';
+    area.appendChild(nameHeader);
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.maxLength = 20;
+    nameInput.placeholder = 'ENTER NAME';
+    nameInput.value = this.captainName;
+    nameInput.style.cssText = 'width:100%; padding:var(--space-sm) var(--space-md); background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); font-family:inherit; font-size:var(--font-size-base); letter-spacing:0.05em; margin-bottom:var(--space-md); box-sizing:border-box;';
+    nameInput.addEventListener('input', (e) => {
+      this.captainName = e.target.value;
+      // Update button state without full rerender to preserve focus
+      const nextBtn = document.querySelector('[data-captain-next]');
+      if (nextBtn) {
+        const canProceed = this.captainAbility && this.captainName.trim().length > 0;
+        nextBtn.style.opacity = canProceed ? '1' : '0.3';
+        nextBtn.style.pointerEvents = canProceed ? 'auto' : 'none';
+        nextBtn.textContent = !this.captainName.trim() ? 'ENTER NAME' : !this.captainAbility ? 'SELECT ABILITY' : 'NEXT →';
+      }
+    });
+    area.appendChild(nameInput);
 
     // Stats
     const statsHeader = document.createElement('div');
@@ -24049,7 +25674,7 @@ const ReconstructionUI = {
 
     screen.appendChild(area);
 
-    // Custom nav — disable NEXT if no ability selected
+    // Custom nav — disable NEXT if no ability selected or no name entered
     const nav = document.createElement('div');
     nav.style.cssText = 'display:flex; gap:var(--space-sm); width:100%; max-width:400px; margin-top:var(--space-lg);';
 
@@ -24060,13 +25685,15 @@ const ReconstructionUI = {
     back.addEventListener('click', () => { this.phase = 'systems'; Game.render(); });
     nav.appendChild(back);
 
+    const canProceed = this.captainAbility && this.captainName.trim().length > 0;
     const next = document.createElement('button');
     next.className = 'btn-confirm';
     next.style.cssText = 'flex:2;';
-    if (!this.captainAbility) {
+    next.setAttribute('data-captain-next', '');
+    if (!canProceed) {
       next.style.opacity = '0.3';
       next.style.pointerEvents = 'none';
-      next.textContent = 'SELECT ABILITY';
+      next.textContent = !this.captainName.trim() ? 'ENTER NAME' : 'SELECT ABILITY';
     } else {
       next.textContent = 'CREW →';
       next.addEventListener('click', () => { this.phase = 'crew_pick'; Game.render(); });
@@ -24315,7 +25942,8 @@ const ReconstructionUI = {
     area.innerHTML += `<div style="margin-bottom:var(--space-md);"><div style="color:var(--text-muted); text-transform:uppercase; margin-bottom:var(--space-xs);">Ship Systems</div>${systemLines}</div>`;
 
     // Captain summary
-    let capLines = '';
+    const capName = this.captainName.trim() || 'Captain';
+    let capLines = `<div style="display:flex; justify-content:space-between; padding:2px 0; margin-bottom:var(--space-xs);"><span>Name</span><span style="color:var(--text-accent);">${capName}</span></div>`;
     for (const [key, info] of Object.entries(this.CAPTAIN_STAT_INFO)) {
       capLines += `<div style="display:flex; justify-content:space-between; padding:2px 0;"><span>${info.emoji} ${info.label}</span><span style="color:var(--text-accent);">${1 + this.captainStats[key]}</span></div>`;
     }
@@ -24386,8 +26014,9 @@ const ReconstructionUI = {
       ShipEngine.equipWeapon(this.selectedWeaponId);
     }
 
-    // Apply captain stats
+    // Apply captain name and stats
     const cap = GameState.run.captain;
+    cap.name = this.captainName.trim() || 'Captain';
     cap.stats.command = 1 + this.captainStats.command;
     cap.stats.intuition = 1 + this.captainStats.intuition;
     cap.stats.resolve = 1 + this.captainStats.resolve;

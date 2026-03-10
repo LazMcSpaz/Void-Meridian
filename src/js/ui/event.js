@@ -101,6 +101,12 @@ const EventUI = {
   },
 
   render(container) {
+    // Delegate to interaction UI if a crew interaction is active
+    if (GameState.run.activeInteraction) {
+      InteractionUI.render(container);
+      return;
+    }
+
     const screen = document.createElement('div');
     screen.className = 'screen';
 

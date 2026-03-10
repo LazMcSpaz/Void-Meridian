@@ -39,6 +39,7 @@ function createShipState() {
 
 function createCaptainState() {
   return {
+    name: '',
     abilities: [],
     stats: {
       command: 1,
@@ -76,6 +77,10 @@ function createRunState() {
     activeEventStep: 0,
     lastStepOutcomes: {},
     activeCombat: null,
+    activeInteraction: null,
+    interactionResolved: false,
+    seenInteractionIds: [],
+    lastInteractionDepth: -1,
     atDepot: false,        // currently docked at a trade post
     depotNodeId: null,     // node id of current depot
   };
