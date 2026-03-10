@@ -1,306 +1,169 @@
-{
-  "_meta": {
-    "document": "Void Meridian — Base Game Content",
-    "version": "1.0",
-    "modules_referenced": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10
-    ],
-    "notes": [
-      "All content is pre-authored and static. No runtime AI calls.",
-      "IDs are stable references for event flags and save data.",
-      "gating.requires arrays use AND logic unless noted.",
-      "resonance_tier maps: 0=0-10, 1=11-25, 2=26-50, 3=51-100, 4=100+",
-      "crew stat checks use role_bonus + trait_modifier vs event difficulty (1-5 scale)",
-      "irremovable=true means Nexus has integrated the module; cannot be unslotted"
-    ],
-    "category": "weapons",
-    "description": "All weapon definitions for Void Meridian. 8 weapons across 3 tiers."
+[
+  {
+    "id": "wpn_pulse_cannon",
+    "name": "Pulse Cannon",
+    "type": "energy",
+    "tier": 1,
+    "emoji": "⚡",
+    "stats": { "damage": 8, "speed_modifier": 0, "range": 2, "ammo": null, "special_charges": 0 },
+    "flavor": "Standard-issue energy projector. Reliable if unexciting.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
   },
-  "weapons": [
-    {
-      "id": "wpn_ballistic_repeater",
-      "name": "Ballistic Repeater",
-      "emoji": "🔫",
-      "tier": 1,
-      "type": "ballistic",
-      "flavor": "RELIABLE. LOUD. DOES NOT CARE ABOUT YOUR SITUATION.",
-      "stats": {
-        "damage": 2,
-        "speed_modifier": 0,
-        "range": "medium",
-        "ammo": "unlimited",
-        "special_charges": 0
-      },
-      "passive": "No setup required. Fires every turn with no conditions.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Suppressive Fire",
-        "effect": "Deals 2 damage. If operated by a Soldier, gains +1 damage and applies [SUPPRESSED] to target — they lose 1 initiative next turn.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "run_start_choice",
-          "trade_post_common"
-        ],
-        "cost_credits": 0,
-        "requires": []
-      },
-      "irremovable": false,
-      "nexus_flavor": null
-    },
-    {
-      "id": "wpn_scatter_cannon",
-      "name": "Scatter Cannon",
-      "emoji": "💥",
-      "tier": 1,
-      "type": "ballistic",
-      "flavor": "WIDE PATTERN. FORGIVING AIM. TERRIBLE FOR SALVAGE.",
-      "stats": {
-        "damage": 3,
-        "speed_modifier": -1,
-        "range": "short",
-        "ammo": "unlimited",
-        "special_charges": 0
-      },
-      "passive": "At short range, hits automatically (no accuracy check). At medium range, accuracy check required. Cannot fire at long range.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Buckshot Blast",
-        "effect": "Deals 3 damage. If enemy hull is below 50%, triggers a random critical hit against one enemy system with no accuracy check.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "run_start_choice",
-          "trade_post_common"
-        ],
-        "cost_credits": 0,
-        "requires": []
-      },
-      "irremovable": false,
-      "nexus_flavor": null
-    },
-    {
-      "id": "wpn_pulse_lance",
-      "name": "Pulse Lance",
-      "emoji": "⚡",
-      "tier": 1,
-      "type": "energy",
-      "flavor": "PRECISE. QUIET. LEAVES NOTHING YOU WANTED TO SALVAGE.",
-      "stats": {
-        "damage": 2,
-        "speed_modifier": 0,
-        "range": "long",
-        "ammo": "unlimited",
-        "special_charges": 0
-      },
-      "passive": "Can fire at any range with no penalty. When operated by a Technician, reveals one random enemy system stat before targeting.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Targeted Pulse",
-        "effect": "Deals 2 damage to hull OR 3 damage directly to a named enemy system (player chooses). If operated by Technician, system targeting costs no action.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "run_start_choice",
-          "trade_post_common"
-        ],
-        "cost_credits": 0,
-        "requires": []
-      },
-      "irremovable": false,
-      "nexus_flavor": null
-    },
-    {
-      "id": "wpn_missile_rack_mk2",
-      "name": "Mk.II Missile Rack",
-      "emoji": "🚀",
-      "tier": 2,
-      "type": "missile",
-      "flavor": "THREE SHOTS. MAKE THEM MEAN IT.",
-      "stats": {
-        "damage": 5,
-        "speed_modifier": 0,
-        "range": "long",
-        "ammo": 3,
-        "special_charges": 0
-      },
-      "passive": "Limited ammo (3 per combat). Cannot be restocked mid-combat. Restocks at trade posts for 40cr per missile. Each hit guarantees a critical hit roll regardless of enemy hull %.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Launch Missile",
-        "effect": "Deals 5 damage and rolls for a critical hit. On critical: player chooses which enemy system is targeted. Costs 1 ammo.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "derelict_salvage",
-          "trade_post_rare",
-          "faction_concord_friendly"
-        ],
-        "cost_credits": 180,
-        "requires": []
-      },
-      "irremovable": false,
-      "nexus_flavor": null
-    },
-    {
-      "id": "wpn_emp_array",
-      "name": "EMP Array",
-      "emoji": "🌀",
-      "tier": 2,
-      "type": "emp",
-      "flavor": "IT DOESN'T DESTROY THEM. IT JUST MAKES THEM WATCH.",
-      "stats": {
-        "damage": 1,
-        "speed_modifier": 0,
-        "range": "medium",
-        "ammo": "unlimited",
-        "special_charges": 2
-      },
-      "passive": "Has 2 special charges per combat (recharges 1 per turn at Engineering station). Special charges enable the EMP Burst action.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "EMP Burst",
-        "effect": "Costs 1 special charge. Deals 1 damage. Disables a named enemy system for 2 turns. Cannot disable the same system twice in one combat. If operated by Technician, disables last 3 turns instead.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "derelict_salvage",
-          "trade_post_rare"
-        ],
-        "cost_credits": 220,
-        "requires": []
-      },
-      "irremovable": false,
-      "nexus_flavor": null
-    },
-    {
-      "id": "wpn_vreth_honor_blade",
-      "name": "Vreth Honor-Cannon",
-      "emoji": "🔴",
-      "tier": 2,
-      "type": "ballistic",
-      "flavor": "VRETH INSCRIPTION ALONG THE BARREL. YOU CANNOT READ IT. IT PROBABLY MATTERS.",
-      "stats": {
-        "damage": 4,
-        "speed_modifier": 1,
-        "range": "medium",
-        "ammo": "unlimited",
-        "special_charges": 0
-      },
-      "passive": "Grants +1 initiative when equipped. Vreth Dominion ships will not target your weapons system in combat if this weapon is visible on scan — they consider targeting an honored weapon cowardly.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Challenge Strike",
-        "effect": "Deals 4 damage. If enemy hull is above 75% (uninjured), deals 6 damage instead — the Vreth reward striking first. If operated by Soldier, also applies [INTIMIDATED] to enemy: they skip their next Flee attempt.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "faction_vreth_friendly",
-          "derelict_vreth_vessel"
-        ],
-        "cost_credits": 260,
-        "requires": [
-          {
-            "type": "faction_reputation",
-            "faction": "vreth_dominion",
-            "minimum": 1
-          }
-        ]
-      },
-      "irremovable": false,
-      "nexus_flavor": null
-    },
-    {
-      "id": "wpn_void_tendril",
-      "name": "Void Tendril Emitter",
-      "emoji": "◈",
-      "tier": 3,
-      "type": "nexus_energy",
-      "flavor": "THE NEXUS GREW THIS. YOU DID NOT INSTALL IT. YOU NOTICED IT ONE MORNING.",
-      "stats": {
-        "damage": 3,
-        "speed_modifier": 0,
-        "range": "any",
-        "ammo": "unlimited",
-        "special_charges": 0
-      },
-      "passive": "Ignores shields entirely — all damage applies directly to hull. Earns +1 Resonance per combat in which it deals a killing blow. Remnant Collective ships react with fear when they scan it: their crew takes a morale penalty during boarding.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Resonance Strike",
-        "effect": "Deals 3 damage, ignoring shields. If captain has Nexus Attunement ability, deals 4 damage and applies [RESONANCE SCAR] — the enemy ship's crew suffers a morale penalty for the rest of combat.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "nexus_anomaly_unlock",
-          "reconstruction_screen_resonance"
-        ],
-        "cost_credits": 0,
-        "requires": [
-          {
-            "type": "resonance_total",
-            "minimum": 26
-          }
-        ]
-      },
-      "irremovable": true,
-      "nexus_flavor": "A new growth on the forward hull. Crew won't talk about when it appeared."
-    },
-    {
-      "id": "wpn_memory_cannon",
-      "name": "Memory Cannon",
-      "emoji": "◈",
-      "tier": 3,
-      "type": "nexus_energy",
-      "flavor": "IT FIRES SOMETHING. YOU DO NOT HAVE A WORD FOR WHAT.",
-      "stats": {
-        "damage": 2,
-        "speed_modifier": 0,
-        "range": "long",
-        "ammo": "unlimited",
-        "special_charges": 1
-      },
-      "passive": "Special charge recharges each time the captain dies and the run resets — carried forward as 1 charge at run start. Each combat kill with this weapon stores a ghost of that enemy's initiative value, added to your next combat's starting initiative pool.",
-      "station_action": {
-        "station": "weapons",
-        "action_name": "Echo Discharge",
-        "effect": "Costs 1 special charge. Deals 2 damage to all enemies simultaneously (AoE). Each enemy hit triggers a critical hit roll. If captain has died 10+ times across all runs, deals 3 AoE damage instead.",
-        "cooldown": 0
-      },
-      "gating": {
-        "source": [
-          "reconstruction_screen_resonance"
-        ],
-        "cost_credits": 0,
-        "requires": [
-          {
-            "type": "resonance_total",
-            "minimum": 51
-          },
-          {
-            "type": "milestone_flag",
-            "flag": "reached_the_wound_once"
-          }
-        ]
-      },
-      "irremovable": true,
-      "nexus_flavor": "After the first shot, two crew independently report the same dream that night."
-    }
-  ]
-}
+  {
+    "id": "wpn_autocannon",
+    "name": "Autocannon",
+    "type": "ballistic",
+    "tier": 1,
+    "emoji": "🔫",
+    "stats": { "damage": 10, "speed_modifier": -1, "range": 2, "ammo": 30, "special_charges": 0 },
+    "flavor": "Kinetic slugs shred hull plating. Mind the ammo.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_missile_pod",
+    "name": "Missile Pod",
+    "type": "missile",
+    "tier": 1,
+    "emoji": "🚀",
+    "stats": { "damage": 14, "speed_modifier": -2, "range": 3, "ammo": 8, "special_charges": 0 },
+    "flavor": "Lock-on warheads that bypass shields. Limited payload.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_emp_lance",
+    "name": "EMP Lance",
+    "type": "emp",
+    "tier": 1,
+    "emoji": "⚡",
+    "stats": { "damage": 5, "speed_modifier": 1, "range": 3, "ammo": null, "special_charges": 2 },
+    "flavor": "Disables enemy systems. Low damage, high utility.",
+    "gating": { "source": ["run_start_choice"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_beam_cutter",
+    "name": "Beam Cutter",
+    "type": "energy",
+    "tier": 1,
+    "emoji": "✂",
+    "stats": { "damage": 6, "speed_modifier": 1, "range": 1, "ammo": null, "special_charges": 0 },
+    "flavor": "Industrial cutting laser repurposed for combat. Precise, close, and personal.",
+    "gating": { "source": ["run_start_choice", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_flak_array",
+    "name": "Flak Array",
+    "type": "ballistic",
+    "tier": 1,
+    "emoji": "✸",
+    "stats": { "damage": 7, "speed_modifier": 0, "range": 1, "ammo": 24, "special_charges": 0 },
+    "flavor": "Fills the space between you and them with shrapnel. Not elegant. Effective.",
+    "gating": { "source": ["run_start_choice", "trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_plasma_torch",
+    "name": "Plasma Torch",
+    "type": "energy",
+    "tier": 1,
+    "emoji": "🔥",
+    "stats": { "damage": 11, "speed_modifier": -1, "range": 1, "ammo": null, "special_charges": 0 },
+    "flavor": "Superheated plasma at knife-fight range. Melts armor like opinion.",
+    "gating": { "source": ["trade_post", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_scatter_laser",
+    "name": "Scatter Laser",
+    "type": "energy",
+    "tier": 2,
+    "emoji": "✦",
+    "stats": { "damage": 12, "speed_modifier": 0, "range": 1, "ammo": null, "special_charges": 0 },
+    "flavor": "Diffused beam tears through close targets.",
+    "gating": { "source": ["trade_post", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_railgun",
+    "name": "Railgun",
+    "type": "ballistic",
+    "tier": 2,
+    "emoji": "⟐",
+    "stats": { "damage": 20, "speed_modifier": -3, "range": 4, "ammo": 12, "special_charges": 0 },
+    "flavor": "Magnetic acceleration. One shot, one hole.",
+    "gating": { "source": ["trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_heavy_lance",
+    "name": "Heavy Lance",
+    "type": "energy",
+    "tier": 2,
+    "emoji": "⫸",
+    "stats": { "damage": 16, "speed_modifier": -2, "range": 4, "ammo": null, "special_charges": 0 },
+    "flavor": "Concentrated beam at maximum distance. Hold still and pray they don't.",
+    "gating": { "source": ["trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_concussion_battery",
+    "name": "Concussion Battery",
+    "type": "ballistic",
+    "tier": 2,
+    "emoji": "💥",
+    "stats": { "damage": 15, "speed_modifier": -2, "range": 2, "ammo": 16, "special_charges": 0 },
+    "flavor": "Impact rounds designed to buckle structural supports. The hull screams.",
+    "gating": { "source": ["trade_post", "salvage"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_phase_disruptor",
+    "name": "Phase Disruptor",
+    "type": "emp",
+    "tier": 2,
+    "emoji": "◇",
+    "stats": { "damage": 8, "speed_modifier": 0, "range": 3, "ammo": null, "special_charges": 3 },
+    "flavor": "Scrambles targeting systems and navigation. Three pulses before the capacitor needs a full cycle.",
+    "gating": { "source": ["trade_post"] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_vreth_honor_blade",
+    "name": "Vreth Honor Blade Array",
+    "type": "ballistic",
+    "tier": 2,
+    "emoji": "⚔",
+    "stats": { "damage": 18, "speed_modifier": -1, "range": 2, "ammo": 20, "special_charges": 0 },
+    "flavor": "Dominion-forged kinetic blades launched in ritual patterns. Every shot is a statement.",
+    "gating": { "source": ["trade_post"], "requires": [{ "type": "faction_reputation", "faction": "vreth_dominion", "minimum": 1 }] },
+    "irremovable": false
+  },
+  {
+    "id": "wpn_remnant_resonance_bow",
+    "name": "Remnant Resonance Bow",
+    "type": "nexus_energy",
+    "tier": 3,
+    "emoji": "◉",
+    "stats": { "damage": 15, "speed_modifier": 1, "range": 3, "ammo": null, "special_charges": 4 },
+    "flavor": "it remembers the shape of what it destroys. each firing is a small grief.",
+    "nexus_flavor": "the bow was here before the ship. the ship grew to hold it.",
+    "gating": { "source": ["reconstruction_screen_resonance"], "requires": [{ "type": "resonance_total", "minimum": 60 }] },
+    "irremovable": true
+  },
+  {
+    "id": "wpn_nexus_tendril",
+    "name": "Nexus Tendril",
+    "type": "nexus_energy",
+    "tier": 3,
+    "emoji": "◈",
+    "stats": { "damage": 18, "speed_modifier": 2, "range": 2, "ammo": null, "special_charges": 3 },
+    "flavor": "it grew from the hull. it fires when you think about firing.",
+    "nexus_flavor": "this is a gift. do not question what it costs.",
+    "gating": { "source": ["reconstruction_screen_resonance"], "requires": [{ "type": "resonance_total", "minimum": 80 }] },
+    "irremovable": true
+  }
+]

@@ -1,449 +1,158 @@
-{
-  "_meta": {
-    "document": "Void Meridian — Base Game Content",
-    "version": "1.0",
-    "modules_referenced": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10
-    ],
-    "notes": [
-      "All content is pre-authored and static. No runtime AI calls.",
-      "IDs are stable references for event flags and save data.",
-      "gating.requires arrays use AND logic unless noted.",
-      "resonance_tier maps: 0=0-10, 1=11-25, 2=26-50, 3=51-100, 4=100+",
-      "crew stat checks use role_bonus + trait_modifier vs event difficulty (1-5 scale)",
-      "irremovable=true means Nexus has integrated the module; cannot be unslotted"
-    ],
-    "category": "ship_modules",
-    "description": "All equippable ship module definitions. 20 modules across 6 base systems."
+[
+  {
+    "id": "mod_hull_patch",
+    "name": "Hull Patch Kit",
+    "slots_onto": "cargo_hold",
+    "tier": 1,
+    "effect": "Restores 10 Hull when used at a station.",
+    "station_action": "repair_10",
+    "flavor": "Sealant, prayer, and duct tape.",
+    "irremovable": false
   },
-  "ship_modules": [
-    {
-      "id": "mod_targeting_computer",
-      "name": "Targeting Computer",
-      "emoji": "🎯",
-      "slots_onto": "weapons",
-      "tier": 1,
-      "flavor": "ACCURACY IS A CHOICE. NOW YOU'VE MADE IT.",
-      "effect": "All weapon accuracy checks gain +1 to roll result. Removes the accuracy penalty for firing at long range with short-range weapons.",
-      "crew_synergy": {
-        "role": "technician",
-        "bonus": "Technician at Weapons station can perform a free system-scan on the target at combat start."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 120,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_missile_rack_basic",
-      "name": "Missile Rack (Basic)",
-      "emoji": "🚀",
-      "slots_onto": "weapons",
-      "tier": 1,
-      "flavor": "ADDS MISSILES. DOES NOT ADD WISDOM ABOUT USING THEM.",
-      "effect": "Adds a secondary missile slot: 2 missiles per combat, 3 damage each, guarantee a critical hit roll. Restocks at trade post for 30cr per missile.",
-      "crew_synergy": {
-        "role": "soldier",
-        "bonus": "Soldier at Weapons station can fire missile as a free action on the first combat turn (does not cost their turn action)."
-      },
-      "source": [
-        "trade_post_common",
-        "derelict_salvage"
-      ],
-      "cost_credits": 140,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_overcharge_coil",
-      "name": "Overcharge Coil",
-      "emoji": "⚡",
-      "slots_onto": "weapons",
-      "tier": 2,
-      "flavor": "TWICE THE OUTPUT. THE ENGINEERS ARE NOT COMFORTABLE WITH THIS.",
-      "effect": "Once per combat, doubles the damage of any single weapon attack. After use, the Weapons system takes a [HEAT] penalty — -1 damage on all attacks for 2 turns while it cools.",
-      "crew_synergy": {
-        "role": "engineer",
-        "bonus": "Engineer at Engineering station can clear [HEAT] in 1 turn instead of 2."
-      },
-      "source": [
-        "derelict_salvage",
-        "planet_exploration_reward"
-      ],
-      "cost_credits": 0,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_nexus_weapon_conduit",
-      "name": "Nexus Weapon Conduit",
-      "emoji": "◈",
-      "slots_onto": "weapons",
-      "tier": 3,
-      "flavor": "THE NEXUS HAS OPINIONS ABOUT WHAT YOU SHOOT AT.",
-      "effect": "Equipped weapon gains +1 damage against any ship the Nexus has 'seen' before — specifically, enemies whose ship-type appeared in a prior run. Generates 1 Resonance per combat. Nexus transmissions during combat become more frequent.",
-      "crew_synergy": {
-        "role": "scientist",
-        "bonus": "Scientist can interpret Nexus combat transmissions — gain a hint about enemy weak system each combat."
-      },
-      "source": [
-        "nexus_anomaly_reward"
-      ],
-      "cost_credits": 0,
-      "irremovable": true,
-      "nexus_integrated": true,
-      "gating_requires": [
-        {
-          "type": "resonance_total",
-          "minimum": 11
-        }
-      ]
-    },
-    {
-      "id": "mod_afterburner",
-      "name": "Afterburner",
-      "emoji": "🔥",
-      "slots_onto": "propulsion",
-      "tier": 1,
-      "flavor": "FAST ENOUGH TO MATTER. NOT FAST ENOUGH TO FEEL SAFE.",
-      "effect": "Flee attempts succeed on a roll of 3+ (out of 5) instead of 4+. Burn 1 less fuel on long-range jumps (minimum 1).",
-      "crew_synergy": {
-        "role": "pilot",
-        "bonus": "Pilot at Helm station improves flee threshold to 2+ and adds one free Evasive Maneuver per combat."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 130,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_stealth_drive",
-      "name": "Stealth Drive",
-      "emoji": "🌑",
-      "slots_onto": "propulsion",
-      "tier": 2,
-      "flavor": "THEY CAN'T SHOOT WHAT THEY CAN'T SEE. USUALLY.",
-      "effect": "Once per sector, pass through Faction Territory without triggering a border event (cloak transit). Cannot use Stealth Drive and fire weapons on the same turn in combat. Reduces sensor detection range on enemies by 1 node.",
-      "crew_synergy": {
-        "role": "pilot",
-        "bonus": "Pilot can maintain stealth one additional turn in combat before forced decloaking."
-      },
-      "source": [
-        "drifter_compact_allied",
-        "derelict_salvage_rare"
-      ],
-      "cost_credits": 280,
-      "irremovable": false,
-      "nexus_integrated": false,
-      "gating_requires": [
-        {
-          "type": "faction_reputation",
-          "faction": "drifter_compact",
-          "minimum": 2
-        }
-      ]
-    },
-    {
-      "id": "mod_dark_matter_injector",
-      "name": "Dark Matter Injector",
-      "emoji": "🌀",
-      "slots_onto": "propulsion",
-      "tier": 2,
-      "flavor": "FASTER BETWEEN NODES. STRANGER BETWEEN NODES.",
-      "effect": "Reduces all jump fuel costs by 1 (minimum 1). 10% chance per jump of triggering a [VOID SKIP] — arrive at the destination node 1 sector deeper than intended (fog of war, but free fuel).",
-      "crew_synergy": {
-        "role": "scientist",
-        "bonus": "Scientist can analyze a VOID SKIP arrival: reveals all adjacent nodes for free."
-      },
-      "source": [
-        "derelict_salvage_rare",
-        "nexus_anomaly_reward"
-      ],
-      "cost_credits": 0,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_nexus_drift_coil",
-      "name": "Nexus Drift Coil",
-      "emoji": "◈",
-      "slots_onto": "propulsion",
-      "tier": 3,
-      "flavor": "THE SHIP KNOWS WHERE IT WANTS TO GO. YOU ARE LEARNING TO LISTEN.",
-      "effect": "Once per run, the Nexus suggests a jump path — a highlighted route appears on the star map. Following it costs no fuel for 3 jumps. Whether the path leads somewhere good is left to the Nexus.",
-      "crew_synergy": {
-        "role": "pilot",
-        "bonus": "Pilot can choose to override the Nexus path after 1 jump, saving the remaining 2 free jumps for a self-chosen route."
-      },
-      "source": [
-        "nexus_anomaly_reward"
-      ],
-      "cost_credits": 0,
-      "irremovable": true,
-      "nexus_integrated": true,
-      "gating_requires": [
-        {
-          "type": "resonance_total",
-          "minimum": 26
-        }
-      ]
-    },
-    {
-      "id": "mod_deep_range_array",
-      "name": "Deep Range Array",
-      "emoji": "📡",
-      "slots_onto": "sensors",
-      "tier": 1,
-      "flavor": "SEE FURTHER. KNOW MORE. SLEEP LESS.",
-      "effect": "Reveals node types (but not contents) 2 columns ahead instead of 1. Void Storms and Dead Zones are always labeled at max sensor range.",
-      "crew_synergy": {
-        "role": "technician",
-        "bonus": "Technician can spend a turn action to fully reveal one hidden node within range (contents, not just type)."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 100,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_life_sign_detector",
-      "name": "Life Sign Detector",
-      "emoji": "💚",
-      "slots_onto": "sensors",
-      "tier": 1,
-      "flavor": "SOMETHING ALIVE AHEAD. WHAT KIND IS THE QUESTION.",
-      "effect": "Anomalous Signal nodes are always pre-labeled as one of: [CREW], [HOSTILE], or [UNKNOWN] before arrival. Derelict nodes show a crew-alive indicator before boarding.",
-      "crew_synergy": {
-        "role": "medic",
-        "bonus": "Medic gets advance warning if the signal contains wounded survivors, enabling pre-staged medical supplies (reduces rescue event difficulty by 1)."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 110,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_nexus_resonance_scanner",
-      "name": "Nexus Resonance Scanner",
-      "emoji": "◈",
-      "slots_onto": "sensors",
-      "tier": 2,
-      "flavor": "IT DOESN'T DETECT THE NEXUS. THE NEXUS USES IT TO DETECT THINGS FOR YOU.",
-      "effect": "Nexus Anomaly nodes are always visible regardless of fog of war. Reveals whether a Dead Zone contains a ghost transmission before arrival. Generates 1 Resonance when passing through any Nexus Anomaly node.",
-      "crew_synergy": {
-        "role": "scientist",
-        "bonus": "Scientist with this module gains a +2 bonus on all Nexus Anomaly event checks."
-      },
-      "source": [
-        "nexus_anomaly_reward",
-        "remnant_collective_friendly"
-      ],
-      "cost_credits": 200,
-      "irremovable": false,
-      "nexus_integrated": false,
-      "gating_requires": [
-        {
-          "type": "resonance_total",
-          "minimum": 11
-        }
-      ]
-    },
-    {
-      "id": "mod_regenerative_plating",
-      "name": "Regenerative Plating",
-      "emoji": "🛡️",
-      "slots_onto": "shields_armor",
-      "tier": 1,
-      "flavor": "IT HEALS SLOWER THAN YOU GET HIT. BUT IT HEALS.",
-      "effect": "Passively restores 5% hull between each node jump (not in combat). Cannot restore hull above 75% passively — full repair still requires a trade post.",
-      "crew_synergy": {
-        "role": "engineer",
-        "bonus": "Engineer boosts passive restoration to 8% between nodes."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 150,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_ablative_layers",
-      "name": "Ablative Armor Layers",
-      "emoji": "🧱",
-      "slots_onto": "shields_armor",
-      "tier": 1,
-      "flavor": "DESIGNED TO BE DESTROYED. THAT IS NOT A FLAW.",
-      "effect": "Provides a one-time 15% hull buffer that absorbs damage before the main hull does. Recharges fully at trade posts for 60cr. Critical hits against armor systems are absorbed by the ablative layer instead (one per recharge cycle).",
-      "crew_synergy": {
-        "role": "engineer",
-        "bonus": "Engineer can perform an emergency mid-combat partial recharge (restores 8% of ablative layer) as a station action."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 130,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_kinetic_dampener",
-      "name": "Kinetic Dampener",
-      "emoji": "🌊",
-      "slots_onto": "shields_armor",
-      "tier": 2,
-      "flavor": "REDUCES IMPACT. INCREASES SURVIVAL. CREW WILL NOT STOP COMMENTING ON THE FEELING.",
-      "effect": "All incoming ballistic damage reduced by 1 (minimum 1). Has no effect against energy or EMP weapons. At hull below 25%, the dampener overloads and provides a one-time 50% damage reduction on the next hit.",
-      "crew_synergy": {
-        "role": "pilot",
-        "bonus": "Pilot's Evasive Maneuver action now also activates the dampener's ballistic reduction on that turn even against energy weapons."
-      },
-      "source": [
-        "derelict_salvage",
-        "trade_post_rare"
-      ],
-      "cost_credits": 190,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_nexus_hull_weave",
-      "name": "Nexus Hull Weave",
-      "emoji": "◈",
-      "slots_onto": "shields_armor",
-      "tier": 3,
-      "flavor": "THE HULL IS DIFFERENT NOW. THE CREW HAVE STOPPED ASKING WHY.",
-      "effect": "Hull damage thresholds shift: system penalties now trigger at 40% and 20% instead of 50% and 25%. At 10% hull, instead of going silent, the Nexus transmits continuously — one per combat turn — and each transmission gives the player a hint about the next enemy action.",
-      "crew_synergy": {
-        "role": "scientist",
-        "bonus": "Scientist can interpret Nexus hull-weave transmissions to predict enemy critical hits before they land (once per combat)."
-      },
-      "source": [
-        "nexus_anomaly_reward"
-      ],
-      "cost_credits": 0,
-      "irremovable": true,
-      "nexus_integrated": true,
-      "gating_requires": [
-        {
-          "type": "resonance_total",
-          "minimum": 51
-        }
-      ]
-    },
-    {
-      "id": "mod_compression_system",
-      "name": "Cargo Compression System",
-      "emoji": "📦",
-      "slots_onto": "cargo_hold",
-      "tier": 1,
-      "flavor": "MORE IN LESS SPACE. THE MATH MAKES SENSE. THE SMELL DOES NOT.",
-      "effect": "Increases effective cargo capacity by 4 units. Allows stacking of identical commodity items (reduces their inventory footprint by half).",
-      "crew_synergy": {
-        "role": "engineer",
-        "bonus": "Engineer can perform a full cargo re-organization between nodes, identifying any hidden quality variance in trade goods (reveals whether goods are standard or high-grade for trade post pricing)."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 90,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_hidden_compartment",
-      "name": "Hidden Compartment",
-      "emoji": "🕳️",
-      "slots_onto": "cargo_hold",
-      "tier": 2,
-      "flavor": "CONCORD INSPECTORS HAVE NEVER FOUND IT. THIS IS NOT ENCOURAGEMENT.",
-      "effect": "Provides 3 hidden cargo slots invisible to faction inspection events. Contraband and stolen goods stored here do not trigger Hostile faction territory consequences. If discovered (5% chance per inspection), relationship drops to -2 with inspecting faction immediately.",
-      "crew_synergy": {
-        "role": "diplomat",
-        "bonus": "Diplomat can smooth over a failed hidden compartment inspection — reduces faction rep loss to -1 instead of -2."
-      },
-      "source": [
-        "drifter_compact_friendly",
-        "derelict_salvage"
-      ],
-      "cost_credits": 170,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_med_bay",
-      "name": "Medical Bay",
-      "emoji": "⚕️",
-      "slots_onto": "crew_quarters",
-      "tier": 1,
-      "flavor": "THEY WILL SURVIVE THINGS THAT SHOULD HAVE KILLED THEM. THIS IS THE POINT.",
-      "effect": "Wounded crew recover in 2 sectors instead of 4. Downed crew in boarding can be stabilized with a 3+ roll instead of 4+. Increases Medic's skill check results by +1 on all medical event checks.",
-      "crew_synergy": {
-        "role": "medic",
-        "bonus": "Medic operating out of a Medical Bay can attempt to save a dying crew member once per run with a 4+ roll (without Med Bay, this option does not exist)."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 160,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_isolation_chamber",
-      "name": "Isolation Chamber",
-      "emoji": "🔒",
-      "slots_onto": "crew_quarters",
-      "tier": 2,
-      "flavor": "CONTAINS OUTBURSTS. CONTAINS INFECTIONS. CONTAINS WHATEVER CAME BACK FROM THAT DERELICT.",
-      "effect": "Provides 1 isolation bunk. Can quarantine a crew member showing erratic post-derelict behavior (prevents morale contagion events). Can hold a prisoner from a boarding outcome. Crew in isolation do not contribute to morale calculations (positive or negative).",
-      "crew_synergy": {
-        "role": "soldier",
-        "bonus": "Soldier can enforce isolation voluntarily on a hostile or mutinous crew member without a loyalty check."
-      },
-      "source": [
-        "trade_post_rare",
-        "derelict_salvage"
-      ],
-      "cost_credits": 200,
-      "irremovable": false,
-      "nexus_integrated": false
-    },
-    {
-      "id": "mod_recreation_space",
-      "name": "Recreation Space",
-      "emoji": "🎲",
-      "slots_onto": "crew_quarters",
-      "tier": 1,
-      "flavor": "MORALE IS A RESOURCE. THIS IS A MORALE RESOURCE.",
-      "effect": "All crew gain +5 morale at the start of each sector (not in combat). Reduces morale decay from consecutive combat sectors by half. Vocal and Reckless crew gain an additional +3 morale from this module.",
-      "crew_synergy": {
-        "role": "medic",
-        "bonus": "Medic in a ship with a Recreation Space can organize crew downtime events — once per run, fully restore one crew member's morale to 80."
-      },
-      "source": [
-        "trade_post_common"
-      ],
-      "cost_credits": 110,
-      "irremovable": false,
-      "nexus_integrated": false
-    }
-  ]
-}
+  {
+    "id": "mod_scanner_array",
+    "name": "Scanner Array",
+    "slots_onto": "sensors",
+    "tier": 1,
+    "effect": "Reveals adjacent nodes on the map.",
+    "crew_synergy": "scientist",
+    "flavor": "See further. Know more. Fear everything.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_reinforced_bulkhead",
+    "name": "Reinforced Bulkhead",
+    "slots_onto": "shields_armor",
+    "tier": 1,
+    "effect": "+15 Max Hull.",
+    "flavor": "Extra plating welded over the weak points.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_fuel_recycler",
+    "name": "Fuel Recycler",
+    "slots_onto": "propulsion",
+    "tier": 1,
+    "effect": "15% chance to not consume fuel on jump.",
+    "flavor": "Reclaims trace elements from exhaust.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_med_bay",
+    "name": "Med Bay",
+    "slots_onto": "crew_quarters",
+    "tier": 1,
+    "effect": "Crew heal conditions 1 node faster. +5 morale on recruit.",
+    "flavor": "Clean beds and better drugs.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_cargo_expander",
+    "name": "Cargo Expander",
+    "slots_onto": "cargo_hold",
+    "tier": 1,
+    "effect": "+2 cargo capacity.",
+    "flavor": "Magnetic clamps and a prayer that the inertial dampeners hold.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_comms_array",
+    "name": "Comms Array",
+    "slots_onto": "sensors",
+    "tier": 1,
+    "effect": "Unlocks hailing options in events. Intercepts nearby transmissions.",
+    "crew_synergy": "diplomat",
+    "flavor": "Hear everything. Say the right thing. Or at least say something.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_nav_assist",
+    "name": "Navigation Assist",
+    "slots_onto": "propulsion",
+    "tier": 1,
+    "effect": "Reveals 2 additional nodes ahead on the map.",
+    "crew_synergy": "pilot",
+    "flavor": "Predictive routing. Not prediction — just very fast math.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_crew_quarters_upgrade",
+    "name": "Improved Quarters",
+    "slots_onto": "crew_quarters",
+    "tier": 1,
+    "effect": "+5 morale on crew recruit. Crew morale decay reduced.",
+    "flavor": "Actual mattresses. The luxury of a closed door.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_targeting_computer",
+    "name": "Targeting Computer",
+    "slots_onto": "weapons",
+    "tier": 2,
+    "effect": "+2 damage to all equipped weapons.",
+    "crew_synergy": "soldier",
+    "flavor": "It does the math so you can do the violence.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_signal_jammer",
+    "name": "Signal Jammer",
+    "slots_onto": "sensors",
+    "tier": 2,
+    "effect": "Blocks enemy reinforcement calls in combat. Hides your transponder.",
+    "crew_synergy": "technician",
+    "flavor": "They can't call for help if they can't call.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_trade_cipher",
+    "name": "Trade Cipher",
+    "slots_onto": "cargo_hold",
+    "tier": 2,
+    "effect": "+15% sell prices at trade posts. Access to restricted market listings.",
+    "crew_synergy": "diplomat",
+    "flavor": "The right codes open the right doors. The wrong codes open the airlock.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_shield_harmonics",
+    "name": "Shield Harmonics",
+    "slots_onto": "shields_armor",
+    "tier": 2,
+    "effect": "Shields now partially block ballistic weapons (-2 damage). Energy weapons still fully blocked.",
+    "flavor": "Frequency modulation turns kinetic impacts into heat dissipation. Mostly.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_advanced_med_bay",
+    "name": "Advanced Med Bay",
+    "slots_onto": "crew_quarters",
+    "tier": 2,
+    "effect": "Crew heal all conditions between nodes. Can stabilize critically wounded crew.",
+    "crew_synergy": "medic",
+    "flavor": "Surgical suite, cryopod, and a medic who knows which is which.",
+    "irremovable": false
+  },
+  {
+    "id": "mod_remnant_memory_core",
+    "name": "Remnant Memory Core",
+    "slots_onto": "sensors",
+    "tier": 3,
+    "effect": "Generates 1 Resonance per node. Ancient data fragments surface unpredictably.",
+    "flavor": "it remembers things that haven't happened yet. or things that already did, somewhere else.",
+    "nexus_integrated": true,
+    "irremovable": true,
+    "gating_requires": [{ "type": "resonance_total", "minimum": 40 }]
+  },
+  {
+    "id": "mod_nexus_cortex",
+    "name": "Nexus Cortex",
+    "slots_onto": "sensors",
+    "tier": 3,
+    "effect": "Generates 2 Resonance per node. Reveals Nexus Anomaly nodes.",
+    "flavor": "it sees what you see. it remembers what you forget.",
+    "nexus_integrated": true,
+    "irremovable": true,
+    "gating_requires": [{ "type": "resonance_total", "minimum": 50 }]
+  }
+]

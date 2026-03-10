@@ -4,27 +4,81 @@ const EventEngine = {
 
   // ─── Trigger an event at a map node ────────────────────────
 
+  // Tier preference weights by depth zone
+  _TIER_WEIGHTS: {
+    early: { 1: 5, 2: 2, 3: 0 },
+    mid:   { 1: 1, 2: 5, 3: 2 },
+    late:  { 1: 0, 2: 2, 3: 5 },
+  },
+
+  _weightedPick(candidates, depthZone) {
+    const tierWeights = this._TIER_WEIGHTS[depthZone] || { 1: 1, 2: 1, 3: 1 };
+    const weighted = candidates.map(evt => {
+      const tier = evt.complexity_tier || 2;
+      let weight = tierWeights[tier] || 1;
+      // Non-repeatable events get 3x priority over repeatable
+      if (!evt.repeatable) weight *= 3;
+      return { event: evt, weight };
+    });
+    const totalWeight = weighted.reduce((s, w) => s + w.weight, 0);
+    if (totalWeight <= 0) return candidates[Math.floor(Math.random() * candidates.length)];
+    let roll = Math.random() * totalWeight;
+    for (const w of weighted) {
+      roll -= w.weight;
+      if (roll <= 0) return w.event;
+    }
+    return weighted[weighted.length - 1].event;
+  },
+
   triggerNodeEvent(node) {
     const factionContext = node.faction || 'none';
+    const run = GameState.run;
+    const maxDepth = run.map ? run.map.maxDepth : 30;
+    const depthZone = Registry._getDepthZone(run.depth, maxDepth);
     const eligible = Registry.getEligibleEvents(node.type, factionContext);
 
     let event;
     if (eligible.length > 0) {
-      event = eligible[Math.floor(Math.random() * eligible.length)];
+      // Tier-weighted selection
+      event = this._weightedPick(eligible, depthZone);
       event = JSON.parse(JSON.stringify(event)); // deep clone
     } else {
-      // Relaxed fallback: ignore depth_zone
+      // Relaxed fallback level 1: ignore depth_zone, keep tier weights
       const relaxed = (Registry.eventsByType[node.type] || []).filter(evt => {
         if (evt.faction_context && evt.faction_context !== 'none' && evt.faction_context !== factionContext) return false;
         if ((evt.min_resonance || 0) > GameState.meta.resonance) return false;
-        if (GameState.run.seenEventIds && GameState.run.seenEventIds.includes(evt.id)) return false;
+        if (evt.requires_flags && evt.requires_flags.length > 0) {
+          if (!evt.requires_flags.every(f => run.runFlags.includes(f))) return false;
+        }
+        if (!evt.repeatable && run.seenEventIds && run.seenEventIds.includes(evt.id)) return false;
         return true;
       });
       if (relaxed.length > 0) {
-        event = JSON.parse(JSON.stringify(relaxed[Math.floor(Math.random() * relaxed.length)]));
+        event = JSON.parse(JSON.stringify(this._weightedPick(relaxed, depthZone)));
       } else {
-        event = this._placeholderEvent();
+        // Relaxed fallback level 2: ignore tier weights (uniform random)
+        const anyLeft = (Registry.eventsByType[node.type] || []).filter(evt => {
+          if (evt.faction_context && evt.faction_context !== 'none' && evt.faction_context !== factionContext) return false;
+          if ((evt.min_resonance || 0) > GameState.meta.resonance) return false;
+          if (evt.requires_flags && evt.requires_flags.length > 0) {
+            if (!evt.requires_flags.every(f => run.runFlags.includes(f))) return false;
+          }
+          if (!evt.repeatable && run.seenEventIds && run.seenEventIds.includes(evt.id)) return false;
+          return true;
+        });
+        if (anyLeft.length > 0) {
+          event = JSON.parse(JSON.stringify(anyLeft[Math.floor(Math.random() * anyLeft.length)]));
+        } else {
+          event = this._placeholderEvent();
+        }
       }
+    }
+
+    // Apply variant text for repeatable events
+    if (event.variants && event.variants.length > 0) {
+      const variant = event.variants[Math.floor(Math.random() * event.variants.length)];
+      if (variant.setup_text) event.setup_text = variant.setup_text;
+      if (variant.title) event.title = variant.title;
     }
 
     GameState.run.activeEvent = event;
@@ -119,6 +173,14 @@ const EventEngine = {
       if (livingCrew.length > 0) {
         const avgMorale = livingCrew.reduce((sum, c) => sum + c.morale, 0) / livingCrew.length;
         skillValue += (avgMorale - 50) * 0.2;
+      }
+      // Captain ability bonus: +10 if captain has a matching ability
+      const abilityStats = { rally_cry: 'command', gut_feeling: 'intuition', iron_will: 'resolve', scavenger_eye: 'intuition' };
+      for (const ab of run.captain.abilities) {
+        if (abilityStats[ab] === option.check_target) {
+          skillValue += 10;
+          break;
+        }
       }
     }
 
@@ -223,8 +285,8 @@ const EventEngine = {
   },
 
   _finishEvent(event) {
-    // Mark event as seen
-    if (event.id && event.id !== 'PLACEHOLDER') {
+    // Mark event as seen (repeatable events skip this)
+    if (event.id && event.id !== 'PLACEHOLDER' && !event.repeatable) {
       if (!GameState.run.seenEventIds.includes(event.id)) {
         GameState.run.seenEventIds.push(event.id);
       }
@@ -318,18 +380,29 @@ const EventEngine = {
 
   _processReward(reward) {
     const run = GameState.run;
-    switch (reward.type) {
-      case 'credits':
-        run.credits = Math.max(0, run.credits + reward.value);
-        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} credits`);
-        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} credits`);
-        break;
 
-      case 'fuel':
-        run.fuel = Math.max(0, run.fuel + reward.value);
-        if (reward.value > 0) GameState.addLog('event', `Gained ${reward.value} fuel`);
-        else if (reward.value < 0) GameState.addLog('event', `Lost ${Math.abs(reward.value)} fuel`);
+    // Scavenger's Eye: +25% credits/fuel gains at derelict nodes
+    const scavengerBonus = run.captain.abilities.includes('scavenger_eye') &&
+      run.activeEvent && run.activeEvent.node_type === 'derelict' && reward.value > 0;
+
+    switch (reward.type) {
+      case 'credits': {
+        let val = reward.value;
+        if (scavengerBonus) val = Math.round(val * 1.25);
+        run.credits = Math.max(0, run.credits + val);
+        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} credits`);
         break;
+      }
+
+      case 'fuel': {
+        let val = reward.value;
+        if (scavengerBonus) val = Math.round(val * 1.25);
+        run.fuel = Math.max(0, run.fuel + val);
+        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} fuel`);
+        break;
+      }
 
       case 'hull_repair':
         ShipEngine.repair(reward.value);

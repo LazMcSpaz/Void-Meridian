@@ -165,11 +165,36 @@ const EventUI = {
 
     // Render options
     if (step.options) {
+      // Gut Feeling: reveal one hidden option (no hint = normally invisible)
+      const hasGutFeeling = GameState.run.captain.abilities.includes('gut_feeling');
+      let gutFeelingRevealed = false;
+
       for (let i = 0; i < step.options.length; i++) {
         const option = step.options[i];
         const { available, hint } = EventEngine.checkOptionAvailability(option);
 
-        if (!available && !hint) continue;
+        // Normally hidden options (unavailable with no hint) — Gut Feeling can reveal one
+        if (!available && !hint) {
+          if (hasGutFeeling && !gutFeelingRevealed) {
+            gutFeelingRevealed = true;
+            // Show as a revealed-by-intuition option
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn locked';
+            btn.style.borderColor = 'var(--color-nexus)';
+            let label = option.label || 'Choose';
+            if (option.check_type && option.check_type !== 'none') {
+              label += ` [${option.check_target || option.check_type}]`;
+            }
+            btn.textContent = label;
+            const reason = document.createElement('span');
+            reason.className = 'lock-reason';
+            reason.style.color = 'var(--color-nexus)';
+            reason.textContent = '⟡ Gut Feeling — requirements not met';
+            btn.appendChild(reason);
+            screen.appendChild(btn);
+          }
+          continue;
+        }
 
         const btn = document.createElement('button');
         btn.className = 'choice-btn' + (!available ? ' locked' : '');
@@ -232,6 +257,16 @@ const EventUI = {
       effectsEl.style.cssText = 'margin-top:var(--space-sm); color:var(--text-muted); font-size:var(--font-size-sm);';
       effectsEl.innerHTML = effects.join('<br>');
       screen.appendChild(effectsEl);
+    }
+
+    // Crew bark — a crew member reacts to the outcome
+    const bark = CrewEngine.getEventBark(evt._lastOutcomeLevel, outcome);
+    if (bark) {
+      const barkEl = document.createElement('div');
+      barkEl.style.cssText = 'margin-top:var(--space-md); padding:var(--space-sm) var(--space-md); border-left:2px solid var(--text-muted); color:var(--text-secondary); font-size:var(--font-size-sm);';
+      const nameSpan = `<span style="color:var(--text-accent)">${bark.speaker.emoji} ${bark.speaker.name}</span>`;
+      barkEl.innerHTML = `${nameSpan}<br><span style="font-style:italic">${bark.line}</span>`;
+      screen.appendChild(barkEl);
     }
 
     // Continue button
@@ -357,12 +392,12 @@ const EventUI = {
       const modHeader = document.createElement('div');
       modHeader.className = 'system-label';
       modHeader.style.marginBottom = 'var(--space-sm)';
-      modHeader.textContent = 'MODULES';
+      modHeader.textContent = 'MODULES (tap for details)';
       screen.appendChild(modHeader);
 
       for (const mod of ship.equippedModules) {
         const modEl = document.createElement('div');
-        modEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary);';
+        modEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary); cursor:pointer; padding:var(--space-xs) 0;';
         const emoji = mod.nexus_integrated ? '◈' : (mod.emoji || '◻');
         let tags = '';
         if (mod.irremovable) tags += ' [⬡]';
@@ -370,9 +405,99 @@ const EventUI = {
         modEl.textContent = `${emoji} ${mod.name}${tags}`;
         if (mod.tier === 3) modEl.style.color = 'var(--color-nexus)';
         if (mod.nexus_integrated) modEl.style.fontStyle = 'italic';
+
+        modEl.addEventListener('click', () => {
+          this._showModuleDetail(mod);
+        });
+
         screen.appendChild(modEl);
       }
     }
+  },
+
+  // ─── Module Detail Overlay ─────────────────────────────────────
+
+  _showModuleDetail(mod) {
+    // Remove existing overlay if any
+    const existing = document.getElementById('module-detail-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'module-detail-overlay';
+    overlay.style.cssText = 'position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); padding:var(--space-lg);';
+
+    const card = document.createElement('div');
+    card.style.cssText = 'max-width:400px; width:100%; padding:var(--space-lg); background:var(--bg-secondary); border:1px solid var(--border);';
+
+    // Name
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'color:var(--text-primary); font-size:var(--font-size-lg); margin-bottom:var(--space-sm);';
+    const emoji = mod.nexus_integrated ? '◈' : (mod.emoji || '◻');
+    nameEl.textContent = `${emoji} ${mod.name}`;
+    if (mod.tier === 3) nameEl.style.color = 'var(--color-nexus)';
+    card.appendChild(nameEl);
+
+    // Slot
+    const slotEl = document.createElement('div');
+    slotEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); text-transform:uppercase; margin-bottom:var(--space-sm);';
+    slotEl.textContent = `T${mod.tier || 1} Module — ${ShipEngine.SYSTEM_NAMES[mod.slots_onto] || mod.slots_onto}`;
+    card.appendChild(slotEl);
+
+    // Effect
+    if (mod.effect) {
+      const effEl = document.createElement('div');
+      effEl.style.cssText = 'color:var(--text-accent); margin-bottom:var(--space-sm);';
+      effEl.textContent = mod.effect;
+      card.appendChild(effEl);
+    }
+
+    // Flavor
+    if (mod.flavor) {
+      const flavEl = document.createElement('div');
+      flavEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); font-style:italic; margin-bottom:var(--space-md);';
+      flavEl.textContent = mod.flavor;
+      card.appendChild(flavEl);
+    }
+
+    // Tags
+    if (mod.irremovable) {
+      const tagEl = document.createElement('div');
+      tagEl.style.cssText = 'color:var(--color-warning); font-size:var(--font-size-sm); margin-bottom:var(--space-md);';
+      tagEl.textContent = '[⬡] This module cannot be removed.';
+      card.appendChild(tagEl);
+    }
+
+    // Uninstall button (if removable)
+    if (!mod.irremovable) {
+      const uninstallBtn = document.createElement('button');
+      uninstallBtn.className = 'btn-confirm';
+      uninstallBtn.style.cssText = 'margin-bottom:var(--space-sm); border-color:var(--color-danger); color:var(--color-danger);';
+      uninstallBtn.textContent = 'UNINSTALL MODULE';
+      uninstallBtn.addEventListener('click', () => {
+        ShipEngine.removeModule(mod.id);
+        GameState.save();
+        overlay.remove();
+        Game.render();
+      });
+      card.appendChild(uninstallBtn);
+    }
+
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn-confirm';
+    closeBtn.style.cssText = 'border-color:var(--border); color:var(--text-secondary);';
+    closeBtn.textContent = 'CLOSE';
+    closeBtn.addEventListener('click', () => overlay.remove());
+    card.appendChild(closeBtn);
+
+    overlay.appendChild(card);
+
+    // Close on background tap
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    document.body.appendChild(overlay);
   },
 
   _createStatBar(label, percent, variant) {

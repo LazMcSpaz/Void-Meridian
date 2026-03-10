@@ -1,12 +1,15 @@
 /* Void Meridian — Trade Depot Docking UI */
 
 const DepotUI = {
-  // Sub-screen within the depot: 'menu' | 'trade' | 'recruit' | 'fuel' | 'repairs'
+  // Sub-screen within the depot: 'menu' | 'trade' | 'recruit' | 'fuel' | 'repairs' | 'confirm_buy'
   subScreen: 'menu',
 
   // Generated stock for this depot visit (lazily populated)
   _stock: null,
   _recruitPool: null,
+
+  // Pending purchase for confirmation
+  _pendingPurchase: null,
 
   // ─── Entry Point ─────────────────────────────────────────────
 
@@ -62,11 +65,12 @@ const DepotUI = {
 
   render(container) {
     switch (this.subScreen) {
-      case 'trade':   this._renderTrade(container); break;
-      case 'recruit': this._renderRecruit(container); break;
-      case 'fuel':    this._renderFuel(container); break;
-      case 'repairs': this._renderRepairs(container); break;
-      default:        this._renderMenu(container); break;
+      case 'trade':       this._renderTrade(container); break;
+      case 'confirm_buy': this._renderConfirmBuy(container); break;
+      case 'recruit':     this._renderRecruit(container); break;
+      case 'fuel':        this._renderFuel(container); break;
+      case 'repairs':     this._renderRepairs(container); break;
+      default:            this._renderMenu(container); break;
     }
   },
 
@@ -287,43 +291,161 @@ const DepotUI = {
       : GameState.run.ship.equippedModules.some(m => m.id === entry.item.id);
 
     btn.className = 'choice-btn' + (!canAfford || alreadyOwned ? ' locked' : '');
-    btn.style.position = 'relative';
 
     const name = document.createElement('span');
     name.textContent = `${entry.item.emoji || '◻'} ${entry.item.name}`;
     btn.appendChild(name);
+
+    // Show effect text (the mechanical description)
+    if (entry.item.effect) {
+      const eff = document.createElement('span');
+      eff.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--text-accent); margin-top:var(--space-xs);';
+      eff.textContent = entry.item.effect;
+      btn.appendChild(eff);
+    }
+
+    // Show weapon stats for weapons
+    if (entry.type === 'weapon' && entry.item.stats) {
+      const s = entry.item.stats;
+      const statsEl = document.createElement('span');
+      statsEl.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--text-secondary); margin-top:var(--space-xs);';
+      let statsText = `DMG ${s.damage} | SPD ${s.speed_modifier >= 0 ? '+' : ''}${s.speed_modifier} | RNG ${s.range}`;
+      if (s.ammo != null) statsText += ` | AMMO ${s.ammo}`;
+      statsEl.textContent = statsText;
+      btn.appendChild(statsEl);
+    }
+
+    // Show module slot target
+    if (entry.type === 'module' && entry.item.slots_onto) {
+      const slot = document.createElement('span');
+      slot.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--text-muted); margin-top:var(--space-xs);';
+      slot.textContent = `Installs on: ${ShipEngine.SYSTEM_NAMES[entry.item.slots_onto] || entry.item.slots_onto}`;
+      btn.appendChild(slot);
+    }
 
     const price = document.createElement('span');
     price.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--color-credits); margin-top:var(--space-xs);';
     price.textContent = alreadyOwned ? 'OWNED' : `${entry.price} credits`;
     btn.appendChild(price);
 
-    if (entry.item.flavor) {
-      const flav = document.createElement('span');
-      flav.style.cssText = 'display:block; font-size:var(--font-size-sm); color:var(--text-muted); margin-top:var(--space-xs); font-style:italic;';
-      flav.textContent = entry.item.flavor;
-      btn.appendChild(flav);
-    }
-
     if (canAfford && !alreadyOwned) {
-      btn.addEventListener('click', () => this._buyItem(entry));
+      btn.addEventListener('click', () => {
+        this._pendingPurchase = entry;
+        this.subScreen = 'confirm_buy';
+        Game.render();
+      });
     }
 
     return btn;
   },
 
-  _buyItem(entry) {
-    if (!EconomyEngine.spend(entry.price)) return;
+  // ─── Purchase Confirmation ───────────────────────────────────
 
-    if (entry.type === 'weapon') {
-      ShipEngine.equipWeapon(entry.item.id);
+  _renderConfirmBuy(container) {
+    const entry = this._pendingPurchase;
+    if (!entry) { this.subScreen = 'trade'; Game.render(); return; }
+
+    const screen = document.createElement('div');
+    screen.className = 'screen';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = 'CONFIRM PURCHASE';
+    screen.appendChild(header);
+
+    // Item detail card
+    const card = document.createElement('div');
+    card.style.cssText = 'padding:var(--space-md); border:1px solid var(--text-accent); background:var(--bg-card); margin-bottom:var(--space-md);';
+
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'color:var(--text-primary); font-size:var(--font-size-lg); margin-bottom:var(--space-sm);';
+    nameEl.textContent = `${entry.item.emoji || '◻'} ${entry.item.name}`;
+    card.appendChild(nameEl);
+
+    if (entry.type === 'module') {
+      const typeEl = document.createElement('div');
+      typeEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); text-transform:uppercase; margin-bottom:var(--space-sm);';
+      typeEl.textContent = `Module — ${ShipEngine.SYSTEM_NAMES[entry.item.slots_onto] || entry.item.slots_onto}`;
+      card.appendChild(typeEl);
     } else {
-      ShipEngine.addModule(entry.item.id);
+      const typeEl = document.createElement('div');
+      typeEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); text-transform:uppercase; margin-bottom:var(--space-sm);';
+      typeEl.textContent = `Weapon — T${entry.item.tier} ${entry.item.type}`;
+      card.appendChild(typeEl);
     }
 
-    GameState.addLog('event', `Purchased ${entry.item.name} for ${entry.price} credits`);
-    GameState.save();
-    Game.render();
+    // Effect text
+    if (entry.item.effect) {
+      const effEl = document.createElement('div');
+      effEl.style.cssText = 'color:var(--text-accent); font-size:var(--font-size-sm); margin-bottom:var(--space-sm);';
+      effEl.textContent = entry.item.effect;
+      card.appendChild(effEl);
+    }
+
+    // Weapon stats
+    if (entry.type === 'weapon' && entry.item.stats) {
+      const s = entry.item.stats;
+      const statsEl = document.createElement('div');
+      statsEl.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin-bottom:var(--space-sm);';
+      let t = `DMG ${s.damage} | SPD ${s.speed_modifier >= 0 ? '+' : ''}${s.speed_modifier} | RNG ${s.range}`;
+      if (s.ammo != null) t += ` | AMMO ${s.ammo}`;
+      if (s.special_charges > 0) t += ` | CHG ${s.special_charges}`;
+      statsEl.textContent = t;
+      card.appendChild(statsEl);
+    }
+
+    // Flavor text
+    if (entry.item.flavor) {
+      const flavEl = document.createElement('div');
+      flavEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm); font-style:italic;';
+      flavEl.textContent = entry.item.flavor;
+      card.appendChild(flavEl);
+    }
+
+    screen.appendChild(card);
+
+    // Cost summary
+    const costEl = document.createElement('div');
+    costEl.style.cssText = 'margin-bottom:var(--space-md); font-size:var(--font-size-sm);';
+    costEl.innerHTML = `
+      <span style="color:var(--text-secondary)">Cost:</span> <span style="color:var(--color-credits)">${entry.price} credits</span><br>
+      <span style="color:var(--text-secondary)">After purchase:</span> <span style="color:var(--color-credits)">${GameState.run.credits - entry.price} credits</span>
+    `;
+    screen.appendChild(costEl);
+
+    // Confirm button
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'btn-confirm';
+    confirmBtn.style.cssText = 'margin-bottom:var(--space-sm);';
+    confirmBtn.textContent = `BUY ${entry.item.name.toUpperCase()}`;
+    confirmBtn.addEventListener('click', () => {
+      if (!EconomyEngine.spend(entry.price)) return;
+      if (entry.type === 'weapon') {
+        ShipEngine.equipWeapon(entry.item.id);
+      } else {
+        ShipEngine.addModule(entry.item.id);
+      }
+      GameState.addLog('event', `Purchased ${entry.item.name} for ${entry.price} credits`);
+      GameState.save();
+      this._pendingPurchase = null;
+      this.subScreen = 'trade';
+      Game.render();
+    });
+    screen.appendChild(confirmBtn);
+
+    // Cancel
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-confirm';
+    cancelBtn.style.cssText = 'border-color:var(--border); color:var(--text-secondary);';
+    cancelBtn.textContent = 'CANCEL';
+    cancelBtn.addEventListener('click', () => {
+      this._pendingPurchase = null;
+      this.subScreen = 'trade';
+      Game.render();
+    });
+    screen.appendChild(cancelBtn);
+
+    container.appendChild(screen);
   },
 
   // ─── Recruit Service ─────────────────────────────────────────

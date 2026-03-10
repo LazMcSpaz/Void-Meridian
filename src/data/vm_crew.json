@@ -1,474 +1,111 @@
-{
-  "_meta": {
-    "document": "Void Meridian — Base Game Content",
-    "version": "1.0",
-    "modules_referenced": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10
-    ],
-    "notes": [
-      "All content is pre-authored and static. No runtime AI calls.",
-      "IDs are stable references for event flags and save data.",
-      "gating.requires arrays use AND logic unless noted.",
-      "resonance_tier maps: 0=0-10, 1=11-25, 2=26-50, 3=51-100, 4=100+",
-      "crew stat checks use role_bonus + trait_modifier vs event difficulty (1-5 scale)",
-      "irremovable=true means Nexus has integrated the module; cannot be unslotted"
-    ],
-    "category": "crew",
-    "description": "All crew definitions. 7 common archetypes + 7 named characters."
+[
+  {
+    "id": "dr_yema_osha",
+    "name": "Dr. Yema Osha",
+    "role": "medic",
+    "emoji": "🧬",
+    "trait": "idealistic",
+    "morale_start": 40,
+    "loyalty_start": 25,
+    "unique_passive": "Pathogen immunity — Osha is unaffected by biological hazards. +10% crew healing at stations.",
+    "personality_description": "Former Caduceus-7 researcher. Survived alone for months with a pathogen that killed her crew. She treats medicine like penance — every patient is the crew she couldn't save.",
+    "faction_affiliation": null,
+    "secret": "The pathogen wasn't an accident. Osha's research team engineered it from Remnant biosamples. She was the only one who understood what they'd made, and the only one immune to the result.",
+    "first_encounter": { "event_id": "DEREL_001" }
   },
-  "crew": {
-    "common_archetypes": {
-      "_note": "One per role. These are procedurally named at recruitment. Personality trait is randomly assigned from the compatible traits listed. Stats shown are starting ranges.",
-      "archetypes": [
-        {
-          "id": "arch_engineer_common",
-          "role": "engineer",
-          "emoji": "🔧",
-          "name_pool": [
-            "Voss",
-            "Tarkin",
-            "Rell",
-            "Maren",
-            "Dox",
-            "Sable",
-            "Prynn"
-          ],
-          "compatible_traits": [
-            "stoic",
-            "pragmatic",
-            "reckless"
-          ],
-          "morale_start_range": [
-            45,
-            65
-          ],
-          "loyalty_start_range": [
-            30,
-            50
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": 0,
-            "def_modifier": 1
-          },
-          "combat_special": "Sabotage one enemy system during boarding (Engineering check, difficulty 3).",
-          "passive_skill": "Reduces all module installation costs by 10cr. Jury-rig: once per run, restore a damaged system to partial function without trade post repair.",
-          "dialogue_flavor": "Talks about the ship. Rarely about themselves."
-        },
-        {
-          "id": "arch_pilot_common",
-          "role": "pilot",
-          "emoji": "🧭",
-          "name_pool": [
-            "Cael",
-            "Drift",
-            "Yuna",
-            "Brix",
-            "Farrow",
-            "Kes",
-            "Nava"
-          ],
-          "compatible_traits": [
-            "reckless",
-            "stoic",
-            "curious"
-          ],
-          "morale_start_range": [
-            50,
-            70
-          ],
-          "loyalty_start_range": [
-            30,
-            50
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": 1,
-            "def_modifier": 0
-          },
-          "combat_special": "Plot rapid boarding extraction — removes all crew from boarding in one action if things go wrong.",
-          "passive_skill": "Fuel efficiency: every 5 jumps, one is free. Flee attempts cost 1 fuel instead of 2 when Pilot is at helm.",
-          "dialogue_flavor": "References places they've been. Never explains why they left."
-        },
-        {
-          "id": "arch_medic_common",
-          "role": "medic",
-          "emoji": "⚕️",
-          "name_pool": [
-            "Lira",
-            "Osei",
-            "Tamsin",
-            "Rook",
-            "Nelle",
-            "Fenn",
-            "Daya"
-          ],
-          "compatible_traits": [
-            "idealistic",
-            "haunted",
-            "vocal"
-          ],
-          "morale_start_range": [
-            55,
-            70
-          ],
-          "loyalty_start_range": [
-            35,
-            55
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": -1,
-            "def_modifier": 0
-          },
-          "combat_special": "Stabilize a downed crew member mid-boarding (Medic check, difficulty 2).",
-          "passive_skill": "Crew morale loss from traumatic events is reduced by 5. Stress recovery: crew with Medic aboard recover from [WOUNDED] condition 1 sector faster.",
-          "dialogue_flavor": "Notices what others miss. Mentions it quietly."
-        },
-        {
-          "id": "arch_soldier_common",
-          "role": "soldier",
-          "emoji": "⚔️",
-          "name_pool": [
-            "Breck",
-            "Irons",
-            "Sura",
-            "Kael",
-            "Mord",
-            "Teva",
-            "Crux"
-          ],
-          "compatible_traits": [
-            "reckless",
-            "stoic",
-            "pragmatic"
-          ],
-          "morale_start_range": [
-            45,
-            65
-          ],
-          "loyalty_start_range": [
-            25,
-            45
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": 2,
-            "def_modifier": 1
-          },
-          "combat_special": "Hold position: sacrifice their turn to give all adjacent crew +1 def for one round.",
-          "passive_skill": "Mutiny suppression: if morale drops below 20 ship-wide, Soldier prevents the mutiny warning event from triggering for 2 additional sectors. Intimidation: adds a Hail option in pre-combat that wouldn't otherwise appear.",
-          "dialogue_flavor": "Short sentences. Usually right."
-        },
-        {
-          "id": "arch_technician_common",
-          "role": "technician",
-          "emoji": "📡",
-          "name_pool": [
-            "Hex",
-            "Wren",
-            "Pell",
-            "Sorin",
-            "Mika",
-            "Dace",
-            "Talis"
-          ],
-          "compatible_traits": [
-            "curious",
-            "pragmatic",
-            "stoic"
-          ],
-          "morale_start_range": [
-            45,
-            65
-          ],
-          "loyalty_start_range": [
-            30,
-            50
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": 0,
-            "def_modifier": 0
-          },
-          "combat_special": "Hack enemy systems for combat advantage: disable one enemy station action for 1 turn (Technician check, difficulty 3).",
-          "passive_skill": "Derelict interface: reduces difficulty of all derelict event checks by 1. Sensor bonus: once per sector, auto-reveals the contents of one adjacent hidden node.",
-          "dialogue_flavor": "Explains things nobody asked about. Sometimes it's important."
-        },
-        {
-          "id": "arch_diplomat_common",
-          "role": "diplomat",
-          "emoji": "🗣️",
-          "name_pool": [
-            "Elara",
-            "Quint",
-            "Sereth",
-            "Bane",
-            "Lyss",
-            "Corev",
-            "Adra"
-          ],
-          "compatible_traits": [
-            "vocal",
-            "idealistic",
-            "pragmatic"
-          ],
-          "morale_start_range": [
-            55,
-            70
-          ],
-          "loyalty_start_range": [
-            35,
-            55
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": -1,
-            "def_modifier": 0
-          },
-          "combat_special": "Mid-boarding negotiation: attempt to end boarding peacefully (Diplomat check vs. difficulty based on enemy type — Vreth will not negotiate).",
-          "passive_skill": "Toll reduction: faction territory tolls cost 20% less credits. Conflict resolution: once per run, prevents a crew feud from escalating to a mechanical penalty.",
-          "dialogue_flavor": "Chooses words carefully. You only notice when they stop."
-        },
-        {
-          "id": "arch_scientist_common",
-          "role": "scientist",
-          "emoji": "🔬",
-          "name_pool": [
-            "Maret",
-            "Ollen",
-            "Vesper",
-            "Cray",
-            "Idris",
-            "Sable",
-            "Faye"
-          ],
-          "compatible_traits": [
-            "curious",
-            "haunted",
-            "idealistic"
-          ],
-          "morale_start_range": [
-            50,
-            65
-          ],
-          "loyalty_start_range": [
-            30,
-            50
-          ],
-          "recruitment_cost_pts": 1,
-          "recruitment_cost_credits": 60,
-          "recruitment_source": [
-            "trade_post"
-          ],
-          "combat_stats": {
-            "atk_modifier": -1,
-            "def_modifier": 0
-          },
-          "combat_special": "Extract high-value alien components during boarding (Scientist check, difficulty 3) — turns standard salvage into rare alien tech.",
-          "passive_skill": "Alien tech analysis: any alien or Remnant module's function is revealed before installation (normally a mystery). Planet exploration yields +1 reward tier when Scientist is assigned to surface team.",
-          "dialogue_flavor": "Questions that sound innocent. Answers that don't."
-        }
-      ]
-    },
-    "named_characters": {
-      "_note": "One named character per role. Each has a fixed personality, a defined first-encounter trigger, a faction affiliation (if any), and a 'secret' revealed at loyalty 80+. These become permanently available for resurrection in future runs after first encounter.",
-      "characters": [
-        {
-          "id": "crew_varex",
-          "name": "Varex",
-          "role": "engineer",
-          "emoji": "🔧",
-          "trait": "haunted",
-          "morale_start": 35,
-          "loyalty_start": 20,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": null,
-          "first_encounter": {
-            "node_type": "derelict",
-            "trigger": "Boarding a derelict that has been stripped by someone before you. Varex is locked in an engine compartment. Alive. Waiting. They say they've been there for two weeks. The math doesn't add up.",
-            "recruitable_if": "Player chooses to investigate the anomaly rather than leave"
-          },
-          "personality_description": "Says very little about the past. Does the work. Does it better than anyone. Flinches sometimes at sounds that aren't there.",
-          "portrait_note": "Older. Eyes that have recalculated something and not liked the answer.",
-          "unique_passive": "Ghost Protocol: if Varex dies, their final repair action completes automatically regardless — one last fix as they go.",
-          "unique_dialogue_trigger": "Reacts to any Nexus transmission with visible discomfort. Different discomfort than the rest of the crew — recognition, not fear.",
-          "secret_loyalty_80": "Varex was aboard a ship called the Solent Pyre. It had an artifact fused to its hull. This is not their first time serving on a ship the Nexus has touched. They do not know why they survived the Pyre. They have suspicions.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "Varex wakes confused, as they always do. But they look at the engine room before anything else. Checking something. Satisfied with what they find."
-        },
-        {
-          "id": "crew_sable_drift",
-          "name": "Sable Drift",
-          "role": "pilot",
-          "emoji": "🧭",
-          "trait": "reckless",
-          "morale_start": 70,
-          "loyalty_start": 30,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": "drifter_compact",
-          "first_encounter": {
-            "node_type": "faction_territory_drifter",
-            "trigger": "A Drifter Compact station is running an unsanctioned race through an asteroid field. Sable Drift is currently winning it, in a ship that should not be winning anything.",
-            "recruitable_if": "Player enters the race OR wins a side bet on Drift and introduces themselves afterward"
-          },
-          "personality_description": "Loud, warm, and utterly certain things will work out. Has a very long record of things working out. Nobody understands why.",
-          "portrait_note": "Wide grin. Helmet they never fully take off.",
-          "unique_passive": "Charmed: when Sable Drift operates the Helm, flee attempts cannot critically fail — the worst outcome is a regular failure.",
-          "unique_dialogue_trigger": "Genuinely excited by Void Storms. Gets quieter approaching The Wound — the only time they get quieter about anything.",
-          "secret_loyalty_80": "Sable Drift has been to The Wound before. Not aboard this ship. Not with this crew. They don't remember who the captain was. They remember the sound of the Nexus at that range. They've been trying to get back ever since without admitting that's what they're doing.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "Sable Drift wakes up laughing at something, then stops when they see the crew staring. 'Right,' they say. 'Different run.'"
-        },
-        {
-          "id": "crew_osara_mend",
-          "name": "Osara Mend",
-          "role": "medic",
-          "emoji": "⚕️",
-          "trait": "idealistic",
-          "morale_start": 65,
-          "loyalty_start": 45,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": "concord_assembly",
-          "first_encounter": {
-            "node_type": "planet_exploration",
-            "trigger": "On a planet surface, the crew finds a field hospital run by one person for a community that can't get Concord support. Osara Mend is that person, and has been for two years.",
-            "recruitable_if": "Player provides medical supplies from cargo OR defends the settlement from a threat event"
-          },
-          "personality_description": "Believes in things. Will tell you what they believe in. Loses morale sharply when asked to do something that contradicts it. Gains morale sharply when the captain does something good for no reason.",
-          "portrait_note": "Medic's whites, dirty. Calm face that doesn't match what they've been through.",
-          "unique_passive": "Field Triage: Osara can stabilize downed crew with a 2+ roll instead of 3+. Once per run, can fully revive a crew member who would otherwise permanently die (not resurrection — they survive in-run).",
-          "unique_dialogue_trigger": "Comments on captain decisions involving civilians or vulnerable parties. Always. Will not let it go until you respond.",
-          "secret_loyalty_80": "Osara left Concord medical service after a triage protocol ordered her to stop treating a settlement to conserve resources for a Concord fleet. She saved everyone anyway. The Concord hasn't forgotten. Occasionally a Concord ship will flag the Meridian for inspection with unusual interest — looking for her.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "Osara wakes asking about the crew before she asks about herself. When told who else survived, she nods slowly. Begins counting what she'll need."
-        },
-        {
-          "id": "crew_kael_seven",
-          "name": "Kael-Seven",
-          "role": "soldier",
-          "emoji": "⚔️",
-          "trait": "stoic",
-          "morale_start": 50,
-          "loyalty_start": 40,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": "vreth_dominion",
-          "first_encounter": {
-            "node_type": "combat",
-            "trigger": "After a combat with a Vreth vessel, Kael-Seven is the only survivor on the enemy ship. A warrior who held the ship alone after their captain died. They do not surrender — they simply acknowledge the better fighter.",
-            "recruitable_if": "Player chose to board rather than strip the wreck, and speaks to them directly (no Diplomat required — Kael-Seven responds to directness)"
-          },
-          "personality_description": "Economical. Follows the code. The code is their own. It will become clear over time what is and isn't in it.",
-          "portrait_note": "Vreth military bearing. Scars from engagements they could have avoided. Didn't avoid.",
-          "unique_passive": "Last Stand: when Kael-Seven is the last crew member in a boarding, they get +2 atk and +2 def instead of the normal last-crew penalty.",
-          "unique_dialogue_trigger": "Reacts differently to the Nexus than other crew — not fear, not reverence. Professional interest. They compare it to a Vreth weapon they once saw, once, from a distance.",
-          "secret_loyalty_80": "Kael-Seven's designation includes a number because there were six before them — a Vreth experimental program. They are the only one who survived it. The Vreth Dominion wants them back. Not to honor them. To understand why they survived while the others did not.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "Kael-Seven says nothing when they wake. Stands. Tests their hands. Looks at the captain and waits for orders. There is something different in their eyes, but they will not speak about it."
-        },
-        {
-          "id": "crew_hex_null",
-          "name": "Hex-Null",
-          "role": "technician",
-          "emoji": "📡",
-          "trait": "curious",
-          "morale_start": 60,
-          "loyalty_start": 35,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": null,
-          "first_encounter": {
-            "node_type": "anomalous_signal",
-            "trigger": "The anomalous signal resolves as a distress beacon from a self-piloted probe that has been transmitting for 40 years. The probe was designed by Hex-Null, who has been following it for three years trying to recover it. They are in a very small ship. It is out of fuel.",
-            "recruitable_if": "Player investigates the probe OR rescues Hex-Null's ship from fuel starvation"
-          },
-          "personality_description": "Excited by everything. Not as a personality affectation — genuinely thrilled by the existence of almost any phenomenon. Makes working near them tiring. Makes problems easier.",
-          "portrait_note": "Covered in sensor calibration marks they drew on themselves to track something. Nobody has asked what.",
-          "unique_passive": "Overclock: once per combat, Hex-Null can push any ship system beyond its rated capacity for one turn — doubles its output but requires an Engineering check (difficulty 3) or the system takes damage.",
-          "unique_dialogue_trigger": "Has been quietly scanning the Nexus since boarding. Has notebooks. Shares findings at high loyalty. The findings are alarming.",
-          "secret_loyalty_80": "Hex-Null's probe was originally designed to track a signal that predates known civilization. The signal source matches the Nexus's electromagnetic signature exactly. The probe has been following the Meridian — not transmitting randomly. It found what it was looking for.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "Hex-Null wakes up and immediately asks if they can see the resurrection logs. Whatever the Nexus records during that process — they want the data. They look feverish about it."
-        },
-        {
-          "id": "crew_covenant_grey",
-          "name": "Covenant Grey",
-          "role": "diplomat",
-          "emoji": "🗣️",
-          "trait": "pragmatic",
-          "morale_start": 55,
-          "loyalty_start": 50,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": "concord_assembly",
-          "first_encounter": {
-            "node_type": "faction_territory_concord",
-            "trigger": "Covenant Grey is the Concord official processing your border crossing. They wave you through without inspection. Then they show up on the next station asking for passage aboard. They have resigned their post. They have a bag. They are done explaining themselves.",
-            "recruitable_if": "Player does not ask too many questions"
-          },
-          "personality_description": "Quietly competent. Knows things about every faction they should not know. Gives nothing for free but charges a fair rate.",
-          "portrait_note": "Concord-adjacent clothing they haven't updated since leaving. Either haven't noticed or haven't cared.",
-          "unique_passive": "Institutional Memory: Covenant Grey's faction reputation bonuses are doubled — their presence on the ship applies +1 to all faction tolerance checks without being at a station.",
-          "unique_dialogue_trigger": "Has opinions about Concord decisions during events involving them. Complicated opinions. Will share them. Morale responds accordingly to outcomes.",
-          "secret_loyalty_80": "Covenant Grey did not resign. They were extracted from their post by a Remnant Collective operative after handing over Concord intelligence on the Meridian's route through Concord space. They do not know why the Remnant wanted the ship's movements. They have become increasingly certain it involves the Nexus. They are trying to decide if they should tell you.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "Covenant Grey wakes up, straightens their collar, and asks what they missed. When told, they are quiet for a long time. Then: 'I need to review my notes.'"
-        },
-        {
-          "id": "crew_the_remnant_voice",
-          "name": "The Voice",
-          "role": "scientist",
-          "emoji": "🔬",
-          "trait": "haunted",
-          "morale_start": 30,
-          "loyalty_start": 15,
-          "recruitment_cost_pts": 2,
-          "faction_affiliation": "remnant_collective",
-          "first_encounter": {
-            "node_type": "dead_zone",
-            "trigger": "The Dead Zone contains a ghost transmission that resolves into something that is not a ghost — a Remnant figure standing in the void between nodes in a suit that should not be functional. They ask to board. They know the captain's name. The first one. The one before the Nexus.",
-            "recruitable_if": "Player allows boarding (no crew will recommend it)"
-          },
-          "personality_description": "Ancient. Not in body — their body is fine, approximate age unclear — but in manner. Speaks as though they have had this conversation before. Keeps correcting themselves and saying 'sorry, different run.'",
-          "portrait_note": "Remnant Collective environmental suit, older model. Something on it that might be a rank insignia but is not any rank anyone recognizes.",
-          "unique_passive": "Nexus Interpreter: The Voice can translate Nexus transmissions — when active at the Tactical station, transmission overlays include a secondary interpretation layer that reveals their literal meaning (which is often different from and more disturbing than the surface text).",
-          "unique_dialogue_trigger": "Speaks to the Nexus directly. Out loud. Occasionally it seems to respond to them specifically, not the captain.",
-          "secret_loyalty_80": "The Voice was assigned to watch the Nexus in a prior era — not this era, and not aboard this ship. The Remnant Collective has been seeding watchers onto Nexus-bonded vessels for a thousand years. They do not know if the Nexus has noticed. Their job is to ensure the captain reaches The Wound. They have not decided whether to tell you what happens when you do.",
-          "resurrection_cost_pts": 4,
-          "resurrection_flavor": "The Voice is already awake when the reconstruction completes. Sitting at a station they weren't at before. When asked how — 'The Nexus is faster when it knows the pattern,' they say. Then: 'Hello again, captain.'"
-        }
-      ]
-    }
+  {
+    "id": "oss_navigator_pilot",
+    "name": "Oss",
+    "role": "pilot",
+    "emoji": "🧭",
+    "trait": "reckless",
+    "morale_start": 55,
+    "loyalty_start": 20,
+    "unique_passive": "Drifter instincts — 10% chance to avoid fuel cost on jump. +1 evasion in combat.",
+    "personality_description": "Drifter Compact navigator who's been running from something since before you met. Flies like someone who doesn't expect to land. Best pilot you've ever seen when she's not trying to get killed.",
+    "faction_affiliation": "drifter_compact",
+    "secret": "Oss witnessed a Concord Assembly black operation that destroyed a Drifter freeport. She's the only survivor and the only proof it happened. The Concord wants her quiet.",
+    "first_encounter": { "event_id": "SIGNAL_001" }
+  },
+  {
+    "id": "vel_remnant_scientist",
+    "name": "Vel",
+    "role": "scientist",
+    "emoji": "◈",
+    "trait": "curious",
+    "morale_start": 45,
+    "loyalty_start": 35,
+    "unique_passive": "Ancient knowledge — Nexus anomaly events gain a bonus option. +1 Resonance at Nexus nodes.",
+    "personality_description": "Claims to be a Remnant Collective archivist. Speaks about the Nexus builders in present tense. Knows things that shouldn't be knowable. Unsettlingly patient.",
+    "faction_affiliation": "remnant_collective",
+    "secret": "Vel is not a Remnant scholar studying the builders. Vel is a builder — the last one, preserved in a form that can still interact with the living. The Nexus recognizes Vel. Vel recognizes it back.",
+    "first_encounter": { "event_id": "SIGNAL_003" }
+  },
+  {
+    "id": "dorin_engineer",
+    "name": "Dorin",
+    "role": "engineer",
+    "emoji": "🔧",
+    "trait": "pragmatic",
+    "morale_start": 50,
+    "loyalty_start": 30,
+    "unique_passive": "Master mechanic — hull repairs at stations restore +5 extra. Identifies salvageable components in derelicts.",
+    "personality_description": "Engineer's hands and a father's worry. Left Vreth territory with Sera and Maren after their homestead was erased from official records. Fixes things because fixing things is the only language he trusts.",
+    "faction_affiliation": null,
+    "secret": "Dorin built the drive system that the Vreth used to destroy his own settlement. He was a Dominion military engineer before he was a refugee. The technical knowledge that makes him valuable is the same knowledge that made him dangerous to the Vreth.",
+    "first_encounter": { "event_id": "TRADE_003" }
+  },
+  {
+    "id": "sera_soldier",
+    "name": "Sera",
+    "role": "soldier",
+    "emoji": "⚔",
+    "trait": "stoic",
+    "morale_start": 45,
+    "loyalty_start": 25,
+    "unique_passive": "Combat vigilance — +2 damage when hull is below 50%. Detects ambush events one step earlier.",
+    "personality_description": "Former Vreth Dominion military, rank unclear — she doesn't talk about it. Watches exits. Counts weapons. Sleeps with her boots on. Protects Dorin and Maren with the focus of someone who has already lost everything once.",
+    "faction_affiliation": null,
+    "secret": "Sera was the commanding officer of the garrison sent to annex Dorin's settlement. She chose to protect the settlement instead of following orders. The soldiers who died on Brennar VI were her own squad. She killed them.",
+    "first_encounter": { "event_id": "TRADE_003" }
+  },
+  {
+    "id": "kess_diplomat",
+    "name": "Kess",
+    "role": "diplomat",
+    "emoji": "📜",
+    "trait": "vocal",
+    "morale_start": 50,
+    "loyalty_start": 20,
+    "unique_passive": "Assembly insider — Concord territory events gain a bonus option. +10% trade prices at Concord stations.",
+    "personality_description": "Former Concord Assembly liaison officer who walked away from a career because she saw how the Reclamation Division operated. Talks like a bureaucrat, thinks like a spy. Her loyalty is hard to earn because she's been burned by institutions.",
+    "faction_affiliation": "concord_assembly",
+    "secret": "Kess didn't just leave the Assembly — she was the architect of the Reclamation Division's operational protocols. She knows every hidden facility, every suppressed record, every officer who signed off on making evidence disappear. She left because they started using those protocols on people."
+  },
+  {
+    "id": "rook_medic",
+    "name": "Rook",
+    "role": "medic",
+    "emoji": "✚",
+    "trait": "haunted",
+    "morale_start": 35,
+    "loyalty_start": 30,
+    "unique_passive": "Field triage — crew injuries in combat are less severe. Wounded crew can still act at reduced capacity.",
+    "personality_description": "Drifter Compact field surgeon who's treated injuries on stations that don't officially exist. Quiet in a way that feels heavy. Drinks synth-coffee like it's medicine. The best medic you'll find outside a Concord hospital, which is exactly why he's not in one.",
+    "faction_affiliation": "drifter_compact",
+    "secret": "Rook was a Concord military surgeon who performed experimental procedures on Drifter prisoners of war. He defected to the Compact out of guilt and has spent fifteen years trying to repair what he broke. The prisoners he experimented on are still alive. Some of them are looking for him."
+  },
+  {
+    "id": "tam_technician",
+    "name": "Tam",
+    "role": "technician",
+    "emoji": "⚙",
+    "trait": "curious",
+    "morale_start": 55,
+    "loyalty_start": 25,
+    "unique_passive": "System intuition — hacking and technical event options have +15% success rate. Can jury-rig damaged modules.",
+    "personality_description": "Found in a derelict with Remnant-era implants she doesn't remember getting. Talks to machines and they seem to listen. Young, fast, and unsettlingly good at understanding technology that predates human civilization. Asks too many questions about the Nexus.",
+    "faction_affiliation": "remnant_collective",
+    "secret": "Tam's implants aren't Remnant technology adapted for humans. They're human technology adapted by the Remnant — she was modified as an infant by the Collective as part of an experiment to create beings who could interface with Nexus-class artifacts. She's the only subject who survived."
   }
-}
+]
