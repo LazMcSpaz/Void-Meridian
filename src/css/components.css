@@ -133,8 +133,8 @@
   font-size: 1.2rem;
   border: 1px solid var(--border);
   border-radius: 50%;
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
+  cursor: default;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
 }
 
 .map-node.current {
@@ -148,11 +148,23 @@
 
 .map-node.hidden-node {
   opacity: 0.2;
-  cursor: default;
+}
+
+.map-node.selectable {
+  cursor: pointer;
+  border-color: var(--color-success);
+  box-shadow: 0 0 6px rgba(135, 214, 141, 0.4);
+  animation: node-pulse 2s ease-in-out infinite;
 }
 
 .map-node.selectable:active {
   border-color: var(--border-active);
+  box-shadow: 0 0 10px rgba(92, 207, 230, 0.5);
+}
+
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(135, 214, 141, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(135, 214, 141, 0.6); }
 }
 
 /* === Narrative Text === */

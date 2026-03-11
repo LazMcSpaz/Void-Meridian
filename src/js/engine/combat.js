@@ -654,12 +654,12 @@ const CombatEngine = {
 
     const scientist = GameState.run.crew.find(c => !c.dead && c.role === 'scientist');
     const techie = GameState.run.crew.find(c => !c.dead && c.role === 'technician');
-    const successChance = (scientist || techie) ? 80 : 50;
+    let successChance = (scientist || techie) ? 80 : 50;
 
     combat.actionsRemaining--;
 
     // Sensor level boosts scan success
-    var sensorLvl = this._getSensorLevel();
+    const sensorLvl = this._getSensorLevel();
     if (sensorLvl >= 3) successChance = Math.min(95, successChance + 15);
     else if (sensorLvl >= 2) successChance = Math.min(90, successChance + 10);
 

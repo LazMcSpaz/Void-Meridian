@@ -21,9 +21,26 @@ const MapUI = {
     // Fuel display
     const fuel = document.createElement('div');
     fuel.className = 'system-label';
-    fuel.style.marginBottom = 'var(--space-md)';
+    fuel.style.marginBottom = 'var(--space-sm)';
     fuel.textContent = `FUEL: ${GameState.run.fuel}`;
     screen.appendChild(fuel);
+
+    // Faction color legend
+    const legend = document.createElement('div');
+    legend.style.cssText = 'display:flex; gap:var(--space-md); flex-wrap:wrap; font-size:var(--font-size-sm); margin-bottom:var(--space-md);';
+    const factions = [
+      { name: 'Concord', color: 'var(--faction-concord)' },
+      { name: 'Vreth', color: 'var(--faction-vreth)' },
+      { name: 'Drifter', color: 'var(--faction-drifter)' },
+      { name: 'Remnant', color: 'var(--faction-remnant)' },
+    ];
+    for (const f of factions) {
+      const item = document.createElement('span');
+      item.style.cssText = `color:${f.color};`;
+      item.textContent = `● ${f.name}`;
+      legend.appendChild(item);
+    }
+    screen.appendChild(legend);
 
     // Render map layers
     const mapContainer = document.createElement('div');
