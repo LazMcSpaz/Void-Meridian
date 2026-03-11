@@ -130,6 +130,13 @@ const EventEngine = {
       }
     }
 
+    // Named crew passive: options requiring a specific named crew member
+    if (option.requires_named_crew) {
+      if (!CrewEngine.hasNamedCrew(option.requires_named_crew)) {
+        return { available: false, hint: option.locked_hint || `Requires ${option.requires_named_crew}` };
+      }
+    }
+
     // Skill checks targeting a crew role require that role aboard
     if (option.check_type === 'skill' && option.check_target) {
       const role = option.check_target;
@@ -158,8 +165,22 @@ const EventEngine = {
       if (crewMember) {
         // Base role bonus: having the right role gives 30 points
         skillValue = 30;
+        // Command stat: crew effectiveness bonus (+3 per command level above 1)
+        const command = (run.captain.stats && run.captain.stats.command) || 1;
+        skillValue += (command - 1) * 3;
         // Morale modifier: (morale - 50) * 0.2 gives -10 to +10
         skillValue += (crewMember.morale - 50) * 0.2;
+        // Condition penalty: shaken crew perform worse
+        // Rook passive: wounded crew can still act at reduced capacity (-5 instead of -10)
+        if (crewMember.conditions && crewMember.conditions.some(
+          c => (typeof c === 'string' ? c : c.name) === 'shaken'
+        )) {
+          skillValue -= CrewEngine.hasNamedCrew('rook') ? 5 : 10;
+        }
+        // Tam passive: +15% success rate on hacking/technical options
+        if (option.check_target === 'technician' && CrewEngine.hasNamedCrew('tam')) {
+          skillValue += 15;
+        }
       } else {
         // No matching role crew — attempt with lower skill
         skillValue = 10;
@@ -396,8 +417,14 @@ const EventEngine = {
     }
 
     // 2. Morale delta (applied to all crew)
+    // Resolve stat: reduces negative morale impact by 20% per level above 1
     if (outcome.morale_delta) {
-      CrewEngine.adjustMoraleAll(outcome.morale_delta);
+      let moraleDelta = outcome.morale_delta;
+      if (moraleDelta < 0) {
+        const resolve = (GameState.run.captain.stats && GameState.run.captain.stats.resolve) || 1;
+        moraleDelta = Math.round(moraleDelta * Math.max(0.4, 1 - (resolve - 1) * 0.2));
+      }
+      CrewEngine.adjustMoraleAll(moraleDelta);
     }
 
     // 3. Loyalty delta (applied to all crew for non-assignment events)
@@ -458,13 +485,18 @@ const EventEngine = {
     // Scavenger's Eye: +25% credits/fuel gains at derelict nodes
     const scavengerBonus = run.captain.abilities.includes('scavenger_eye') &&
       run.activeEvent && run.activeEvent.node_type === 'derelict' && reward.value > 0;
+    // Dorin passive: identifies salvageable components in derelicts (+15% credits/fuel)
+    const dorinBonus = run.activeEvent && run.activeEvent.node_type === 'derelict' &&
+      reward.value > 0 && CrewEngine.hasNamedCrew('dorin');
 
     switch (reward.type) {
       case 'credits': {
         let val = reward.value;
         if (scavengerBonus) val = Math.round(val * 1.25);
+        if (dorinBonus) val = Math.round(val * 1.15);
         run.credits = Math.max(0, run.credits + val);
-        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        const creditTag = scavengerBonus ? ' (Scavenger\'s Eye)' : dorinBonus ? ' (Dorin)' : '';
+        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + creditTag);
         else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} credits`);
         break;
       }
@@ -472,8 +504,10 @@ const EventEngine = {
       case 'fuel': {
         let val = reward.value;
         if (scavengerBonus) val = Math.round(val * 1.25);
+        if (dorinBonus) val = Math.round(val * 1.15);
         run.fuel = Math.max(0, run.fuel + val);
-        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        const fuelTag = scavengerBonus ? ' (Scavenger\'s Eye)' : dorinBonus ? ' (Dorin)' : '';
+        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + fuelTag);
         else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} fuel`);
         break;
       }

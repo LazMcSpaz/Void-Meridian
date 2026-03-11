@@ -85,6 +85,7 @@ const CrewEngine = {
     if (archetype) {
       const member = this._createFromArchetype(archetype.role, 0);
       GameState.run.crew.push(member);
+      this._applyRecruitBonuses(member);
       GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
       return member;
     }
@@ -95,6 +96,7 @@ const CrewEngine = {
       const member = this._createFromArchetype(roleMatch[1], 0);
       member.name = this._formatRecruitName(crewId);
       GameState.run.crew.push(member);
+      this._applyRecruitBonuses(member);
       GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
       return member;
     }
@@ -124,6 +126,7 @@ const CrewEngine = {
     };
 
     GameState.run.crew.push(member);
+    this._applyRecruitBonuses(member);
 
     // Track encounter in meta state
     if (!GameState.meta.namedCrewState[named.id]) {
@@ -134,6 +137,13 @@ const CrewEngine = {
 
     GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
     return member;
+  },
+
+  _applyRecruitBonuses(member) {
+    // Med Bay: +5 morale on recruit
+    if (GameState.run.ship.equippedModules.some(m => m.id === 'mod_med_bay')) {
+      member.morale = Math.min(100, member.morale + 5);
+    }
   },
 
   _formatRecruitName(crewId) {
@@ -207,7 +217,9 @@ const CrewEngine = {
       GameState.run.runFlags.push('iron_will_used');
       GameState.addLog('crew', `${member.name} should have died — but your iron will kept them alive.`);
       this.adjustMorale(member, -20);
-      member.conditions.push('shaken');
+      // Rook passive: crew injuries are less severe (shorter shaken duration)
+      const rookPresent = this.hasNamedCrew('rook');
+      this.addCondition(member, 'shaken', rookPresent ? 2 : 4);
       return null;
     }
 
@@ -233,11 +245,53 @@ const CrewEngine = {
   // ─── Post-Event Tick ──────────────────────────────────────────
 
   tickAfterEvent() {
+    const hasMedBay = GameState.run.ship.equippedModules.some(m => m.id === 'mod_med_bay');
+    // Dr. Yema Osha passive: +10% crew healing — conditions tick down 1 faster
+    const hasOsha = this.hasNamedCrew('dr_yema');
+
     for (const member of GameState.run.crew) {
       if (member.dead) continue;
 
-      if (member.morale > 55) member.morale -= 1;
-      else if (member.morale < 45) member.morale += 1;
+      // Morale decay/recovery — resolve reduces negative drift
+      const resolve = (GameState.run.captain.stats && GameState.run.captain.stats.resolve) || 1;
+      if (member.morale > 55) {
+        // High resolve slows morale decay: resolve 3 = no decay
+        if (resolve < 3) member.morale -= 1;
+      } else if (member.morale < 45) {
+        member.morale += 1;
+        // High command helps crew recover morale faster
+        const command = (GameState.run.captain.stats && GameState.run.captain.stats.command) || 1;
+        if (command >= 3) member.morale += 1;
+      }
+
+      // Condition healing: each condition ticks down duration; Med Bay speeds it up
+      if (member.conditions && member.conditions.length > 0) {
+        const healed = [];
+        for (let i = member.conditions.length - 1; i >= 0; i--) {
+          const cond = member.conditions[i];
+          if (cond === 'dead') continue;
+
+          // Conditions stored as strings get a single-tick grace period then clear
+          // Conditions stored as objects {name, duration} tick down
+          if (typeof cond === 'string') {
+            // Convert legacy string conditions to timed: 3 nodes (2 with Med Bay, faster with Osha)
+            let baseDuration = hasMedBay ? 2 : 3;
+            if (hasOsha) baseDuration = Math.max(1, baseDuration - 1);
+            member.conditions[i] = { name: cond, duration: baseDuration };
+          } else if (typeof cond === 'object' && cond.duration != null) {
+            let healRate = hasMedBay ? 2 : 1;
+            if (hasOsha) healRate += 1;
+            cond.duration -= healRate;
+            if (cond.duration <= 0) {
+              healed.push(cond.name);
+              member.conditions.splice(i, 1);
+            }
+          }
+        }
+        for (const h of healed) {
+          GameState.addLog('crew', `${member.name} recovered from ${h}.`);
+        }
+      }
 
       if (member.loyalty <= 15) {
         this._checkMutiny(member);
@@ -340,6 +394,36 @@ const CrewEngine = {
 
     const line = lines[Math.floor(Math.random() * lines.length)];
     return { speaker, line };
+  },
+
+  // ─── Named Crew Passive Helpers ─────────────────────────────────
+
+  /** Check if a named crew member (by namedId prefix) is alive on board */
+  hasNamedCrew(namedIdPrefix) {
+    return GameState.run.crew.some(c => !c.dead && c.isNamed && c.namedId && c.namedId.startsWith(namedIdPrefix));
+  },
+
+  getNamedCrew(namedIdPrefix) {
+    return GameState.run.crew.find(c => !c.dead && c.isNamed && c.namedId && c.namedId.startsWith(namedIdPrefix));
+  },
+
+  // ─── Condition Helpers ──────────────────────────────────────────
+
+  hasCondition(member, condName) {
+    if (!member.conditions) return false;
+    return member.conditions.some(c => (typeof c === 'string' ? c : c.name) === condName);
+  },
+
+  addCondition(member, condName, duration) {
+    if (member.dead || this.hasCondition(member, condName)) return;
+    // Dr. Yema Osha passive: pathogen immunity — unaffected by biological conditions
+    if (member.isNamed && member.namedId && member.namedId.startsWith('dr_yema')) {
+      GameState.addLog('crew', `${member.name}'s pathogen immunity protected her.`);
+      return;
+    }
+    const hasMedBay = GameState.run.ship.equippedModules.some(m => m.id === 'mod_med_bay');
+    member.conditions.push({ name: condName, duration: duration || (hasMedBay ? 2 : 3) });
+    GameState.addLog('crew', `${member.name} is now ${condName}.`);
   },
 
   // ─── Helpers ──────────────────────────────────────────────────

@@ -527,7 +527,24 @@ const CombatEngine = {
     let damage = weapon.damage || 2;
 
     const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
-    if (gunner) damage += 1;
+    if (gunner) {
+      damage += 1;
+      // Crew synergy: Targeting Computer + soldier grants extra +1 damage
+      if (GameState.run.ship.equippedModules.some(m => m.id === 'mod_targeting_computer')) {
+        damage += 1;
+      }
+    }
+
+    // Crew combat stats: sum atk_modifier from all living crew
+    const atkBonus = GameState.run.crew
+      .filter(c => !c.dead && c.combatStats && c.combatStats.atk_modifier)
+      .reduce((sum, c) => sum + c.combatStats.atk_modifier, 0);
+    if (atkBonus) damage += atkBonus;
+
+    // Sera passive: +2 damage when hull is below 50%
+    if (CrewEngine.hasNamedCrew('sera') && GameState.run.ship.hull < GameState.run.ship.maxHull * 0.5) {
+      damage += 2;
+    }
 
     if (target.scanned && target.weakness === 'weapons') {
       damage = Math.round(damage * 1.3);
@@ -1060,6 +1077,12 @@ const CombatEngine = {
         damage = Math.max(1, damage - shieldLevel * 2 - 3);
       }
 
+      // Crew combat stats: sum def_modifier from all living crew
+      const defBonus = GameState.run.crew
+        .filter(c => !c.dead && c.combatStats && c.combatStats.def_modifier)
+        .reduce((sum, c) => sum + c.combatStats.def_modifier, 0);
+      if (defBonus) damage = Math.max(1, damage - defBonus);
+
       const actualDmg = Math.max(1, damage);
       ShipEngine.takeDamage(actualDmg);
       this._addEffect(entity.x, entity.y, 'attack');
@@ -1209,6 +1232,11 @@ const CombatEngine = {
     if (shooter.id === 'player') {
       var sensorLvl = this._getSensorLevel();
       acc += (sensorLvl - 1) * 3;
+    }
+
+    // Oss passive: +1 evasion — enemies have -8% accuracy against player
+    if (target.id === 'player' && CrewEngine.hasNamedCrew('oss')) {
+      acc -= 8;
     }
 
     return Math.max(30, Math.min(98, acc));
