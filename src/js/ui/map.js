@@ -21,9 +21,26 @@ const MapUI = {
     // Fuel display
     const fuel = document.createElement('div');
     fuel.className = 'system-label';
-    fuel.style.marginBottom = 'var(--space-md)';
+    fuel.style.marginBottom = 'var(--space-sm)';
     fuel.textContent = `FUEL: ${GameState.run.fuel}`;
     screen.appendChild(fuel);
+
+    // Faction color legend
+    const legend = document.createElement('div');
+    legend.style.cssText = 'display:flex; gap:var(--space-md); flex-wrap:wrap; font-size:var(--font-size-sm); margin-bottom:var(--space-md);';
+    const factions = [
+      { name: 'Concord', color: 'var(--faction-concord)' },
+      { name: 'Vreth', color: 'var(--faction-vreth)' },
+      { name: 'Drifter', color: 'var(--faction-drifter)' },
+      { name: 'Remnant', color: 'var(--faction-remnant)' },
+    ];
+    for (const f of factions) {
+      const item = document.createElement('span');
+      item.style.cssText = `color:${f.color};`;
+      item.textContent = `● ${f.name}`;
+      legend.appendChild(item);
+    }
+    screen.appendChild(legend);
 
     // Render map layers
     const mapContainer = document.createElement('div');
@@ -37,6 +54,10 @@ const MapUI = {
     const sensorsWorking = sensors && !sensors.damaged;
     const hasScanner = GameState.run.ship.equippedModules.some(m => m.id === 'mod_scanner_array');
     const hasNexusCortex = GameState.run.ship.equippedModules.some(m => m.id === 'mod_nexus_cortex');
+    // Crew synergy: Scanner Array + scientist reveals one extra layer
+    const scannerSynergy = hasScanner && GameState.run.crew.some(c => !c.dead && c.role === 'scientist');
+    // Sera passive: detects ambush (combat) events one step earlier
+    const seraDetectsAmbush = CrewEngine.hasNamedCrew('sera');
 
     for (let d = Math.max(0, currentDepth - 1); d <= Math.min(map.maxDepth, maxVisible); d++) {
       const layerNodes = map.nodes.filter(n => n.depth === d);
@@ -50,7 +71,8 @@ const MapUI = {
         // Nexus Cortex reveals nexus_anomaly nodes within visible range
         const nexusCortexReveal = hasNexusCortex && node.type === 'nexus_anomaly' &&
           node.depth <= currentDepth + 3;
-        const isRevealed = node.revealed || node.depth <= currentDepth + 1 || nexusCortexReveal;
+        const revealRange = scannerSynergy ? currentDepth + 2 : currentDepth + 1;
+        const isRevealed = node.revealed || node.depth <= revealRange || nexusCortexReveal;
         const isCurrent = node.id === GameState.run.currentNodeId;
         const isVisited = node.visited;
         const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
@@ -59,8 +81,10 @@ const MapUI = {
         // Some nodes broadcast their presence (no sensors needed)
         const broadcasts = node.type === 'trade_post' || node.type === 'dead_zone' ||
           node.type === 'faction_territory';
+        // Sera passive: can identify combat nodes one layer further out
+        const seraReveal = seraDetectsAmbush && node.type === 'combat' && node.depth <= currentDepth + 2;
         // Sensor check: need sensors level 3+ or Scanner Array module to identify other nodes
-        const canIdentify = isVisited || (isRevealed && broadcasts) || nexusCortexReveal ||
+        const canIdentify = isVisited || (isRevealed && broadcasts) || nexusCortexReveal || seraReveal ||
           (isRevealed && sensorsWorking && (sensors.level >= 3 || hasScanner));
 
         el.className = 'map-node' +
@@ -146,7 +170,21 @@ const MapUI = {
       return;
     }
 
-    GameState.run.fuel--;
+    // Fuel Recycler: 15% chance to not consume fuel on jump
+    // Oss passive: additional 10% chance to avoid fuel cost
+    const hasFuelRecycler = GameState.run.ship.equippedModules.some(m => m.id === 'mod_fuel_recycler');
+    const hasOss = CrewEngine.hasNamedCrew('oss');
+    let fuelSaved = false;
+    if (hasFuelRecycler && Math.random() < 0.15) {
+      GameState.addLog('system', 'Fuel Recycler reclaimed exhaust — no fuel consumed.');
+      fuelSaved = true;
+    } else if (hasOss && Math.random() < 0.10) {
+      GameState.addLog('system', 'Oss found a shortcut — no fuel consumed.');
+      fuelSaved = true;
+    }
+    if (!fuelSaved) {
+      GameState.run.fuel--;
+    }
     GameState.run.depth = node.depth;
     GameState.run.currentNodeId = node.id;
     node.visited = true;
@@ -160,6 +198,12 @@ const MapUI = {
         CrewEngine.adjustMoraleAll(10);
         GameState.addLog('system', 'Rally Cry! The captain\'s words lift the crew\'s spirits. (+10 morale)');
       }
+    }
+
+    // Vel passive: +1 Resonance at nexus_anomaly nodes
+    if (node.type === 'nexus_anomaly' && CrewEngine.hasNamedCrew('vel')) {
+      GameState.meta.resonance += 1;
+      GameState.addLog('nexus', 'Vel communes with the Nexus. (+1 Resonance)');
     }
 
     // Reveal adjacent nodes

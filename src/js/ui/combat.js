@@ -307,7 +307,11 @@ const CombatUI = {
       player_action: 'ACTION PHASE',
       enemy: 'ENEMY TURN',
       yield_offer: 'ENEMY YIELDS',
-      victory: combat.combatResult === 'victory_disabled' ? 'ENEMY DISABLED' : 'ENEMY DESTROYED',
+      victory: 'ENEMY DESTROYED',
+      surrender_confirm: 'CONFIRM SURRENDER',
+      surrender_outcome: 'SURRENDERED',
+      boarding: 'BOARDING',
+      boarding_result: 'BOARDING COMPLETE',
     };
 
     var turnDiv = document.createElement('div');
@@ -377,6 +381,18 @@ const CombatUI = {
       case 'victory':
         this._renderVictory(screen, combat);
         break;
+      case 'surrender_confirm':
+        this._renderSurrenderConfirm(screen, combat);
+        break;
+      case 'surrender_outcome':
+        this._renderSurrenderOutcome(screen, combat);
+        break;
+      case 'boarding':
+        this._renderBoarding(screen, combat);
+        break;
+      case 'boarding_result':
+        this._renderBoardingResult(screen, combat);
+        break;
     }
   },
 
@@ -389,9 +405,12 @@ const CombatUI = {
     var btnRow = document.createElement('div');
     btnRow.style.cssText = 'display:flex; flex-wrap:wrap; gap:var(--space-xs);';
 
-    // Flee button if at edge
+    // Flee button if at edge — show success chance
     if (CombatEngine._isAtEdge(player)) {
-      btnRow.appendChild(this._actionBtn('\uD83C\uDFC3 FLEE (edge)', 'var(--color-warning)',
+      var propLevel = GameState.run.ship.baseSystems.propulsion.level || 1;
+      var enemies = combat.entities.filter(function(e) { return e.type === 'enemy' && e.hull > 0 && !e.yielded; });
+      var fleeChance = Math.min(95, Math.max(20, 70 + propLevel * 5 - enemies.length * 10));
+      btnRow.appendChild(this._actionBtn('\uD83C\uDFC3 FLEE (' + fleeChance + '%)', 'var(--color-warning)',
         function() { CombatEngine.attemptFlee(); }));
     }
 
@@ -470,12 +489,13 @@ const CombatUI = {
 
     screen.appendChild(utilRow);
 
-    // Weapon info hint
+    // Weapon info hint with accuracy
     if (combat.selectedWeaponIdx !== null) {
       var selWpn = player.weapons[combat.selectedWeaponIdx];
+      var baseAcc = CombatEngine.WEAPON_ACCURACY[selWpn.type] || 80;
       var hint = document.createElement('div');
       hint.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin-top:var(--space-xs);';
-      hint.textContent = selWpn.name + ': ' + selWpn.type + ' \u2022 dmg ' + selWpn.damage + ' \u2022 range ' + selWpn.range + ' \u2014 tap a target';
+      hint.textContent = selWpn.name + ': ' + selWpn.type + ' \u2022 dmg ' + selWpn.damage + ' \u2022 range ' + selWpn.range + ' \u2022 ~' + baseAcc + '% acc \u2014 tap a target';
       screen.appendChild(hint);
     }
   },
@@ -528,6 +548,141 @@ const CombatUI = {
 
     var continueBtn = this._actionBtn('CONTINUE', 'var(--color-accent)',
       function() { CombatEngine.endCombatAndReturn(); });
+    continueBtn.style.marginTop = 'var(--space-md)';
+    panel.appendChild(continueBtn);
+
+    screen.appendChild(panel);
+  },
+
+  // ─── Surrender ─────────────────────────────────────────────
+
+  _renderSurrenderConfirm(screen, combat) {
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid var(--color-danger); padding:var(--space-md); ' +
+      'margin:var(--space-sm) 0; background:rgba(255,107,107,0.05);';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.color = 'var(--color-danger)';
+    title.textContent = 'CONFIRM SURRENDER';
+    panel.appendChild(title);
+
+    var desc = document.createElement('div');
+    desc.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-sm) 0; line-height:1.5;';
+    desc.textContent = 'Surrendering will cost 50% of your credits. The enemy will fire a parting shot (15% hull damage) and your reputation with their faction will decrease.';
+    panel.appendChild(desc);
+
+    panel.appendChild(this._actionBtn('\uD83C\uDFF3 CONFIRM SURRENDER', 'var(--color-danger)',
+      function() { CombatEngine.confirmSurrender(); }));
+
+    panel.appendChild(this._actionBtn('CANCEL', 'var(--text-muted)',
+      function() { CombatEngine.cancelSurrender(); }));
+
+    screen.appendChild(panel);
+  },
+
+  _renderSurrenderOutcome(screen, combat) {
+    var stats = combat.surrenderStats || {};
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid var(--color-danger); padding:var(--space-md); ' +
+      'margin:var(--space-sm) 0; background:rgba(255,107,107,0.05); text-align:center;';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.cssText = 'color:var(--color-danger); margin-bottom:var(--space-sm);';
+    title.textContent = 'SURRENDERED';
+    panel.appendChild(title);
+
+    var lines = [
+      'Credits lost: \u20A2' + (stats.creditsLost || 0),
+      'Hull damage: ' + (stats.hullDamage || 0),
+    ];
+    if (stats.faction) lines.push('Reputation decreased: ' + stats.faction);
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = document.createElement('div');
+      line.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-xs) 0;';
+      line.textContent = lines[i];
+      panel.appendChild(line);
+    }
+
+    var continueBtn = this._actionBtn('CONTINUE', 'var(--color-danger)',
+      function() { CombatEngine.confirmSurrenderReturn(); });
+    continueBtn.style.marginTop = 'var(--space-md)';
+    panel.appendChild(continueBtn);
+
+    screen.appendChild(panel);
+  },
+
+  // ─── Boarding ─────────────────────────────────────────────
+
+  _renderBoarding(screen, combat) {
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid var(--color-success); padding:var(--space-md); ' +
+      'margin:var(--space-sm) 0; background:rgba(135,214,141,0.05);';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.color = 'var(--color-success)';
+    title.textContent = 'BOARDING — CHOOSE ACTION';
+    panel.appendChild(title);
+
+    var desc = document.createElement('div');
+    desc.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-sm) 0;';
+    desc.textContent = 'The disabled vessel is open for boarding. Choose how to proceed.';
+    panel.appendChild(desc);
+
+    // Crew role hints
+    var crew = GameState.run.crew.filter(function(c) { return !c.dead; });
+    var hasTech = crew.some(function(c) { return c.role === 'technician' || c.role === 'engineer'; });
+    var hasSci = crew.some(function(c) { return c.role === 'scientist'; });
+
+    // Loot option - always works
+    var lootBtn = this._actionBtn('\uD83D\uDCE6 LOOT CARGO \u2014 Credits + cargo item', 'var(--color-success)',
+      function() { CombatEngine.selectBoardingAction('loot'); });
+    panel.appendChild(lootBtn);
+
+    // Salvage option
+    var salvageLabel = '\uD83D\uDD27 SALVAGE SYSTEMS \u2014 Chance for a module' + (hasTech ? ' (crew bonus)' : '');
+    var salvageBtn = this._actionBtn(salvageLabel, 'var(--border)',
+      function() { CombatEngine.selectBoardingAction('salvage'); });
+    panel.appendChild(salvageBtn);
+
+    // Intel option
+    var intelLabel = '\uD83D\uDCE1 EXTRACT INTEL \u2014 Lore + reveal map nodes' + (hasSci ? ' (crew bonus)' : '');
+    var intelBtn = this._actionBtn(intelLabel, 'var(--border)',
+      function() { CombatEngine.selectBoardingAction('intel'); });
+    panel.appendChild(intelBtn);
+
+    // Skip option
+    panel.appendChild(this._actionBtn('\u23ED SKIP BOARDING', 'var(--text-muted)',
+      function() { CombatEngine.finishBoarding(); }));
+
+    screen.appendChild(panel);
+  },
+
+  _renderBoardingResult(screen, combat) {
+    var result = combat.boardingResult || { success: false, rewards: [] };
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid ' + (result.success ? 'var(--color-success)' : 'var(--color-warning)') + '; ' +
+      'padding:var(--space-md); margin:var(--space-sm) 0; background:' +
+      (result.success ? 'rgba(135,214,141,0.05)' : 'rgba(255,213,128,0.05)') + '; text-align:center;';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.color = result.success ? 'var(--color-success)' : 'var(--color-warning)';
+    title.textContent = result.success ? 'BOARDING SUCCESSFUL' : 'BOARDING RESULT';
+    panel.appendChild(title);
+
+    for (var i = 0; i < result.rewards.length; i++) {
+      var line = document.createElement('div');
+      line.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-xs) 0;';
+      line.textContent = '\u2022 ' + result.rewards[i];
+      panel.appendChild(line);
+    }
+
+    var continueBtn = this._actionBtn('CONTINUE', 'var(--color-accent)',
+      function() { CombatEngine.finishBoarding(); });
     continueBtn.style.marginTop = 'var(--space-md)';
     panel.appendChild(continueBtn);
 

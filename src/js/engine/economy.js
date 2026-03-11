@@ -48,6 +48,10 @@ const EconomyEngine = {
     if (GameState.run.captain.abilities.includes('scavenger_eye')) {
       modifier -= 0.15;
     }
+    // Kess passive: +10% trade prices at Concord stations
+    if (faction === 'concord_assembly' && CrewEngine.hasNamedCrew('kess')) {
+      modifier -= 0.10;
+    }
     return Math.max(0.3, modifier);
   },
 

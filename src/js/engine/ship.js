@@ -67,6 +67,17 @@ const ShipEngine = {
     GameState.addLog('system', `${displayName} system repaired.`);
   },
 
+  // ─── Cargo Capacity ──────────────────────────────────────────
+
+  getCargoCapacity() {
+    var cargoLevel = GameState.run.ship.baseSystems.cargo_hold.level || 1;
+    return cargoLevel * 3;
+  },
+
+  isCargoFull() {
+    return GameState.run.ship.cargo.length >= this.getCargoCapacity();
+  },
+
   // ─── Weapon Management ────────────────────────────────────────
 
   equipWeapon(weaponId) {

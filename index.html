@@ -379,8 +379,8 @@ body {
   font-size: 1.2rem;
   border: 1px solid var(--border);
   border-radius: 50%;
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
+  cursor: default;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
 }
 
 .map-node.current {
@@ -394,11 +394,23 @@ body {
 
 .map-node.hidden-node {
   opacity: 0.2;
-  cursor: default;
+}
+
+.map-node.selectable {
+  cursor: pointer;
+  border-color: var(--color-success);
+  box-shadow: 0 0 6px rgba(135, 214, 141, 0.4);
+  animation: node-pulse 2s ease-in-out infinite;
 }
 
 .map-node.selectable:active {
   border-color: var(--border-active);
+  box-shadow: 0 0 10px rgba(92, 207, 230, 0.5);
+}
+
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(135, 214, 141, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(135, 214, 141, 0.6); }
 }
 
 /* === Narrative Text === */
@@ -537,6 +549,7 @@ body {
 .combat-cell-effect.scan     { animation: combat-scan 0.8s ease-out forwards; }
 .combat-cell-effect.attack   { animation: combat-attack-out 0.4s ease-out forwards; }
 .combat-cell-effect.explode  { animation: combat-explode 0.6s ease-out forwards; }
+.combat-cell-effect.miss     { animation: combat-miss 0.5s ease-out forwards; }
 
 .combat-threat-cell {
   border: 1px dashed rgba(255, 107, 107, 0.3);
@@ -21909,6 +21922,13 @@ const EventEngine = {
       }
     }
 
+    // Named crew passive: options requiring a specific named crew member
+    if (option.requires_named_crew) {
+      if (!CrewEngine.hasNamedCrew(option.requires_named_crew)) {
+        return { available: false, hint: option.locked_hint || `Requires ${option.requires_named_crew}` };
+      }
+    }
+
     // Skill checks targeting a crew role require that role aboard
     if (option.check_type === 'skill' && option.check_target) {
       const role = option.check_target;
@@ -21937,8 +21957,22 @@ const EventEngine = {
       if (crewMember) {
         // Base role bonus: having the right role gives 30 points
         skillValue = 30;
+        // Command stat: crew effectiveness bonus (+3 per command level above 1)
+        const command = (run.captain.stats && run.captain.stats.command) || 1;
+        skillValue += (command - 1) * 3;
         // Morale modifier: (morale - 50) * 0.2 gives -10 to +10
         skillValue += (crewMember.morale - 50) * 0.2;
+        // Condition penalty: shaken crew perform worse
+        // Rook passive: wounded crew can still act at reduced capacity (-5 instead of -10)
+        if (crewMember.conditions && crewMember.conditions.some(
+          c => (typeof c === 'string' ? c : c.name) === 'shaken'
+        )) {
+          skillValue -= CrewEngine.hasNamedCrew('rook') ? 5 : 10;
+        }
+        // Tam passive: +15% success rate on hacking/technical options
+        if (option.check_target === 'technician' && CrewEngine.hasNamedCrew('tam')) {
+          skillValue += 15;
+        }
       } else {
         // No matching role crew — attempt with lower skill
         skillValue = 10;
@@ -22175,8 +22209,14 @@ const EventEngine = {
     }
 
     // 2. Morale delta (applied to all crew)
+    // Resolve stat: reduces negative morale impact by 20% per level above 1
     if (outcome.morale_delta) {
-      CrewEngine.adjustMoraleAll(outcome.morale_delta);
+      let moraleDelta = outcome.morale_delta;
+      if (moraleDelta < 0) {
+        const resolve = (GameState.run.captain.stats && GameState.run.captain.stats.resolve) || 1;
+        moraleDelta = Math.round(moraleDelta * Math.max(0.4, 1 - (resolve - 1) * 0.2));
+      }
+      CrewEngine.adjustMoraleAll(moraleDelta);
     }
 
     // 3. Loyalty delta (applied to all crew for non-assignment events)
@@ -22237,13 +22277,18 @@ const EventEngine = {
     // Scavenger's Eye: +25% credits/fuel gains at derelict nodes
     const scavengerBonus = run.captain.abilities.includes('scavenger_eye') &&
       run.activeEvent && run.activeEvent.node_type === 'derelict' && reward.value > 0;
+    // Dorin passive: identifies salvageable components in derelicts (+15% credits/fuel)
+    const dorinBonus = run.activeEvent && run.activeEvent.node_type === 'derelict' &&
+      reward.value > 0 && CrewEngine.hasNamedCrew('dorin');
 
     switch (reward.type) {
       case 'credits': {
         let val = reward.value;
         if (scavengerBonus) val = Math.round(val * 1.25);
+        if (dorinBonus) val = Math.round(val * 1.15);
         run.credits = Math.max(0, run.credits + val);
-        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        const creditTag = scavengerBonus ? ' (Scavenger\'s Eye)' : dorinBonus ? ' (Dorin)' : '';
+        if (val > 0) GameState.addLog('event', `Gained ${val} credits` + creditTag);
         else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} credits`);
         break;
       }
@@ -22251,8 +22296,10 @@ const EventEngine = {
       case 'fuel': {
         let val = reward.value;
         if (scavengerBonus) val = Math.round(val * 1.25);
+        if (dorinBonus) val = Math.round(val * 1.15);
         run.fuel = Math.max(0, run.fuel + val);
-        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + (scavengerBonus ? ' (Scavenger\'s Eye)' : ''));
+        const fuelTag = scavengerBonus ? ' (Scavenger\'s Eye)' : dorinBonus ? ' (Dorin)' : '';
+        if (val > 0) GameState.addLog('event', `Gained ${val} fuel` + fuelTag);
         else if (val < 0) GameState.addLog('event', `Lost ${Math.abs(val)} fuel`);
         break;
       }
@@ -22290,8 +22337,12 @@ const EventEngine = {
         break;
 
       case 'cargo':
-        run.ship.cargo.push(reward.value);
-        GameState.addLog('event', `Acquired cargo: ${reward.description || reward.value}`);
+        if (ShipEngine.isCargoFull()) {
+          GameState.addLog('event', `Cargo hold full — could not store: ${reward.description || reward.value}`);
+        } else {
+          run.ship.cargo.push(reward.value);
+          GameState.addLog('event', `Acquired cargo: ${reward.description || reward.value} (${run.ship.cargo.length}/${ShipEngine.getCargoCapacity()})`);
+        }
         break;
 
       case 'lore_fragment':
@@ -22388,6 +22439,15 @@ const CombatEngine = {
   },
 
   YIELD_THRESHOLD: 0.25,  // 25% hull
+
+  // Base accuracy by weapon type (percentage)
+  WEAPON_ACCURACY: {
+    ballistic: 75,
+    energy: 90,
+    missile: 85,
+    emp: 80,
+    nexus_energy: 95,
+  },
 
   // Depth scaling multipliers
   _depthScale(depth) {
@@ -22852,11 +22912,45 @@ const CombatEngine = {
       return;
     }
 
+    // Accuracy check
+    var hitChance = this._calcAccuracy(weapon, player, target);
+    var hitRoll = Math.random() * 100;
+    if (hitRoll >= hitChance) {
+      // Miss!
+      if (weapon._ammo !== null) {
+        weapon._ammo--;
+        if (weapon._ref) weapon._ref._currentAmmo = weapon._ammo;
+      }
+      combat.actionsRemaining--;
+      combat.lastAction = `${weapon.name} misses ${target.name}! (${Math.round(hitChance)}% acc) ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+      this._addEffect(player.x, player.y, 'attack');
+      this._addEffect(target.x, target.y, 'miss');
+      this._afterPlayerAction(combat);
+      return;
+    }
+
     // Calculate damage
     let damage = weapon.damage || 2;
 
     const gunner = GameState.run.crew.find(c => !c.dead && c.role === 'soldier');
-    if (gunner) damage += 1;
+    if (gunner) {
+      damage += 1;
+      // Crew synergy: Targeting Computer + soldier grants extra +1 damage
+      if (GameState.run.ship.equippedModules.some(m => m.id === 'mod_targeting_computer')) {
+        damage += 1;
+      }
+    }
+
+    // Crew combat stats: sum atk_modifier from all living crew
+    const atkBonus = GameState.run.crew
+      .filter(c => !c.dead && c.combatStats && c.combatStats.atk_modifier)
+      .reduce((sum, c) => sum + c.combatStats.atk_modifier, 0);
+    if (atkBonus) damage += atkBonus;
+
+    // Sera passive: +2 damage when hull is below 50%
+    if (CrewEngine.hasNamedCrew('sera') && GameState.run.ship.hull < GameState.run.ship.maxHull * 0.5) {
+      damage += 2;
+    }
 
     if (target.scanned && target.weakness === 'weapons') {
       damage = Math.round(damage * 1.3);
@@ -22966,12 +23060,12 @@ const CombatEngine = {
 
     const scientist = GameState.run.crew.find(c => !c.dead && c.role === 'scientist');
     const techie = GameState.run.crew.find(c => !c.dead && c.role === 'technician');
-    const successChance = (scientist || techie) ? 80 : 50;
+    let successChance = (scientist || techie) ? 80 : 50;
 
     combat.actionsRemaining--;
 
     // Sensor level boosts scan success
-    var sensorLvl = this._getSensorLevel();
+    const sensorLvl = this._getSensorLevel();
     if (sensorLvl >= 3) successChance = Math.min(95, successChance + 15);
     else if (sensorLvl >= 2) successChance = Math.min(90, successChance + 10);
 
@@ -23084,9 +23178,70 @@ const CombatEngine = {
       return;
     }
 
-    GameState.run.fuel = Math.max(0, GameState.run.fuel - 1);
-    GameState.addLog('combat', 'Fled from combat.');
-    this._endCombat('fled');
+    // Flee check: base 70%, +5% per propulsion level, -10% per living enemy
+    const propLevel = GameState.run.ship.baseSystems.propulsion.level || 1;
+    const enemies = combat.entities.filter(e => e.type === 'enemy' && e.hull > 0 && !e.yielded);
+    const fleeChance = Math.min(95, Math.max(20, 70 + propLevel * 5 - enemies.length * 10));
+    const roll = Math.random() * 100;
+
+    this._clearEffects();
+
+    if (roll < fleeChance) {
+      // Success — but enemy fires a parting shot at 50% damage
+      var partingDmg = 0;
+      for (var i = 0; i < enemies.length; i++) {
+        if (enemies[i].weapons && enemies[i].weapons.length > 0) {
+          var wpnDmg = enemies[i].weapons[0].damage || enemies[i].attack || 5;
+          partingDmg += Math.round(wpnDmg * 0.5 * (0.6 + Math.random() * 0.4));
+        }
+      }
+      if (partingDmg > 0) {
+        ShipEngine.takeDamage(partingDmg);
+        player.hull = GameState.run.ship.hull;
+        this._addEffect(player.x, player.y, 'damage');
+      }
+
+      GameState.run.fuel = Math.max(0, GameState.run.fuel - 1);
+      combat.lastAction = `Engines flare — you break free! ${partingDmg > 0 ? 'Parting shots deal ' + partingDmg + ' damage.' : ''}`;
+      GameState.addLog('combat', `Fled from combat. ${partingDmg > 0 ? 'Took ' + partingDmg + ' parting damage.' : ''}`);
+
+      // Check if parting shot killed us
+      if (GameState.run.ship.hull <= 0) {
+        Game.render();
+        setTimeout(() => this._playerDestroyed(), 600);
+        return;
+      }
+
+      Game.render();
+      setTimeout(() => this._endCombat('fled'), 800);
+    } else {
+      // Failure — enemy gets a free full-damage attack
+      var freeDmg = 0;
+      for (var j = 0; j < enemies.length; j++) {
+        if (enemies[j].weapons && enemies[j].weapons.length > 0) {
+          var eDmg = enemies[j].weapons[0].damage || enemies[j].attack || 5;
+          freeDmg += Math.round(eDmg * (0.6 + Math.random() * 0.8));
+          this._addEffect(enemies[j].x, enemies[j].y, 'attack');
+        }
+      }
+      if (freeDmg > 0) {
+        ShipEngine.takeDamage(freeDmg);
+        player.hull = GameState.run.ship.hull;
+        this._addEffect(player.x, player.y, 'damage');
+      }
+
+      combat.lastAction = `Escape failed! (${Math.round(fleeChance)}% chance) Enemy fires freely — ${freeDmg} damage!`;
+
+      if (GameState.run.ship.hull <= 0) {
+        Game.render();
+        setTimeout(() => this._playerDestroyed(), 600);
+        return;
+      }
+
+      // Stay in combat, consume the action
+      combat.actionsRemaining = Math.max(0, combat.actionsRemaining - 1);
+      this._afterPlayerAction(combat);
+    }
   },
 
   // ─── Surrender ──────────────────────────────────────────────
@@ -23095,9 +23250,67 @@ const CombatEngine = {
     const combat = GameState.run.activeCombat;
     if (!combat) return;
 
+    // Show confirmation panel first
+    combat.phase = 'surrender_confirm';
+    combat.lastAction = 'Confirm surrender? The enemy will fire a parting shot.';
+    Game.render();
+  },
+
+  confirmSurrender() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+
+    const player = combat.entities.find(e => e.id === 'player');
+    this._clearEffects();
+
+    // Lose 50% credits
     const lost = Math.floor(GameState.run.credits * 0.5);
     GameState.run.credits -= lost;
-    GameState.addLog('combat', `Surrendered. Lost ₢${lost}.`);
+
+    // Enemy fires a parting shot (15% of max hull)
+    const partingDmg = Math.round(GameState.run.ship.maxHull * 0.15);
+    ShipEngine.takeDamage(partingDmg);
+    if (player) player.hull = GameState.run.ship.hull;
+    this._addEffect(player.x, player.y, 'damage');
+
+    // Reputation penalty with enemy faction
+    const factionEntity = combat.entities.find(e => e.type === 'enemy' && e.faction);
+    if (factionEntity) {
+      EconomyEngine.adjustReputation(factionEntity.faction, -1);
+    }
+
+    // Show surrender outcome
+    combat.phase = 'surrender_outcome';
+    combat.surrenderStats = {
+      creditsLost: lost,
+      hullDamage: partingDmg,
+      faction: factionEntity ? EconomyEngine.getFactionDisplayName(factionEntity.faction) : null,
+    };
+    combat.lastAction = `Surrendered. Lost ₢${lost}. Parting shot dealt ${partingDmg} hull damage.`;
+    GameState.addLog('combat', combat.lastAction);
+
+    // Check if parting shot killed us
+    if (GameState.run.ship.hull <= 0) {
+      Game.render();
+      setTimeout(() => this._playerDestroyed(), 600);
+      return;
+    }
+
+    Game.render();
+  },
+
+  cancelSurrender() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+    // Return to whichever phase makes sense
+    combat.phase = combat.hasMoved ? 'player_action' : 'player_move';
+    combat.lastAction = 'Surrender cancelled.';
+    Game.render();
+  },
+
+  confirmSurrenderReturn() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
     this._endCombat('surrendered');
   },
 
@@ -23254,6 +23467,14 @@ const CombatEngine = {
       const blocked = this.WEAPON_BLOCKED_BY_OBSTACLES[weapon.type] !== false;
       if (blocked && !this._hasLineOfSight(entity, player, combat.cells)) continue;
 
+      // Accuracy check for enemies
+      var enemyAcc = this._calcAccuracy(weapon, entity, player);
+      if (Math.random() * 100 >= enemyAcc) {
+        this._addEffect(entity.x, entity.y, 'attack');
+        this._addEffect(player.x, player.y, 'miss');
+        return `${entity.name} fires and misses!`;
+      }
+
       let damage = weapon.damage || entity.attack;
       damage = Math.round(damage * (0.6 + Math.random() * 0.8));
 
@@ -23261,6 +23482,12 @@ const CombatEngine = {
         const shieldLevel = GameState.run.ship.baseSystems.shields_armor.level;
         damage = Math.max(1, damage - shieldLevel * 2 - 3);
       }
+
+      // Crew combat stats: sum def_modifier from all living crew
+      const defBonus = GameState.run.crew
+        .filter(c => !c.dead && c.combatStats && c.combatStats.def_modifier)
+        .reduce((sum, c) => sum + c.combatStats.def_modifier, 0);
+      if (defBonus) damage = Math.max(1, damage - defBonus);
 
       const actualDmg = Math.max(1, damage);
       ShipEngine.takeDamage(actualDmg);
@@ -23306,6 +23533,7 @@ const CombatEngine = {
     const baseLoot = 10 + Math.floor(Math.random() * 30);
     const loot = result === 'victory_disabled' ? Math.round(baseLoot * 1.5) : baseLoot;
     GameState.run.credits += loot;
+    combat._victoryLoot = loot;
 
     const factionEntity = combat.entities.find(e => e.type === 'enemy' && e.faction);
     if (factionEntity && result === 'victory_destroyed') {
@@ -23313,12 +23541,18 @@ const CombatEngine = {
     }
 
     combat.combatResult = result;
-    combat.phase = 'victory';
-    combat.lastAction = result === 'victory_disabled'
-      ? `Enemy disabled. Looted ₢${loot}. The ship is intact — boarding is possible.`
-      : `Enemy destroyed. Salvaged ₢${loot} from the wreckage.`;
 
-    GameState.addLog('combat', combat.lastAction);
+    if (result === 'victory_disabled') {
+      // Go to boarding phase instead of victory
+      combat.phase = 'boarding';
+      combat.lastAction = `Enemy disabled. Looted ₢${loot}. The ship is intact — choose a boarding action.`;
+      GameState.addLog('combat', `Enemy disabled. Looted ₢${loot}.`);
+    } else {
+      combat.phase = 'victory';
+      combat.lastAction = `Enemy destroyed. Salvaged ₢${loot} from the wreckage.`;
+      GameState.addLog('combat', combat.lastAction);
+    }
+
     Game.render();
   },
 
@@ -23384,6 +23618,162 @@ const CombatEngine = {
     GameState.screen = 'gameOver';
     GameState.save();
     Game.render();
+  },
+
+  // ─── Accuracy Calculation ───────────────────────────────────
+
+  _calcAccuracy(weapon, shooter, target) {
+    var baseAcc = this.WEAPON_ACCURACY[weapon.type] || 80;
+    var dist = this._getDistance(shooter, target);
+    var optimalRange = Math.ceil((weapon.range || this.WEAPON_RANGE[weapon.type] || 2) / 2);
+
+    // Distance penalty: -5% per tile away from optimal range
+    var distPenalty = Math.abs(dist - optimalRange) * 5;
+    var acc = baseAcc - distPenalty;
+
+    // Scanned bonus: +10% against scanned targets
+    if (target.scanned) acc += 10;
+
+    // Sensor level bonus (player only): +3% per sensor level above 1
+    if (shooter.id === 'player') {
+      var sensorLvl = this._getSensorLevel();
+      acc += (sensorLvl - 1) * 3;
+    }
+
+    // Oss passive: +1 evasion — enemies have -8% accuracy against player
+    if (target.id === 'player' && CrewEngine.hasNamedCrew('oss')) {
+      acc -= 8;
+    }
+
+    return Math.max(30, Math.min(98, acc));
+  },
+
+  // ─── Boarding Mechanic ────────────────────────────────────
+
+  selectBoardingAction(actionType) {
+    const combat = GameState.run.activeCombat;
+    if (!combat || combat.phase !== 'boarding') return;
+
+    const crew = GameState.run.crew.filter(c => !c.dead);
+    var result = { success: false, rewards: [] };
+
+    switch (actionType) {
+      case 'loot': {
+        // Always succeeds — guaranteed credits + cargo
+        var bonusCredits = 15 + Math.floor(Math.random() * 25);
+        GameState.run.credits += bonusCredits;
+        result.success = true;
+        result.rewards.push('₢' + bonusCredits);
+
+        // Add a cargo item
+        var cargoItems = ['salvaged_data_core', 'hull_plating', 'fuel_cells', 'trade_goods', 'medical_supplies', 'encrypted_manifest'];
+        var cargoItem = cargoItems[Math.floor(Math.random() * cargoItems.length)];
+        var capacity = this._getCargoCapacity();
+        if (GameState.run.ship.cargo.length < capacity) {
+          GameState.run.ship.cargo.push(cargoItem);
+          result.rewards.push(cargoItem.replace(/_/g, ' '));
+        } else {
+          result.rewards.push('cargo full');
+        }
+        GameState.addLog('combat', 'Boarded and looted: ₢' + bonusCredits + ', ' + cargoItem.replace(/_/g, ' '));
+        break;
+      }
+      case 'salvage': {
+        // Skill check — technician/engineer gives 70%, otherwise 40%
+        var hasTech = crew.some(c => c.role === 'technician' || c.role === 'engineer');
+        var salvageChance = hasTech ? 70 : 40;
+
+        if (Math.random() * 100 < salvageChance) {
+          // Pick a random module from registry
+          var modules = ['mod_hull_patch', 'mod_scanner_array', 'mod_reinforced_bulkhead', 'mod_fuel_recycler', 'mod_targeting_computer', 'mod_med_bay'];
+          var modId = modules[Math.floor(Math.random() * modules.length)];
+          ShipEngine.addModule(modId);
+          var mod = Registry.getModule(modId);
+          result.success = true;
+          result.rewards.push(mod ? mod.name : modId);
+          GameState.addLog('combat', 'Salvaged module: ' + (mod ? mod.name : modId));
+        } else {
+          result.success = false;
+          result.rewards.push('nothing usable found');
+          GameState.addLog('combat', 'Salvage attempt failed — nothing usable.');
+        }
+        break;
+      }
+      case 'intel': {
+        // Skill check — scientist gives 75%, otherwise 35%
+        var hasSci = crew.some(c => c.role === 'scientist');
+        var intelChance = hasSci ? 75 : 35;
+
+        if (Math.random() * 100 < intelChance) {
+          // Add a lore fragment
+          var fragId = 'boarding_intel_' + Date.now();
+          var fragDesc = this._getIntelDescription(combat);
+          if (!GameState.run.loreFragments.some(lf => lf.id === fragId)) {
+            GameState.run.loreFragments.push({ id: fragId, description: fragDesc, depth: GameState.run.depth });
+          }
+
+          // Reveal nearby map nodes
+          this._revealNearbyNodes(2);
+
+          result.success = true;
+          result.rewards.push('intel acquired', 'nearby nodes revealed');
+          GameState.addLog('discovery', fragDesc);
+        } else {
+          result.success = false;
+          result.rewards.push('data corrupted');
+          GameState.addLog('combat', 'Intel extraction failed — data corrupted.');
+        }
+        break;
+      }
+    }
+
+    combat.phase = 'boarding_result';
+    combat.boardingResult = result;
+    combat.lastAction = result.success
+      ? 'Boarding ' + (result.success ? 'successful' : 'failed') + ': ' + result.rewards.join(', ')
+      : 'Boarding yielded: ' + result.rewards.join(', ');
+    Game.render();
+  },
+
+  _getCargoCapacity() {
+    var cargoLevel = GameState.run.ship.baseSystems.cargo_hold.level || 1;
+    return cargoLevel * 3;
+  },
+
+  _getIntelDescription(combat) {
+    var descs = [
+      'Intercepted comm logs reveal patrol routes through the sector.',
+      'Navigation data extracted — nearby hazards charted.',
+      'Faction supply manifests recovered from the ship\'s computers.',
+      'Encrypted transmissions decoded — enemy fleet movements logged.',
+      'Crew manifest and mission parameters recovered from the wreck.',
+    ];
+    return descs[Math.floor(Math.random() * descs.length)];
+  },
+
+  _revealNearbyNodes(count) {
+    var map = GameState.run.map;
+    if (!map || !map.nodes) return;
+    var currentId = GameState.run.currentNodeId;
+    var currentNode = map.nodes.find(n => n.id === currentId);
+    if (!currentNode) return;
+
+    // Reveal connected nodes' types
+    var revealed = 0;
+    for (var i = 0; i < (currentNode.connections || []).length && revealed < count; i++) {
+      var connId = currentNode.connections[i];
+      var connNode = map.nodes.find(n => n.id === connId);
+      if (connNode && !connNode._revealed) {
+        connNode._revealed = true;
+        revealed++;
+      }
+    }
+  },
+
+  finishBoarding() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+    this._endCombat(combat.combatResult);
   },
 
   // ─── Visual Effects ─────────────────────────────────────────
@@ -23608,6 +23998,10 @@ const EconomyEngine = {
     if (GameState.run.captain.abilities.includes('scavenger_eye')) {
       modifier -= 0.15;
     }
+    // Kess passive: +10% trade prices at Concord stations
+    if (faction === 'concord_assembly' && CrewEngine.hasNamedCrew('kess')) {
+      modifier -= 0.10;
+    }
     return Math.max(0.3, modifier);
   },
 
@@ -23713,6 +24107,7 @@ const CrewEngine = {
     if (archetype) {
       const member = this._createFromArchetype(archetype.role, 0);
       GameState.run.crew.push(member);
+      this._applyRecruitBonuses(member);
       GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
       return member;
     }
@@ -23723,6 +24118,7 @@ const CrewEngine = {
       const member = this._createFromArchetype(roleMatch[1], 0);
       member.name = this._formatRecruitName(crewId);
       GameState.run.crew.push(member);
+      this._applyRecruitBonuses(member);
       GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
       return member;
     }
@@ -23752,6 +24148,7 @@ const CrewEngine = {
     };
 
     GameState.run.crew.push(member);
+    this._applyRecruitBonuses(member);
 
     // Track encounter in meta state
     if (!GameState.meta.namedCrewState[named.id]) {
@@ -23762,6 +24159,13 @@ const CrewEngine = {
 
     GameState.addLog('crew', `${member.name} (${member.role}) joined the crew.`);
     return member;
+  },
+
+  _applyRecruitBonuses(member) {
+    // Med Bay: +5 morale on recruit
+    if (GameState.run.ship.equippedModules.some(m => m.id === 'mod_med_bay')) {
+      member.morale = Math.min(100, member.morale + 5);
+    }
   },
 
   _formatRecruitName(crewId) {
@@ -23835,7 +24239,9 @@ const CrewEngine = {
       GameState.run.runFlags.push('iron_will_used');
       GameState.addLog('crew', `${member.name} should have died — but your iron will kept them alive.`);
       this.adjustMorale(member, -20);
-      member.conditions.push('shaken');
+      // Rook passive: crew injuries are less severe (shorter shaken duration)
+      const rookPresent = this.hasNamedCrew('rook');
+      this.addCondition(member, 'shaken', rookPresent ? 2 : 4);
       return null;
     }
 
@@ -23861,11 +24267,53 @@ const CrewEngine = {
   // ─── Post-Event Tick ──────────────────────────────────────────
 
   tickAfterEvent() {
+    const hasMedBay = GameState.run.ship.equippedModules.some(m => m.id === 'mod_med_bay');
+    // Dr. Yema Osha passive: +10% crew healing — conditions tick down 1 faster
+    const hasOsha = this.hasNamedCrew('dr_yema');
+
     for (const member of GameState.run.crew) {
       if (member.dead) continue;
 
-      if (member.morale > 55) member.morale -= 1;
-      else if (member.morale < 45) member.morale += 1;
+      // Morale decay/recovery — resolve reduces negative drift
+      const resolve = (GameState.run.captain.stats && GameState.run.captain.stats.resolve) || 1;
+      if (member.morale > 55) {
+        // High resolve slows morale decay: resolve 3 = no decay
+        if (resolve < 3) member.morale -= 1;
+      } else if (member.morale < 45) {
+        member.morale += 1;
+        // High command helps crew recover morale faster
+        const command = (GameState.run.captain.stats && GameState.run.captain.stats.command) || 1;
+        if (command >= 3) member.morale += 1;
+      }
+
+      // Condition healing: each condition ticks down duration; Med Bay speeds it up
+      if (member.conditions && member.conditions.length > 0) {
+        const healed = [];
+        for (let i = member.conditions.length - 1; i >= 0; i--) {
+          const cond = member.conditions[i];
+          if (cond === 'dead') continue;
+
+          // Conditions stored as strings get a single-tick grace period then clear
+          // Conditions stored as objects {name, duration} tick down
+          if (typeof cond === 'string') {
+            // Convert legacy string conditions to timed: 3 nodes (2 with Med Bay, faster with Osha)
+            let baseDuration = hasMedBay ? 2 : 3;
+            if (hasOsha) baseDuration = Math.max(1, baseDuration - 1);
+            member.conditions[i] = { name: cond, duration: baseDuration };
+          } else if (typeof cond === 'object' && cond.duration != null) {
+            let healRate = hasMedBay ? 2 : 1;
+            if (hasOsha) healRate += 1;
+            cond.duration -= healRate;
+            if (cond.duration <= 0) {
+              healed.push(cond.name);
+              member.conditions.splice(i, 1);
+            }
+          }
+        }
+        for (const h of healed) {
+          GameState.addLog('crew', `${member.name} recovered from ${h}.`);
+        }
+      }
 
       if (member.loyalty <= 15) {
         this._checkMutiny(member);
@@ -23968,6 +24416,36 @@ const CrewEngine = {
 
     const line = lines[Math.floor(Math.random() * lines.length)];
     return { speaker, line };
+  },
+
+  // ─── Named Crew Passive Helpers ─────────────────────────────────
+
+  /** Check if a named crew member (by namedId prefix) is alive on board */
+  hasNamedCrew(namedIdPrefix) {
+    return GameState.run.crew.some(c => !c.dead && c.isNamed && c.namedId && c.namedId.startsWith(namedIdPrefix));
+  },
+
+  getNamedCrew(namedIdPrefix) {
+    return GameState.run.crew.find(c => !c.dead && c.isNamed && c.namedId && c.namedId.startsWith(namedIdPrefix));
+  },
+
+  // ─── Condition Helpers ──────────────────────────────────────────
+
+  hasCondition(member, condName) {
+    if (!member.conditions) return false;
+    return member.conditions.some(c => (typeof c === 'string' ? c : c.name) === condName);
+  },
+
+  addCondition(member, condName, duration) {
+    if (member.dead || this.hasCondition(member, condName)) return;
+    // Dr. Yema Osha passive: pathogen immunity — unaffected by biological conditions
+    if (member.isNamed && member.namedId && member.namedId.startsWith('dr_yema')) {
+      GameState.addLog('crew', `${member.name}'s pathogen immunity protected her.`);
+      return;
+    }
+    const hasMedBay = GameState.run.ship.equippedModules.some(m => m.id === 'mod_med_bay');
+    member.conditions.push({ name: condName, duration: duration || (hasMedBay ? 2 : 3) });
+    GameState.addLog('crew', `${member.name} is now ${condName}.`);
   },
 
   // ─── Helpers ──────────────────────────────────────────────────
@@ -24361,6 +24839,17 @@ const ShipEngine = {
     sys.damaged = false;
     const displayName = this.SYSTEM_NAMES[systemName] || systemName;
     GameState.addLog('system', `${displayName} system repaired.`);
+  },
+
+  // ─── Cargo Capacity ──────────────────────────────────────────
+
+  getCargoCapacity() {
+    var cargoLevel = GameState.run.ship.baseSystems.cargo_hold.level || 1;
+    return cargoLevel * 3;
+  },
+
+  isCargoFull() {
+    return GameState.run.ship.cargo.length >= this.getCargoCapacity();
   },
 
   // ─── Weapon Management ────────────────────────────────────────
@@ -24773,9 +25262,26 @@ const MapUI = {
     // Fuel display
     const fuel = document.createElement('div');
     fuel.className = 'system-label';
-    fuel.style.marginBottom = 'var(--space-md)';
+    fuel.style.marginBottom = 'var(--space-sm)';
     fuel.textContent = `FUEL: ${GameState.run.fuel}`;
     screen.appendChild(fuel);
+
+    // Faction color legend
+    const legend = document.createElement('div');
+    legend.style.cssText = 'display:flex; gap:var(--space-md); flex-wrap:wrap; font-size:var(--font-size-sm); margin-bottom:var(--space-md);';
+    const factions = [
+      { name: 'Concord', color: 'var(--faction-concord)' },
+      { name: 'Vreth', color: 'var(--faction-vreth)' },
+      { name: 'Drifter', color: 'var(--faction-drifter)' },
+      { name: 'Remnant', color: 'var(--faction-remnant)' },
+    ];
+    for (const f of factions) {
+      const item = document.createElement('span');
+      item.style.cssText = `color:${f.color};`;
+      item.textContent = `● ${f.name}`;
+      legend.appendChild(item);
+    }
+    screen.appendChild(legend);
 
     // Render map layers
     const mapContainer = document.createElement('div');
@@ -24789,6 +25295,10 @@ const MapUI = {
     const sensorsWorking = sensors && !sensors.damaged;
     const hasScanner = GameState.run.ship.equippedModules.some(m => m.id === 'mod_scanner_array');
     const hasNexusCortex = GameState.run.ship.equippedModules.some(m => m.id === 'mod_nexus_cortex');
+    // Crew synergy: Scanner Array + scientist reveals one extra layer
+    const scannerSynergy = hasScanner && GameState.run.crew.some(c => !c.dead && c.role === 'scientist');
+    // Sera passive: detects ambush (combat) events one step earlier
+    const seraDetectsAmbush = CrewEngine.hasNamedCrew('sera');
 
     for (let d = Math.max(0, currentDepth - 1); d <= Math.min(map.maxDepth, maxVisible); d++) {
       const layerNodes = map.nodes.filter(n => n.depth === d);
@@ -24802,7 +25312,8 @@ const MapUI = {
         // Nexus Cortex reveals nexus_anomaly nodes within visible range
         const nexusCortexReveal = hasNexusCortex && node.type === 'nexus_anomaly' &&
           node.depth <= currentDepth + 3;
-        const isRevealed = node.revealed || node.depth <= currentDepth + 1 || nexusCortexReveal;
+        const revealRange = scannerSynergy ? currentDepth + 2 : currentDepth + 1;
+        const isRevealed = node.revealed || node.depth <= revealRange || nexusCortexReveal;
         const isCurrent = node.id === GameState.run.currentNodeId;
         const isVisited = node.visited;
         const isSelectable = isRevealed && !isVisited && node.depth === currentDepth + 1 &&
@@ -24811,8 +25322,10 @@ const MapUI = {
         // Some nodes broadcast their presence (no sensors needed)
         const broadcasts = node.type === 'trade_post' || node.type === 'dead_zone' ||
           node.type === 'faction_territory';
+        // Sera passive: can identify combat nodes one layer further out
+        const seraReveal = seraDetectsAmbush && node.type === 'combat' && node.depth <= currentDepth + 2;
         // Sensor check: need sensors level 3+ or Scanner Array module to identify other nodes
-        const canIdentify = isVisited || (isRevealed && broadcasts) || nexusCortexReveal ||
+        const canIdentify = isVisited || (isRevealed && broadcasts) || nexusCortexReveal || seraReveal ||
           (isRevealed && sensorsWorking && (sensors.level >= 3 || hasScanner));
 
         el.className = 'map-node' +
@@ -24898,7 +25411,21 @@ const MapUI = {
       return;
     }
 
-    GameState.run.fuel--;
+    // Fuel Recycler: 15% chance to not consume fuel on jump
+    // Oss passive: additional 10% chance to avoid fuel cost
+    const hasFuelRecycler = GameState.run.ship.equippedModules.some(m => m.id === 'mod_fuel_recycler');
+    const hasOss = CrewEngine.hasNamedCrew('oss');
+    let fuelSaved = false;
+    if (hasFuelRecycler && Math.random() < 0.15) {
+      GameState.addLog('system', 'Fuel Recycler reclaimed exhaust — no fuel consumed.');
+      fuelSaved = true;
+    } else if (hasOss && Math.random() < 0.10) {
+      GameState.addLog('system', 'Oss found a shortcut — no fuel consumed.');
+      fuelSaved = true;
+    }
+    if (!fuelSaved) {
+      GameState.run.fuel--;
+    }
     GameState.run.depth = node.depth;
     GameState.run.currentNodeId = node.id;
     node.visited = true;
@@ -24912,6 +25439,12 @@ const MapUI = {
         CrewEngine.adjustMoraleAll(10);
         GameState.addLog('system', 'Rally Cry! The captain\'s words lift the crew\'s spirits. (+10 morale)');
       }
+    }
+
+    // Vel passive: +1 Resonance at nexus_anomaly nodes
+    if (node.type === 'nexus_anomaly' && CrewEngine.hasNamedCrew('vel')) {
+      GameState.meta.resonance += 1;
+      GameState.addLog('nexus', 'Vel communes with the Nexus. (+1 Resonance)');
     }
 
     // Reveal adjacent nodes
@@ -24955,6 +25488,24 @@ const DepotUI = {
     this.subScreen = 'menu';
     this._stock = null;
     this._recruitPool = null;
+
+    // Hull Patch Kit: restore 10 hull when docking at a station
+    const patchKit = GameState.run.ship.equippedModules.find(m => m.id === 'mod_hull_patch');
+    if (patchKit && GameState.run.ship.hull < GameState.run.ship.maxHull) {
+      ShipEngine.repair(10);
+      GameState.addLog('system', 'Hull Patch Kit applied on docking — +10 hull.');
+    }
+
+    // Tam passive: jury-rig one damaged module/system on docking
+    if (CrewEngine.hasNamedCrew('tam')) {
+      const damagedSystems = Object.entries(GameState.run.ship.baseSystems)
+        .filter(([, sys]) => sys.damaged);
+      if (damagedSystems.length > 0) {
+        const [key] = damagedSystems[Math.floor(Math.random() * damagedSystems.length)];
+        ShipEngine.repairSystem(key);
+        GameState.addLog('system', `Tam jury-rigged the ${ShipEngine.SYSTEM_NAMES[key] || key} system.`);
+      }
+    }
 
     // Check for auto-trigger events first
     const autoEvent = this._pickAutoEvent(node);
@@ -25748,8 +26299,11 @@ const DepotUI = {
         if (canAfford) {
           btn.addEventListener('click', () => {
             EconomyEngine.spend(opt.cost);
-            ShipEngine.repair(opt.amount);
-            GameState.addLog('event', `Hull repaired +${opt.amount} for ${opt.cost} credits`);
+            // Dorin passive: hull repairs at stations restore +5 extra
+            const dorinBonus = CrewEngine.hasNamedCrew('dorin') ? 5 : 0;
+            ShipEngine.repair(opt.amount + dorinBonus);
+            const totalRepair = opt.amount + dorinBonus;
+            GameState.addLog('event', `Hull repaired +${totalRepair} for ${opt.cost} credits` + (dorinBonus ? ' (Dorin)' : ''));
             GameState.save();
             Game.render();
           });
@@ -26216,6 +26770,31 @@ const EventUI = {
 
         screen.appendChild(modEl);
       }
+    }
+
+    // Cargo Hold
+    screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+    const cargoHeader = document.createElement('div');
+    cargoHeader.className = 'system-label';
+    cargoHeader.style.marginBottom = 'var(--space-sm)';
+    const cargoCapacity = ShipEngine.getCargoCapacity();
+    const cargoCount = (ship.cargo || []).length;
+    cargoHeader.textContent = `CARGO HOLD (${cargoCount}/${cargoCapacity})`;
+    screen.appendChild(cargoHeader);
+
+    if (cargoCount > 0) {
+      for (const item of ship.cargo) {
+        const itemEl = document.createElement('div');
+        itemEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary); font-size:var(--font-size-sm);';
+        const displayName = item.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        itemEl.textContent = '\uD83D\uDCE6 ' + displayName;
+        screen.appendChild(itemEl);
+      }
+    } else {
+      const emptyEl = document.createElement('div');
+      emptyEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm);';
+      emptyEl.textContent = 'Empty';
+      screen.appendChild(emptyEl);
     }
 
     // Lore fragments
@@ -28065,7 +28644,11 @@ const CombatUI = {
       player_action: 'ACTION PHASE',
       enemy: 'ENEMY TURN',
       yield_offer: 'ENEMY YIELDS',
-      victory: combat.combatResult === 'victory_disabled' ? 'ENEMY DISABLED' : 'ENEMY DESTROYED',
+      victory: 'ENEMY DESTROYED',
+      surrender_confirm: 'CONFIRM SURRENDER',
+      surrender_outcome: 'SURRENDERED',
+      boarding: 'BOARDING',
+      boarding_result: 'BOARDING COMPLETE',
     };
 
     var turnDiv = document.createElement('div');
@@ -28135,6 +28718,18 @@ const CombatUI = {
       case 'victory':
         this._renderVictory(screen, combat);
         break;
+      case 'surrender_confirm':
+        this._renderSurrenderConfirm(screen, combat);
+        break;
+      case 'surrender_outcome':
+        this._renderSurrenderOutcome(screen, combat);
+        break;
+      case 'boarding':
+        this._renderBoarding(screen, combat);
+        break;
+      case 'boarding_result':
+        this._renderBoardingResult(screen, combat);
+        break;
     }
   },
 
@@ -28147,9 +28742,12 @@ const CombatUI = {
     var btnRow = document.createElement('div');
     btnRow.style.cssText = 'display:flex; flex-wrap:wrap; gap:var(--space-xs);';
 
-    // Flee button if at edge
+    // Flee button if at edge — show success chance
     if (CombatEngine._isAtEdge(player)) {
-      btnRow.appendChild(this._actionBtn('\uD83C\uDFC3 FLEE (edge)', 'var(--color-warning)',
+      var propLevel = GameState.run.ship.baseSystems.propulsion.level || 1;
+      var enemies = combat.entities.filter(function(e) { return e.type === 'enemy' && e.hull > 0 && !e.yielded; });
+      var fleeChance = Math.min(95, Math.max(20, 70 + propLevel * 5 - enemies.length * 10));
+      btnRow.appendChild(this._actionBtn('\uD83C\uDFC3 FLEE (' + fleeChance + '%)', 'var(--color-warning)',
         function() { CombatEngine.attemptFlee(); }));
     }
 
@@ -28228,12 +28826,13 @@ const CombatUI = {
 
     screen.appendChild(utilRow);
 
-    // Weapon info hint
+    // Weapon info hint with accuracy
     if (combat.selectedWeaponIdx !== null) {
       var selWpn = player.weapons[combat.selectedWeaponIdx];
+      var baseAcc = CombatEngine.WEAPON_ACCURACY[selWpn.type] || 80;
       var hint = document.createElement('div');
       hint.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin-top:var(--space-xs);';
-      hint.textContent = selWpn.name + ': ' + selWpn.type + ' \u2022 dmg ' + selWpn.damage + ' \u2022 range ' + selWpn.range + ' \u2014 tap a target';
+      hint.textContent = selWpn.name + ': ' + selWpn.type + ' \u2022 dmg ' + selWpn.damage + ' \u2022 range ' + selWpn.range + ' \u2022 ~' + baseAcc + '% acc \u2014 tap a target';
       screen.appendChild(hint);
     }
   },
@@ -28286,6 +28885,141 @@ const CombatUI = {
 
     var continueBtn = this._actionBtn('CONTINUE', 'var(--color-accent)',
       function() { CombatEngine.endCombatAndReturn(); });
+    continueBtn.style.marginTop = 'var(--space-md)';
+    panel.appendChild(continueBtn);
+
+    screen.appendChild(panel);
+  },
+
+  // ─── Surrender ─────────────────────────────────────────────
+
+  _renderSurrenderConfirm(screen, combat) {
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid var(--color-danger); padding:var(--space-md); ' +
+      'margin:var(--space-sm) 0; background:rgba(255,107,107,0.05);';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.color = 'var(--color-danger)';
+    title.textContent = 'CONFIRM SURRENDER';
+    panel.appendChild(title);
+
+    var desc = document.createElement('div');
+    desc.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-sm) 0; line-height:1.5;';
+    desc.textContent = 'Surrendering will cost 50% of your credits. The enemy will fire a parting shot (15% hull damage) and your reputation with their faction will decrease.';
+    panel.appendChild(desc);
+
+    panel.appendChild(this._actionBtn('\uD83C\uDFF3 CONFIRM SURRENDER', 'var(--color-danger)',
+      function() { CombatEngine.confirmSurrender(); }));
+
+    panel.appendChild(this._actionBtn('CANCEL', 'var(--text-muted)',
+      function() { CombatEngine.cancelSurrender(); }));
+
+    screen.appendChild(panel);
+  },
+
+  _renderSurrenderOutcome(screen, combat) {
+    var stats = combat.surrenderStats || {};
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid var(--color-danger); padding:var(--space-md); ' +
+      'margin:var(--space-sm) 0; background:rgba(255,107,107,0.05); text-align:center;';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.cssText = 'color:var(--color-danger); margin-bottom:var(--space-sm);';
+    title.textContent = 'SURRENDERED';
+    panel.appendChild(title);
+
+    var lines = [
+      'Credits lost: \u20A2' + (stats.creditsLost || 0),
+      'Hull damage: ' + (stats.hullDamage || 0),
+    ];
+    if (stats.faction) lines.push('Reputation decreased: ' + stats.faction);
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = document.createElement('div');
+      line.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-xs) 0;';
+      line.textContent = lines[i];
+      panel.appendChild(line);
+    }
+
+    var continueBtn = this._actionBtn('CONTINUE', 'var(--color-danger)',
+      function() { CombatEngine.confirmSurrenderReturn(); });
+    continueBtn.style.marginTop = 'var(--space-md)';
+    panel.appendChild(continueBtn);
+
+    screen.appendChild(panel);
+  },
+
+  // ─── Boarding ─────────────────────────────────────────────
+
+  _renderBoarding(screen, combat) {
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid var(--color-success); padding:var(--space-md); ' +
+      'margin:var(--space-sm) 0; background:rgba(135,214,141,0.05);';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.color = 'var(--color-success)';
+    title.textContent = 'BOARDING — CHOOSE ACTION';
+    panel.appendChild(title);
+
+    var desc = document.createElement('div');
+    desc.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-sm) 0;';
+    desc.textContent = 'The disabled vessel is open for boarding. Choose how to proceed.';
+    panel.appendChild(desc);
+
+    // Crew role hints
+    var crew = GameState.run.crew.filter(function(c) { return !c.dead; });
+    var hasTech = crew.some(function(c) { return c.role === 'technician' || c.role === 'engineer'; });
+    var hasSci = crew.some(function(c) { return c.role === 'scientist'; });
+
+    // Loot option - always works
+    var lootBtn = this._actionBtn('\uD83D\uDCE6 LOOT CARGO \u2014 Credits + cargo item', 'var(--color-success)',
+      function() { CombatEngine.selectBoardingAction('loot'); });
+    panel.appendChild(lootBtn);
+
+    // Salvage option
+    var salvageLabel = '\uD83D\uDD27 SALVAGE SYSTEMS \u2014 Chance for a module' + (hasTech ? ' (crew bonus)' : '');
+    var salvageBtn = this._actionBtn(salvageLabel, 'var(--border)',
+      function() { CombatEngine.selectBoardingAction('salvage'); });
+    panel.appendChild(salvageBtn);
+
+    // Intel option
+    var intelLabel = '\uD83D\uDCE1 EXTRACT INTEL \u2014 Lore + reveal map nodes' + (hasSci ? ' (crew bonus)' : '');
+    var intelBtn = this._actionBtn(intelLabel, 'var(--border)',
+      function() { CombatEngine.selectBoardingAction('intel'); });
+    panel.appendChild(intelBtn);
+
+    // Skip option
+    panel.appendChild(this._actionBtn('\u23ED SKIP BOARDING', 'var(--text-muted)',
+      function() { CombatEngine.finishBoarding(); }));
+
+    screen.appendChild(panel);
+  },
+
+  _renderBoardingResult(screen, combat) {
+    var result = combat.boardingResult || { success: false, rewards: [] };
+    var panel = document.createElement('div');
+    panel.style.cssText = 'border:1px solid ' + (result.success ? 'var(--color-success)' : 'var(--color-warning)') + '; ' +
+      'padding:var(--space-md); margin:var(--space-sm) 0; background:' +
+      (result.success ? 'rgba(135,214,141,0.05)' : 'rgba(255,213,128,0.05)') + '; text-align:center;';
+
+    var title = document.createElement('div');
+    title.className = 'system-label';
+    title.style.color = result.success ? 'var(--color-success)' : 'var(--color-warning)';
+    title.textContent = result.success ? 'BOARDING SUCCESSFUL' : 'BOARDING RESULT';
+    panel.appendChild(title);
+
+    for (var i = 0; i < result.rewards.length; i++) {
+      var line = document.createElement('div');
+      line.style.cssText = 'color:var(--text-secondary); font-size:var(--font-size-sm); margin:var(--space-xs) 0;';
+      line.textContent = '\u2022 ' + result.rewards[i];
+      panel.appendChild(line);
+    }
+
+    var continueBtn = this._actionBtn('CONTINUE', 'var(--color-accent)',
+      function() { CombatEngine.finishBoarding(); });
     continueBtn.style.marginTop = 'var(--space-md)';
     panel.appendChild(continueBtn);
 

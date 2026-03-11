@@ -20,6 +20,24 @@ const DepotUI = {
     this._stock = null;
     this._recruitPool = null;
 
+    // Hull Patch Kit: restore 10 hull when docking at a station
+    const patchKit = GameState.run.ship.equippedModules.find(m => m.id === 'mod_hull_patch');
+    if (patchKit && GameState.run.ship.hull < GameState.run.ship.maxHull) {
+      ShipEngine.repair(10);
+      GameState.addLog('system', 'Hull Patch Kit applied on docking — +10 hull.');
+    }
+
+    // Tam passive: jury-rig one damaged module/system on docking
+    if (CrewEngine.hasNamedCrew('tam')) {
+      const damagedSystems = Object.entries(GameState.run.ship.baseSystems)
+        .filter(([, sys]) => sys.damaged);
+      if (damagedSystems.length > 0) {
+        const [key] = damagedSystems[Math.floor(Math.random() * damagedSystems.length)];
+        ShipEngine.repairSystem(key);
+        GameState.addLog('system', `Tam jury-rigged the ${ShipEngine.SYSTEM_NAMES[key] || key} system.`);
+      }
+    }
+
     // Check for auto-trigger events first
     const autoEvent = this._pickAutoEvent(node);
     if (autoEvent) {
@@ -812,8 +830,11 @@ const DepotUI = {
         if (canAfford) {
           btn.addEventListener('click', () => {
             EconomyEngine.spend(opt.cost);
-            ShipEngine.repair(opt.amount);
-            GameState.addLog('event', `Hull repaired +${opt.amount} for ${opt.cost} credits`);
+            // Dorin passive: hull repairs at stations restore +5 extra
+            const dorinBonus = CrewEngine.hasNamedCrew('dorin') ? 5 : 0;
+            ShipEngine.repair(opt.amount + dorinBonus);
+            const totalRepair = opt.amount + dorinBonus;
+            GameState.addLog('event', `Hull repaired +${totalRepair} for ${opt.cost} credits` + (dorinBonus ? ' (Dorin)' : ''));
             GameState.save();
             Game.render();
           });
