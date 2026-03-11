@@ -291,6 +291,7 @@
 .combat-cell-effect.scan     { animation: combat-scan 0.8s ease-out forwards; }
 .combat-cell-effect.attack   { animation: combat-attack-out 0.4s ease-out forwards; }
 .combat-cell-effect.explode  { animation: combat-explode 0.6s ease-out forwards; }
+.combat-cell-effect.miss     { animation: combat-miss 0.5s ease-out forwards; }
 
 .combat-threat-cell {
   border: 1px dashed rgba(255, 107, 107, 0.3);

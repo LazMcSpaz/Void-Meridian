@@ -511,8 +511,12 @@ const EventEngine = {
         break;
 
       case 'cargo':
-        run.ship.cargo.push(reward.value);
-        GameState.addLog('event', `Acquired cargo: ${reward.description || reward.value}`);
+        if (ShipEngine.isCargoFull()) {
+          GameState.addLog('event', `Cargo hold full — could not store: ${reward.description || reward.value}`);
+        } else {
+          run.ship.cargo.push(reward.value);
+          GameState.addLog('event', `Acquired cargo: ${reward.description || reward.value} (${run.ship.cargo.length}/${ShipEngine.getCargoCapacity()})`);
+        }
         break;
 
       case 'lore_fragment':

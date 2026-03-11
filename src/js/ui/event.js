@@ -420,6 +420,31 @@ const EventUI = {
       }
     }
 
+    // Cargo Hold
+    screen.appendChild(Object.assign(document.createElement('hr'), { className: 'divider' }));
+    const cargoHeader = document.createElement('div');
+    cargoHeader.className = 'system-label';
+    cargoHeader.style.marginBottom = 'var(--space-sm)';
+    const cargoCapacity = ShipEngine.getCargoCapacity();
+    const cargoCount = (ship.cargo || []).length;
+    cargoHeader.textContent = `CARGO HOLD (${cargoCount}/${cargoCapacity})`;
+    screen.appendChild(cargoHeader);
+
+    if (cargoCount > 0) {
+      for (const item of ship.cargo) {
+        const itemEl = document.createElement('div');
+        itemEl.style.cssText = 'margin-bottom:var(--space-xs); color:var(--text-secondary); font-size:var(--font-size-sm);';
+        const displayName = item.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        itemEl.textContent = '\uD83D\uDCE6 ' + displayName;
+        screen.appendChild(itemEl);
+      }
+    } else {
+      const emptyEl = document.createElement('div');
+      emptyEl.style.cssText = 'color:var(--text-muted); font-size:var(--font-size-sm);';
+      emptyEl.textContent = 'Empty';
+      screen.appendChild(emptyEl);
+    }
+
     // Lore fragments
     const lore = run.loreFragments || [];
     if (lore.length > 0) {

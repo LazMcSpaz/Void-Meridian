@@ -34,6 +34,15 @@ const CombatEngine = {
 
   YIELD_THRESHOLD: 0.25,  // 25% hull
 
+  // Base accuracy by weapon type (percentage)
+  WEAPON_ACCURACY: {
+    ballistic: 75,
+    energy: 90,
+    missile: 85,
+    emp: 80,
+    nexus_energy: 95,
+  },
+
   // Depth scaling multipliers
   _depthScale(depth) {
     if (depth <= 3) return 0.8;
@@ -497,6 +506,23 @@ const CombatEngine = {
       return;
     }
 
+    // Accuracy check
+    var hitChance = this._calcAccuracy(weapon, player, target);
+    var hitRoll = Math.random() * 100;
+    if (hitRoll >= hitChance) {
+      // Miss!
+      if (weapon._ammo !== null) {
+        weapon._ammo--;
+        if (weapon._ref) weapon._ref._currentAmmo = weapon._ammo;
+      }
+      combat.actionsRemaining--;
+      combat.lastAction = `${weapon.name} misses ${target.name}! (${Math.round(hitChance)}% acc) ${combat.actionsRemaining} action${combat.actionsRemaining !== 1 ? 's' : ''} left.`;
+      this._addEffect(player.x, player.y, 'attack');
+      this._addEffect(target.x, target.y, 'miss');
+      this._afterPlayerAction(combat);
+      return;
+    }
+
     // Calculate damage
     let damage = weapon.damage || 2;
 
@@ -729,9 +755,70 @@ const CombatEngine = {
       return;
     }
 
-    GameState.run.fuel = Math.max(0, GameState.run.fuel - 1);
-    GameState.addLog('combat', 'Fled from combat.');
-    this._endCombat('fled');
+    // Flee check: base 70%, +5% per propulsion level, -10% per living enemy
+    const propLevel = GameState.run.ship.baseSystems.propulsion.level || 1;
+    const enemies = combat.entities.filter(e => e.type === 'enemy' && e.hull > 0 && !e.yielded);
+    const fleeChance = Math.min(95, Math.max(20, 70 + propLevel * 5 - enemies.length * 10));
+    const roll = Math.random() * 100;
+
+    this._clearEffects();
+
+    if (roll < fleeChance) {
+      // Success — but enemy fires a parting shot at 50% damage
+      var partingDmg = 0;
+      for (var i = 0; i < enemies.length; i++) {
+        if (enemies[i].weapons && enemies[i].weapons.length > 0) {
+          var wpnDmg = enemies[i].weapons[0].damage || enemies[i].attack || 5;
+          partingDmg += Math.round(wpnDmg * 0.5 * (0.6 + Math.random() * 0.4));
+        }
+      }
+      if (partingDmg > 0) {
+        ShipEngine.takeDamage(partingDmg);
+        player.hull = GameState.run.ship.hull;
+        this._addEffect(player.x, player.y, 'damage');
+      }
+
+      GameState.run.fuel = Math.max(0, GameState.run.fuel - 1);
+      combat.lastAction = `Engines flare — you break free! ${partingDmg > 0 ? 'Parting shots deal ' + partingDmg + ' damage.' : ''}`;
+      GameState.addLog('combat', `Fled from combat. ${partingDmg > 0 ? 'Took ' + partingDmg + ' parting damage.' : ''}`);
+
+      // Check if parting shot killed us
+      if (GameState.run.ship.hull <= 0) {
+        Game.render();
+        setTimeout(() => this._playerDestroyed(), 600);
+        return;
+      }
+
+      Game.render();
+      setTimeout(() => this._endCombat('fled'), 800);
+    } else {
+      // Failure — enemy gets a free full-damage attack
+      var freeDmg = 0;
+      for (var j = 0; j < enemies.length; j++) {
+        if (enemies[j].weapons && enemies[j].weapons.length > 0) {
+          var eDmg = enemies[j].weapons[0].damage || enemies[j].attack || 5;
+          freeDmg += Math.round(eDmg * (0.6 + Math.random() * 0.8));
+          this._addEffect(enemies[j].x, enemies[j].y, 'attack');
+        }
+      }
+      if (freeDmg > 0) {
+        ShipEngine.takeDamage(freeDmg);
+        player.hull = GameState.run.ship.hull;
+        this._addEffect(player.x, player.y, 'damage');
+      }
+
+      combat.lastAction = `Escape failed! (${Math.round(fleeChance)}% chance) Enemy fires freely — ${freeDmg} damage!`;
+
+      if (GameState.run.ship.hull <= 0) {
+        Game.render();
+        setTimeout(() => this._playerDestroyed(), 600);
+        return;
+      }
+
+      // Stay in combat, consume the action
+      combat.actionsRemaining = Math.max(0, combat.actionsRemaining - 1);
+      this._afterPlayerAction(combat);
+    }
   },
 
   // ─── Surrender ──────────────────────────────────────────────
@@ -740,9 +827,67 @@ const CombatEngine = {
     const combat = GameState.run.activeCombat;
     if (!combat) return;
 
+    // Show confirmation panel first
+    combat.phase = 'surrender_confirm';
+    combat.lastAction = 'Confirm surrender? The enemy will fire a parting shot.';
+    Game.render();
+  },
+
+  confirmSurrender() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+
+    const player = combat.entities.find(e => e.id === 'player');
+    this._clearEffects();
+
+    // Lose 50% credits
     const lost = Math.floor(GameState.run.credits * 0.5);
     GameState.run.credits -= lost;
-    GameState.addLog('combat', `Surrendered. Lost ₢${lost}.`);
+
+    // Enemy fires a parting shot (15% of max hull)
+    const partingDmg = Math.round(GameState.run.ship.maxHull * 0.15);
+    ShipEngine.takeDamage(partingDmg);
+    if (player) player.hull = GameState.run.ship.hull;
+    this._addEffect(player.x, player.y, 'damage');
+
+    // Reputation penalty with enemy faction
+    const factionEntity = combat.entities.find(e => e.type === 'enemy' && e.faction);
+    if (factionEntity) {
+      EconomyEngine.adjustReputation(factionEntity.faction, -1);
+    }
+
+    // Show surrender outcome
+    combat.phase = 'surrender_outcome';
+    combat.surrenderStats = {
+      creditsLost: lost,
+      hullDamage: partingDmg,
+      faction: factionEntity ? EconomyEngine.getFactionDisplayName(factionEntity.faction) : null,
+    };
+    combat.lastAction = `Surrendered. Lost ₢${lost}. Parting shot dealt ${partingDmg} hull damage.`;
+    GameState.addLog('combat', combat.lastAction);
+
+    // Check if parting shot killed us
+    if (GameState.run.ship.hull <= 0) {
+      Game.render();
+      setTimeout(() => this._playerDestroyed(), 600);
+      return;
+    }
+
+    Game.render();
+  },
+
+  cancelSurrender() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+    // Return to whichever phase makes sense
+    combat.phase = combat.hasMoved ? 'player_action' : 'player_move';
+    combat.lastAction = 'Surrender cancelled.';
+    Game.render();
+  },
+
+  confirmSurrenderReturn() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
     this._endCombat('surrendered');
   },
 
@@ -899,6 +1044,14 @@ const CombatEngine = {
       const blocked = this.WEAPON_BLOCKED_BY_OBSTACLES[weapon.type] !== false;
       if (blocked && !this._hasLineOfSight(entity, player, combat.cells)) continue;
 
+      // Accuracy check for enemies
+      var enemyAcc = this._calcAccuracy(weapon, entity, player);
+      if (Math.random() * 100 >= enemyAcc) {
+        this._addEffect(entity.x, entity.y, 'attack');
+        this._addEffect(player.x, player.y, 'miss');
+        return `${entity.name} fires and misses!`;
+      }
+
       let damage = weapon.damage || entity.attack;
       damage = Math.round(damage * (0.6 + Math.random() * 0.8));
 
@@ -951,6 +1104,7 @@ const CombatEngine = {
     const baseLoot = 10 + Math.floor(Math.random() * 30);
     const loot = result === 'victory_disabled' ? Math.round(baseLoot * 1.5) : baseLoot;
     GameState.run.credits += loot;
+    combat._victoryLoot = loot;
 
     const factionEntity = combat.entities.find(e => e.type === 'enemy' && e.faction);
     if (factionEntity && result === 'victory_destroyed') {
@@ -958,12 +1112,18 @@ const CombatEngine = {
     }
 
     combat.combatResult = result;
-    combat.phase = 'victory';
-    combat.lastAction = result === 'victory_disabled'
-      ? `Enemy disabled. Looted ₢${loot}. The ship is intact — boarding is possible.`
-      : `Enemy destroyed. Salvaged ₢${loot} from the wreckage.`;
 
-    GameState.addLog('combat', combat.lastAction);
+    if (result === 'victory_disabled') {
+      // Go to boarding phase instead of victory
+      combat.phase = 'boarding';
+      combat.lastAction = `Enemy disabled. Looted ₢${loot}. The ship is intact — choose a boarding action.`;
+      GameState.addLog('combat', `Enemy disabled. Looted ₢${loot}.`);
+    } else {
+      combat.phase = 'victory';
+      combat.lastAction = `Enemy destroyed. Salvaged ₢${loot} from the wreckage.`;
+      GameState.addLog('combat', combat.lastAction);
+    }
+
     Game.render();
   },
 
@@ -1029,6 +1189,157 @@ const CombatEngine = {
     GameState.screen = 'gameOver';
     GameState.save();
     Game.render();
+  },
+
+  // ─── Accuracy Calculation ───────────────────────────────────
+
+  _calcAccuracy(weapon, shooter, target) {
+    var baseAcc = this.WEAPON_ACCURACY[weapon.type] || 80;
+    var dist = this._getDistance(shooter, target);
+    var optimalRange = Math.ceil((weapon.range || this.WEAPON_RANGE[weapon.type] || 2) / 2);
+
+    // Distance penalty: -5% per tile away from optimal range
+    var distPenalty = Math.abs(dist - optimalRange) * 5;
+    var acc = baseAcc - distPenalty;
+
+    // Scanned bonus: +10% against scanned targets
+    if (target.scanned) acc += 10;
+
+    // Sensor level bonus (player only): +3% per sensor level above 1
+    if (shooter.id === 'player') {
+      var sensorLvl = this._getSensorLevel();
+      acc += (sensorLvl - 1) * 3;
+    }
+
+    return Math.max(30, Math.min(98, acc));
+  },
+
+  // ─── Boarding Mechanic ────────────────────────────────────
+
+  selectBoardingAction(actionType) {
+    const combat = GameState.run.activeCombat;
+    if (!combat || combat.phase !== 'boarding') return;
+
+    const crew = GameState.run.crew.filter(c => !c.dead);
+    var result = { success: false, rewards: [] };
+
+    switch (actionType) {
+      case 'loot': {
+        // Always succeeds — guaranteed credits + cargo
+        var bonusCredits = 15 + Math.floor(Math.random() * 25);
+        GameState.run.credits += bonusCredits;
+        result.success = true;
+        result.rewards.push('₢' + bonusCredits);
+
+        // Add a cargo item
+        var cargoItems = ['salvaged_data_core', 'hull_plating', 'fuel_cells', 'trade_goods', 'medical_supplies', 'encrypted_manifest'];
+        var cargoItem = cargoItems[Math.floor(Math.random() * cargoItems.length)];
+        var capacity = this._getCargoCapacity();
+        if (GameState.run.ship.cargo.length < capacity) {
+          GameState.run.ship.cargo.push(cargoItem);
+          result.rewards.push(cargoItem.replace(/_/g, ' '));
+        } else {
+          result.rewards.push('cargo full');
+        }
+        GameState.addLog('combat', 'Boarded and looted: ₢' + bonusCredits + ', ' + cargoItem.replace(/_/g, ' '));
+        break;
+      }
+      case 'salvage': {
+        // Skill check — technician/engineer gives 70%, otherwise 40%
+        var hasTech = crew.some(c => c.role === 'technician' || c.role === 'engineer');
+        var salvageChance = hasTech ? 70 : 40;
+
+        if (Math.random() * 100 < salvageChance) {
+          // Pick a random module from registry
+          var modules = ['mod_hull_patch', 'mod_scanner_array', 'mod_reinforced_bulkhead', 'mod_fuel_recycler', 'mod_targeting_computer', 'mod_med_bay'];
+          var modId = modules[Math.floor(Math.random() * modules.length)];
+          ShipEngine.addModule(modId);
+          var mod = Registry.getModule(modId);
+          result.success = true;
+          result.rewards.push(mod ? mod.name : modId);
+          GameState.addLog('combat', 'Salvaged module: ' + (mod ? mod.name : modId));
+        } else {
+          result.success = false;
+          result.rewards.push('nothing usable found');
+          GameState.addLog('combat', 'Salvage attempt failed — nothing usable.');
+        }
+        break;
+      }
+      case 'intel': {
+        // Skill check — scientist gives 75%, otherwise 35%
+        var hasSci = crew.some(c => c.role === 'scientist');
+        var intelChance = hasSci ? 75 : 35;
+
+        if (Math.random() * 100 < intelChance) {
+          // Add a lore fragment
+          var fragId = 'boarding_intel_' + Date.now();
+          var fragDesc = this._getIntelDescription(combat);
+          if (!GameState.run.loreFragments.some(lf => lf.id === fragId)) {
+            GameState.run.loreFragments.push({ id: fragId, description: fragDesc, depth: GameState.run.depth });
+          }
+
+          // Reveal nearby map nodes
+          this._revealNearbyNodes(2);
+
+          result.success = true;
+          result.rewards.push('intel acquired', 'nearby nodes revealed');
+          GameState.addLog('discovery', fragDesc);
+        } else {
+          result.success = false;
+          result.rewards.push('data corrupted');
+          GameState.addLog('combat', 'Intel extraction failed — data corrupted.');
+        }
+        break;
+      }
+    }
+
+    combat.phase = 'boarding_result';
+    combat.boardingResult = result;
+    combat.lastAction = result.success
+      ? 'Boarding ' + (result.success ? 'successful' : 'failed') + ': ' + result.rewards.join(', ')
+      : 'Boarding yielded: ' + result.rewards.join(', ');
+    Game.render();
+  },
+
+  _getCargoCapacity() {
+    var cargoLevel = GameState.run.ship.baseSystems.cargo_hold.level || 1;
+    return cargoLevel * 3;
+  },
+
+  _getIntelDescription(combat) {
+    var descs = [
+      'Intercepted comm logs reveal patrol routes through the sector.',
+      'Navigation data extracted — nearby hazards charted.',
+      'Faction supply manifests recovered from the ship\'s computers.',
+      'Encrypted transmissions decoded — enemy fleet movements logged.',
+      'Crew manifest and mission parameters recovered from the wreck.',
+    ];
+    return descs[Math.floor(Math.random() * descs.length)];
+  },
+
+  _revealNearbyNodes(count) {
+    var map = GameState.run.map;
+    if (!map || !map.nodes) return;
+    var currentId = GameState.run.currentNodeId;
+    var currentNode = map.nodes.find(n => n.id === currentId);
+    if (!currentNode) return;
+
+    // Reveal connected nodes' types
+    var revealed = 0;
+    for (var i = 0; i < (currentNode.connections || []).length && revealed < count; i++) {
+      var connId = currentNode.connections[i];
+      var connNode = map.nodes.find(n => n.id === connId);
+      if (connNode && !connNode._revealed) {
+        connNode._revealed = true;
+        revealed++;
+      }
+    }
+  },
+
+  finishBoarding() {
+    const combat = GameState.run.activeCombat;
+    if (!combat) return;
+    this._endCombat(combat.combatResult);
   },
 
   // ─── Visual Effects ─────────────────────────────────────────
