@@ -126,6 +126,30 @@ const MapUI = {
     }
 
     screen.appendChild(mapContainer);
+
+    // Safety: show message if no selectable nodes exist (should not happen mid-map)
+    const anySelectable = map.nodes.some(n => {
+      if (n.visited || n.depth !== currentDepth + 1) return false;
+      return map.edges.some(e => e.from === GameState.run.currentNodeId && e.to === n.id);
+    });
+    if (!anySelectable && currentDepth < map.maxDepth) {
+      const warn = document.createElement('div');
+      warn.style.cssText = 'color:var(--color-warning); text-align:center; margin-top:var(--space-md); font-size:var(--font-size-sm);';
+      warn.textContent = 'No navigable nodes detected. The void presses in...';
+      screen.appendChild(warn);
+
+      // Auto-generate forward connection as emergency fallback
+      const nextLayer = map.nodes.filter(n => n.depth === currentDepth + 1 && !n.visited);
+      if (nextLayer.length > 0) {
+        const fallback = nextLayer[Math.floor(Math.random() * nextLayer.length)];
+        map.edges.push({ from: GameState.run.currentNodeId, to: fallback.id });
+        fallback.revealed = true;
+        GameState.addLog('system', 'Emergency nav-lock: new route detected.');
+        Game.render();
+        return;
+      }
+    }
+
     container.appendChild(screen);
   },
 
@@ -215,6 +239,13 @@ const MapUI = {
       }
     }
 
+    // Check if this is the final depth — trigger voyage ending
+    const hasForwardEdges = map.edges.some(e => e.from === node.id);
+    if (!hasForwardEdges || node.depth >= map.maxDepth) {
+      this._triggerVoyageEnd(node);
+      return;
+    }
+
     // Trade posts use the depot docking system
     if (node.type === 'trade_post') {
       DepotUI.enterDepot(node);
@@ -223,5 +254,59 @@ const MapUI = {
 
     // Trigger node encounter
     EventEngine.triggerNodeEvent(node);
+  },
+
+  _triggerVoyageEnd(node) {
+    // Check for True Ending conditions
+    const hasTrueEndingFlags = NexusEngine.checkTrueEnding();
+    const resonanceTier = GameState.getResonanceTier();
+
+    // Mark milestone flags
+    NexusEngine.checkMilestone('wound_reached');
+
+    if (hasTrueEndingFlags) {
+      // True ending path — player has all required flags
+      NexusEngine.checkMilestone('wound_entered');
+      NexusEngine.checkMilestone('nexus_confronted');
+      GameState.meta.trueEndingReached = true;
+      NexusEngine.accumulateRunResonance();
+      GameState.endRun('true_ending');
+      GameState.screen = 'ending';
+      GameState.save();
+      Game.render();
+    } else if (resonanceTier >= 3) {
+      // High resonance — the Wound pulls them through but the journey continues
+      const gained = NexusEngine.accumulateRunResonance();
+      GameState.addLog('nexus', `The Wound shimmers at the edge of space. Resonance surges. (+${gained})`);
+
+      // Generate a new map sector to continue the voyage
+      const newMap = MapGenerator.generate();
+      GameState.run.map = newMap;
+      GameState.run.currentNodeId = newMap.startNodeId;
+      GameState.run.depth = 0;
+      const startNode = newMap.nodes.find(n => n.id === newMap.startNodeId);
+      if (startNode) {
+        startNode.visited = true;
+        startNode.revealed = true;
+        for (const edge of newMap.edges) {
+          if (edge.from === startNode.id) {
+            const target = newMap.nodes.find(n => n.id === edge.to);
+            if (target) target.revealed = true;
+          }
+        }
+      }
+
+      GameState.addLog('system', 'The Wound bends space. A new sector unfolds before you.');
+      GameState.save();
+      Tabs.switchTo('map');
+    } else {
+      // Standard ending — not enough resonance
+      const gained = NexusEngine.accumulateRunResonance();
+      GameState.addLog('nexus', `The void stretches endlessly. Your instruments fail. Resonance gained: ${gained}.`);
+      GameState.endRun('void_consumed');
+      GameState.screen = 'gameOver';
+      GameState.save();
+      Game.render();
+    }
   },
 };
